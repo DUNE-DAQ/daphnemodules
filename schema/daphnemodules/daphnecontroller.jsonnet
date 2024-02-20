@@ -20,10 +20,12 @@ local types = {
     // Run Control
   
     conf: s.record("Conf", [
-                           s.field("some_configured_value", self.int4, 999999,
-                                           doc="This line is where you'd document the value"),
+                           s.field("daphne_ip", self.string, "daphne.cern.ch",
+                                           doc="address of the daphne connection point"),
+		           s.field("my_second_param", self.int4, 0,
+			           doc="no idea")
                            ],
-                   doc="This configuration is for developer education only"),
+                   doc="Configuration for the the Daphne"),
 
 };
 

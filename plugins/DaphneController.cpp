@@ -14,6 +14,7 @@
 #include "daphnemodules/daphnecontrollerinfo/InfoNljs.hpp"
 
 #include <string>
+#include <logging/Logging.hpp>
 
 namespace dunedaq::daphnemodules {
 
@@ -25,7 +26,9 @@ DaphneController::DaphneController(const std::string& name)
 
 void
 DaphneController::init(const data_t& /* structured args */)
-{}
+{
+  TLOG() << "Test";
+}
 
 void
 DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
@@ -41,7 +44,8 @@ void
 DaphneController::do_conf(const data_t& conf_as_json)
 {
   auto conf_as_cpp = conf_as_json.get<daphnecontroller::Conf>();
-  m_some_configured_value = conf_as_cpp.some_configured_value;
+  auto ip = conf_as_cpp.daphne_ip;
+  //m_some_configured_value = conf_as_cpp.some_configured_value;
 }
 
 } // namespace dunedaq::daphnemodules
