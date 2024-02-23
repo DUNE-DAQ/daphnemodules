@@ -12,7 +12,7 @@
 
 #include "daphnemodules/daphnecontroller/Nljs.hpp"
 #include "daphnemodules/daphnecontrollerinfo/InfoNljs.hpp"
-
+#include "oei.hpp"
 #include <string>
 #include <logging/Logging.hpp>
 
@@ -27,7 +27,6 @@ DaphneController::DaphneController(const std::string& name)
 void
 DaphneController::init(const data_t& /* structured args */)
 {
-  TLOG() << "Test";
 }
 
 void
@@ -44,8 +43,17 @@ void
 DaphneController::do_conf(const data_t& conf_as_json)
 {
   auto conf_as_cpp = conf_as_json.get<daphnecontroller::Conf>();
-  auto ip = conf_as_cpp.daphne_ip;
-  //m_some_configured_value = conf_as_cpp.some_configured_value;
+  auto ips = conf_as_cpp.daphne_list;
+  for (const auto&ip:ips) {
+        OEI thing(ip.c_str());
+        thing.write(0x2000, {1234});
+        TLOG() << "time stamp in DAPHNE with ip address " << ip;
+        std::vector<uint64_t> a = thing.read(0x40500000, 4);
+        for (int r = 0; r < a.size(); r++) {
+        TLOG() << a[r];
+        }
+        thing.closes();
+    }
 }
 
 } // namespace dunedaq::daphnemodules

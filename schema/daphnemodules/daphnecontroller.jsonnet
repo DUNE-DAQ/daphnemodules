@@ -11,19 +11,14 @@ local types = {
     float4 :  s.number(  "float4",  "f4",          doc="A float of 4 bytes"),
     double8 : s.number(  "double8", "f8",          doc="A double of 8 bytes"),
     boolean:  s.boolean( "Boolean",                doc="A boolean"),
-    string:   s.string(  "String",   		   doc="A string"),   
+    string:   s.string(  "String",   		   doc="A string"),
+    ipaddress: s.string( "IPAddress",              doc="A string containing an IP Address"),   
 
-    // TO daphnemodules DEVELOPERS: PLEASE DELETE THIS FOLLOWING COMMENT AFTER READING IT
-    // The following code is an example of a configuration record
-    // written in jsonnet. In the real world it would be written so as
-    // to allow the relevant members of DaphneController to be configured by
-    // Run Control
+    daphne_list: s.sequence("DaphneList", self.ipaddress,doc="List of daphne ip addresses to be controlled" ),
   
     conf: s.record("Conf", [
-                           s.field("daphne_ip", self.string, "daphne.cern.ch",
-                                           doc="address of the daphne connection point"),
-		           s.field("my_second_param", self.int4, 0,
-			           doc="no idea")
+                           s.field("daphne_list", self.daphne_list, 
+                                           doc="addresses of the daphne connection point"),
                            ],
                    doc="Configuration for the the Daphne"),
 
