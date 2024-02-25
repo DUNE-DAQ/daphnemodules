@@ -32,7 +32,7 @@ daq_codegen(daphnecontrollerinfo.jsonnet DEP_PKGS opmonlib TEMPLATES opmonlib/In
 
 # See https://dune-daq-sw.readthedocs.io/en/latest/packages/daq-cmake/#daq_add_library
 
-daq_add_library( LINK_LIBRARIES ) # Any source files and/or dependent libraries to link in not yet determined
+daq_add_library( *.cpp LINK_LIBRARIES ) # Any source files and/or dependent libraries to link in not yet determined
 ##############################################################################
 
 

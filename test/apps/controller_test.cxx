@@ -15,7 +15,6 @@ main()
   c.daphne_list.push_back("10.73.137.105");
   c.daphne_list.push_back("10.73.137.107");
   c.daphne_list.push_back("10.73.137.109");
-  c.daphne_list.push_back("10.73.137.111");
   c.daphne_list.push_back("10.73.137.112");
   c.daphne_list.push_back("10.73.137.113");
   nlohmann::json j;
