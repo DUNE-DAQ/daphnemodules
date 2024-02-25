@@ -1,6 +1,10 @@
 #include <chrono>
 #include <thread>
+#include <logging/Logging.hpp>
 
+
+
+namespace dunedaq::daphnemodules {
 class cmd {
 public:
     cmd(OEI& thing, const std::string& CmdString, bool get_response = true) {
@@ -43,4 +47,4 @@ public:
 
     }
 };
-
+}

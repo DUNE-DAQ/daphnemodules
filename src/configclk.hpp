@@ -1,6 +1,8 @@
 #include <chrono>
 #include <thread>
 
+
+namespace dunedaq::daphnemodules {
 class config {
 public:
     config(OEI& thing,int ep) {
@@ -29,3 +31,4 @@ public:
         printf("Crate number = %0X\n", thing.read(0x3000, 1)[0]);
     }
 };
+}

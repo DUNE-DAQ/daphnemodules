@@ -15,6 +15,7 @@
 #include "oei.hpp"
 #include "cmd.hpp"
 #include "configclk.hpp"
+#include "configanalog.hpp"
 #include <string>
 #include <logging/Logging.hpp>
 
@@ -50,27 +51,8 @@ DaphneController::do_conf(const data_t& conf_as_json)
 	OEI thing(ip.c_str());
 	int ep=stoi(ip.substr(11,2));
         config c(thing,ep);
-	TLOG() << "Configuring Offset in 40 ch DAPHNE " << ip ;
-
-         std::string initial_command = "CFG AFE ALL INITIAL";
-         cmd (thing, initial_command);
-
-         int nChannels = 40;
-         for (int ch = 0; ch < nChannels; ++ch) {
-             cmd (thing, "WR OFFSET CH " + std::to_string(ch) + " V 1468", true);
-             cmd (thing, "CFG OFFSET CH " + std::to_string(ch) + " GAIN 2", true);
-         }
-         TLOG() << "Configuring AFE registers 4, 51, 52 and Attenuators";
-
-         int nAFEs = 5;
-         for (int AFE = 0; AFE < nAFEs; ++AFE) {
-         cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 52 V 21056", true);
-         cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 4 V 24", true);
-         cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 51 V 16", true);
-         cmd (thing, "WR AFE " + std::to_string(AFE) + " VGAIN V 2667", true);
-
-	}
-        thing.closes();
+        confanalog a(thing);
+	thing.closes();
 }
 }
 } // namespace dunedaq::daphnemodules

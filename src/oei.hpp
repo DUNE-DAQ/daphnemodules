@@ -6,7 +6,7 @@
 #include <cstring>
 #include <unistd.h>
 
-
+namespace dunedaq::daphnemodules {
 
 class OEI {
 private:
@@ -100,4 +100,4 @@ public:
     close(sock);
     }
 };
-
+}
