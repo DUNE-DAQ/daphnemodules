@@ -14,6 +14,7 @@
 #include "daphnemodules/daphnecontrollerinfo/InfoNljs.hpp"
 #include "oei.hpp"
 #include "cmd.hpp"
+#include "configclk.hpp"
 #include <string>
 #include <logging/Logging.hpp>
 
@@ -47,7 +48,9 @@ DaphneController::do_conf(const data_t& conf_as_json)
   auto ips = conf_as_cpp.daphne_list;
   for (const auto&ip:ips) {
 	OEI thing(ip.c_str());
-        TLOG() << "Configuring Offset in 40 ch DAPHNE " << ip ;
+	int ep=stoi(ip.substr(11,2));
+        config c(thing,ep);
+	TLOG() << "Configuring Offset in 40 ch DAPHNE " << ip ;
 
          std::string initial_command = "CFG AFE ALL INITIAL";
          cmd (thing, initial_command);
