@@ -40,7 +40,6 @@ public:
                 --more;
             }
             ResString += '\0';
-            TLOG() << ResString;
         }
     }
 };
