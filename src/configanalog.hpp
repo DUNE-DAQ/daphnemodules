@@ -11,7 +11,6 @@ public:
              cmd (thing, "WR OFFSET CH " + std::to_string(ch) + " V 1468", true);
              cmd (thing, "CFG OFFSET CH " + std::to_string(ch) + " GAIN 2", true);
          }
-         TLOG() << "Configuring AFE registers 4, 51, 52 and Attenuators";
          int nAFEs = 5;
          for (int AFE = 0; AFE < nAFEs; ++AFE) {
          cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 52 V 21056", true);

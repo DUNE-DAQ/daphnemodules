@@ -2,8 +2,6 @@
 #include <thread>
 #include <logging/Logging.hpp>
 
-
-
 namespace dunedaq::daphnemodules {
 class cmd {
 public:
@@ -42,9 +40,8 @@ public:
                 --more;
             }
             ResString += '\0';
-            std::cout << ResString << std::endl;
+            TLOG() << ResString;
         }
-
     }
 };
 }
