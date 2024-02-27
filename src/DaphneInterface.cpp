@@ -10,11 +10,13 @@
 
 using namespace dunedaq::daphnemodules;
 
-DaphneInterface::DaphneInterface( const char* ipaddr, int port ) {
+DaphneInterface::DaphneInterface( const char* ipaddr, int port )
+  : target_p(new sockaddr_in) {
+  
   sock = socket(AF_INET, SOCK_DGRAM, 0);
-  target.sin_family = AF_INET;
-  target.sin_port = htons(port);
-  inet_pton(AF_INET, ipaddr, &(target.sin_addr));
+  target_p -> sin_family = AF_INET;
+  target_p -> sin_port = htons(port);
+  inet_pton(AF_INET, ipaddr, &(target_p ->sin_addr));
 
   // if the ping fails, we should throw an ERS
   if ( ! ping() )
@@ -62,7 +64,7 @@ bool DaphneInterface::ping() const noexcept {
   setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout));
   setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout, sizeof(timeout));
   
-  if (connect(sock, (struct sockaddr *) &target, sizeof(target)) != 0)
+  if (connect(sock, (struct sockaddr *) target_p.get(), sizeof(*target_p)) != 0)
     return true;
   else
     return false;

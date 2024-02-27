@@ -18,6 +18,7 @@
 #include <vector>
 #include <cstring>
 #include <unistd.h>
+#include <memory>
 
 #include <ers/ers.hpp>
 
@@ -39,7 +40,7 @@ namespace dunedaq::daphnemodules {
 
   public:
     DaphneInterface( const char* ipaddr, int port );
-    ~DaphneInterface() {close();}
+    ~DaphneInterface() { if(target_p) close();}
 
     std::vector<uint64_t> read_register(uint64_t addr, uint8_t size) const;
     void write_register(uint64_t addr, std::vector<uint64_t> && data)  const;
@@ -53,7 +54,7 @@ namespace dunedaq::daphnemodules {
     
   private:
     int sock;
-    struct sockaddr_in target;
+    std::unique_ptr<struct sockaddr_in> target_p;
   }; 
   
 
