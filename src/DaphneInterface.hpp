@@ -25,6 +25,19 @@
 namespace dunedaq {
 
   ERS_DECLARE_ISSUE( daphnemodules,
+		     SocketCreationError,
+		     "Failed to create a socket",
+		     ERS_EMPTY
+		   ) 
+
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     InvalidIPAddress,
+		     "Invalid address: " << ip,
+		     ((std::string)ip)
+		   ) 
+
+  
+  ERS_DECLARE_ISSUE( daphnemodules,
 		     FailedPing,
 		     "Failed to ping daphne board at " << ip << ':' << port,
 		     ((std::string)ip)((int)port)
@@ -40,21 +53,27 @@ namespace dunedaq::daphnemodules {
 
   public:
     DaphneInterface( const char* ipaddr, int port );
-    ~DaphneInterface() { if(target_p) close();}
+    ~DaphneInterface() { if(m_connection_id>0) close();}
 
+    DaphneInterface(const DaphneInterface &) = delete;
+    DaphneInterface & operator= (const DaphneInterface & ) = delete;
+    DaphneInterface(DaphneInterface &&) = delete;
+    DaphneInterface & operator= (DaphneInterface &&) = delete;
+    
     std::vector<uint64_t> read_register(uint64_t addr, uint8_t size) const;
     void write_register(uint64_t addr, std::vector<uint64_t> && data)  const;
 
     std::vector<uint64_t> read_buffer(uint64_t addr, uint8_t size) const;
     void write_buffer(uint64_t addr, std::vector<uint64_t> && data) const;
 
+    bool ping(int timeout_s = 1, int timeout_usec = 0) const noexcept;
+
+  protected:
     void close();
-    bool ping() const noexcept;
-    
     
   private:
-    int sock;
-    std::unique_ptr<struct sockaddr_in> target_p;
+    int m_connection_id = -1;
+    sockaddr_in m_target;
   }; 
   
 

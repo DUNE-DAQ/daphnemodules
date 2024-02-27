@@ -10,17 +10,21 @@
 
 using namespace dunedaq::daphnemodules;
 
-DaphneInterface::DaphneInterface( const char* ipaddr, int port )
-  : target_p(new sockaddr_in) {
+DaphneInterface::DaphneInterface( const char* ipaddr, int port ) {
   
-  sock = socket(AF_INET, SOCK_DGRAM, 0);
-  target_p -> sin_family = AF_INET;
-  target_p -> sin_port = htons(port);
-  inet_pton(AF_INET, ipaddr, &(target_p ->sin_addr));
+  m_connection_id = socket(AF_INET, SOCK_DGRAM, 0);
 
-  // if the ping fails, we should throw an ERS
+  if ( m_connection_id < 0 )
+    throw SocketCreationError(ERS_HERE);
+  
+  m_target.sin_family = AF_INET;
+  m_target.sin_port = htons(port);
+  auto ret = inet_pton(AF_INET, ipaddr, &(m_target.sin_addr));
+  if ( ret <= 0 ) 
+    throw InvalidIPAddress(ERS_HERE, ipaddr);
+ 
   if ( ! ping() )
-    throw FailedPing( ERS_HERE, ipaddr, port );
+    throw FailedPing(ERS_HERE, ipaddr, port );
 
 }
 
@@ -51,7 +55,7 @@ void DaphneInterface::close() {
 }
 
 
-bool DaphneInterface::ping() const noexcept {
+bool DaphneInterface::ping(int timeout_s, int timeout_usec) const noexcept {
 
   // MR: We should ping the board here. And not with a system call
   // Something like this should work.
@@ -59,12 +63,12 @@ bool DaphneInterface::ping() const noexcept {
   // Reference:  https://bbs.archlinux.org/viewtopic.php?id=213878
  
   struct timeval timeout;
-  timeout.tv_sec = 1 ;
-  timeout.tv_usec = 0;
-  setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout));
-  setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout, sizeof(timeout));
+  timeout.tv_sec  = timeout_s ;
+  timeout.tv_usec = timeout_usec ;
+  setsockopt(m_connection_id, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout));
+  setsockopt(m_connection_id, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout, sizeof(timeout));
   
-  if (connect(sock, (struct sockaddr *) target_p.get(), sizeof(*target_p)) != 0)
+  if (connect(m_connection_id, (struct sockaddr *) & m_target, sizeof(m_target)) != 0)
     return true;
   else
     return false;
