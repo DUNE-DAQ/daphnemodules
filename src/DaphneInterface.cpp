@@ -18,7 +18,7 @@ DaphneInterface::DaphneInterface( const char* ipaddr, int port ) {
 
   // if the ping fails, we should throw an ERS
   if ( ! ping() )
-    throw FailedPing( ERS_HERE, ipaddr, port )
+    throw FailedPing( ERS_HERE, ipaddr, port );
 
 }
 
@@ -62,7 +62,7 @@ bool DaphneInterface::ping() const noexcept {
   setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout));
   setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout, sizeof(timeout));
   
-  if (connect(sock, (struct sockaddr *) &addr, sizeof(addr)) != 0)
+  if (connect(sock, (struct sockaddr *) &target, sizeof(target)) != 0)
     return true;
   else
     return false;

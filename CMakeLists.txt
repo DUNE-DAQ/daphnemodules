@@ -32,23 +32,23 @@ daq_codegen(daphnecontrollerinfo.jsonnet DEP_PKGS opmonlib TEMPLATES opmonlib/In
 
 # See https://dune-daq-sw.readthedocs.io/en/latest/packages/daq-cmake/#daq_add_library
 
-daq_add_library( *.cpp LINK_LIBRARIES ) # Any source files and/or dependent libraries to link in not yet determined
+daq_add_library( *.cpp LINK_LIBRARIES appfwk::appfwk) # Any source files and/or dependent libraries to link in not yet determined
 ##############################################################################
 
 
 # See https://dune-daq-sw.readthedocs.io/en/latest/packages/daq-cmake/#daq_add_plugin
 
-daq_add_plugin(DaphneController duneDAQModule LINK_LIBRARIES appfwk::appfwk) # Replace appfwk library with a more specific library when appropriate
+daq_add_plugin(DaphneController duneDAQModule LINK_LIBRARIES daphnemodules) # Replace appfwk library with a more specific library when appropriate
 
 ##############################################################################
 
 
 # See https://dune-daq-sw.readthedocs.io/en/latest/packages/daq-cmake/#daq_add_unit_test
 
-daq_add_unit_test(Placeholder_test LINK_LIBRARIES)  # Placeholder_test should be replaced with real unit tests
+daq_add_unit_test(Placeholder_test LINK_LIBRARIES daphnemodules)  # Placeholder_test should be replaced with real unit tests
 
 ##############################################################################
-daq_add_application(daphne_controller_test controller_test.cxx TEST LINK_LIBRARIES appfwk::appfwk)
+daq_add_application(daphne_controller_test controller_test.cxx TEST LINK_LIBRARIES daphnemodules)
 
 
 daq_install()

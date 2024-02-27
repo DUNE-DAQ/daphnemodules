@@ -12,12 +12,12 @@
 
 #include "daphnemodules/daphnecontroller/Nljs.hpp"
 #include "daphnemodules/daphnecontrollerinfo/InfoNljs.hpp"
-#include "oei.hpp"
-#include "cmd.hpp"
-#include "info.hpp"
-#include "testip.hpp"
-#include "configclk.hpp"
-#include "configanalog.hpp"
+// #include "oei.hpp"
+// #include "cmd.hpp"
+// #include "info.hpp"
+// #include "testip.hpp"
+// #include "configclk.hpp"
+// #include "configanalog.hpp"
 #include <string>
 #include <logging/Logging.hpp>
 
@@ -50,15 +50,7 @@ DaphneController::do_conf(const data_t& conf_as_json)
   auto conf_as_cpp = conf_as_json.get<daphnecontroller::Conf>();
   auto ips = conf_as_cpp.daphne_list;
   for (const auto&ip:ips) {
-    OEI thing(ip.c_str());
-  //   int ep=stoi(ip.substr(11,2));
-  //   testip i(ip.c_str());
-  //   configclk clk(thing,ep);
-  //   confanalog analog(thing);
-  //   gateware gate(thing,ep);
-  //   alignment align(thing,ep);
-  //   crateinfo crate(thing,ep);
-    thing.closes()
+    TLOG() << ip; 
   }
 }
 } // namespace dunedaq::daphnemodules

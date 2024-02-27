@@ -24,7 +24,7 @@
 namespace dunedaq {
 
   ERS_DECLARE_ISSUE( daphnemodules,
-		     FailedPing
+		     FailedPing,
 		     "Failed to ping daphne board at " << ip << ':' << port,
 		     ((std::string)ip)((int)port)
 		   ) 
