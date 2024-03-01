@@ -31,7 +31,7 @@ DaphneInterface::DaphneInterface( const char* ipaddr, int port ) {
 
 void DaphneInterface::close() {
 
-  close( m_connection_id );
+  ::close( m_connection_id );
 }
 
 

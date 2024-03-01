@@ -66,17 +66,17 @@ namespace dunedaq::daphnemodules {
     DaphneInterface & operator= (DaphneInterface &&) = delete;
     
     std::vector<uint64_t> read_register(uint64_t addr, uint8_t size) const { return read(0x00, addr, size) ; }
-    void write_register(uint64_t addr, std::vector<uint64_t> && data)  const { write(0x01, addr, data) ; }
+    void write_register(uint64_t addr, std::vector<uint64_t> && data)  const { write(0x01, addr, std::move(data)) ; }
 
     std::vector<uint64_t> read_buffer(uint64_t addr, uint8_t size) const { return read(0x08, addr, size) ; }
-    void write_buffer(uint64_t addr, std::vector<uint64_t> && data) const { write(0x09, addr, data) ; }
+    void write_buffer(uint64_t addr, std::vector<uint64_t> && data) const { write(0x09, addr, std::move(data)) ; }
  
     bool ping(int timeout_s = 1, int timeout_usec = 0) const noexcept;
 
   protected:
     void close();
 
-    void write( uint8_t command_id, uint64_t addr, uint8_t size) const;
+    void write( uint8_t command_id, uint64_t addr, std::vector<uint64_t> && data) const;
     std::vector<uint64_t> read(uint8_t command_id, uint64_t addr, uint8_t size) const;
 
     
