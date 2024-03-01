@@ -42,9 +42,14 @@ namespace dunedaq {
 		     "Failed to ping daphne board at " << ip << ':' << port,
 		     ((std::string)ip)((int)port)
 		   ) 
-		    
-  
-} // dunedaq namespace
+
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     FailedSocketInteraction,
+		     "Failed to call " << command,
+		     ((std::string)command)
+		   ) 
+
+  } // dunedaq namespace
 
 
 namespace dunedaq::daphnemodules {
@@ -60,16 +65,20 @@ namespace dunedaq::daphnemodules {
     DaphneInterface(DaphneInterface &&) = delete;
     DaphneInterface & operator= (DaphneInterface &&) = delete;
     
-    std::vector<uint64_t> read_register(uint64_t addr, uint8_t size) const;
-    void write_register(uint64_t addr, std::vector<uint64_t> && data)  const;
+    std::vector<uint64_t> read_register(uint64_t addr, uint8_t size) const { return read(0x00, addr, size) ; }
+    void write_register(uint64_t addr, std::vector<uint64_t> && data)  const { write(0x01, addr, data) ; }
 
-    std::vector<uint64_t> read_buffer(uint64_t addr, uint8_t size) const;
-    void write_buffer(uint64_t addr, std::vector<uint64_t> && data) const;
-
+    std::vector<uint64_t> read_buffer(uint64_t addr, uint8_t size) const { return read(0x08, addr, size) ; }
+    void write_buffer(uint64_t addr, std::vector<uint64_t> && data) const { write(0x09, addr, data) ; }
+ 
     bool ping(int timeout_s = 1, int timeout_usec = 0) const noexcept;
 
   protected:
     void close();
+
+    void write( uint8_t command_id, uint64_t addr, uint8_t size) const;
+    std::vector<uint64_t> read(uint8_t command_id, uint64_t addr, uint8_t size) const;
+
     
   private:
     int m_connection_id = -1;
