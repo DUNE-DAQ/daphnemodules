@@ -12,12 +12,9 @@
 
 #include "daphnemodules/daphnecontroller/Nljs.hpp"
 #include "daphnemodules/daphnecontrollerinfo/InfoNljs.hpp"
-// #include "oei.hpp"
-// #include "cmd.hpp"
-// #include "info.hpp"
-// #include "testip.hpp"
-// #include "configclk.hpp"
-// #include "configanalog.hpp"
+
+#include "DaphneInterface.hpp"
+
 #include <string>
 #include <logging/Logging.hpp>
 
@@ -48,10 +45,27 @@ void
 DaphneController::do_conf(const data_t& conf_as_json)
 {
   auto conf_as_cpp = conf_as_json.get<daphnecontroller::Conf>();
-  auto ips = conf_as_cpp.daphne_list;
-  for (const auto&ip:ips) {
-    TLOG() << ip; 
+
+  auto ip = conf_as_cpp.daphne_address;
+  TLOG() << "Using daphne at " << ip; 
+
+  DaphneInterface di( ip.c_str(), 2001);
+
+  auto res = di.read_register(0x9000, 1);
+  for ( auto v : res ) {
+    TLOG() << v;
   }
+  
+  res = di.read_buffer(0x40000000,15);
+  for ( auto v : res ) {
+    TLOG() << v;
+  }
+
+
+  // auto res = di.send_command("RD VM ALL");
+  // TLOG() << res.command ;
+  // TLOG() << res.result ;
+  
 }
 } // namespace dunedaq::daphnemodules
 

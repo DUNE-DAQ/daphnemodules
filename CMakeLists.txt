@@ -38,14 +38,14 @@ daq_add_library( *.cpp LINK_LIBRARIES appfwk::appfwk) # Any source files and/or 
 
 # See https://dune-daq-sw.readthedocs.io/en/latest/packages/daq-cmake/#daq_add_plugin
 
-daq_add_plugin(DaphneController duneDAQModule LINK_LIBRARIES daphnemodules) # Replace appfwk library with a more specific library when appropriate
+daq_add_plugin(DaphneController duneDAQModule LINK_LIBRARIES daphnemodules)
 
 ##############################################################################
 
 
 # See https://dune-daq-sw.readthedocs.io/en/latest/packages/daq-cmake/#daq_add_unit_test
 
-daq_add_unit_test(Placeholder_test LINK_LIBRARIES daphnemodules)  # Placeholder_test should be replaced with real unit tests
+daq_add_unit_test(DaphneInterface_test LINK_LIBRARIES daphnemodules) 
 
 ##############################################################################
 daq_add_application(daphne_controller_test controller_test.cxx TEST LINK_LIBRARIES daphnemodules)

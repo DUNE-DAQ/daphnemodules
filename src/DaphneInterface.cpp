@@ -7,6 +7,7 @@
  */
 
 #include "DaphneInterface.hpp"
+#include "logging/Logging.hpp"
 
 using namespace dunedaq::daphnemodules;
 
@@ -23,8 +24,8 @@ DaphneInterface::DaphneInterface( const char* ipaddr, int port ) {
   if ( ret <= 0 ) 
     throw InvalidIPAddress(ERS_HERE, ipaddr);
  
-  if ( ! ping() )
-    throw FailedPing(ERS_HERE, ipaddr, port );
+  // if ( ! ping() )
+  //   throw FailedPing(ERS_HERE, ipaddr, port );
 
 }
 
@@ -58,6 +59,7 @@ bool DaphneInterface::ping(int timeout_s, int timeout_usec) const noexcept {
 
 command_result DaphneInterface::send_command( std::string cmd ) const {
 
+  TLOG() << "Sending command " << cmd;
   std::vector<uint64_t> bytes;
   for (char ch : cmd) {
     bytes.push_back(static_cast<uint64_t>(ch));
@@ -71,12 +73,15 @@ command_result DaphneInterface::send_command( std::string cmd ) const {
     write_buffer(0x90000000, std::move(part));
   }
 
+  TLOG() << "Command sent, waiting for result";
+  
   command_result res;
   int more = 40;
   while (more > 0) {
     auto data_block = read_buffer(0x90000000, 50);
     std::string * writing_pointer = nullptr;
     for (size_t i = 2; i < data_block.size(); ++i) {
+      TLOG() << data_block[i];
       if (data_block[i] == 255) {
 	break;
       } else if (data_block[i] == 1) {
@@ -90,9 +95,12 @@ command_result DaphneInterface::send_command( std::string cmd ) const {
 	writing_pointer = nullptr;
       } else if (isprint(static_cast<int>(data_block[i]))) {
 	more = 40;
-	*writing_pointer += static_cast<char>(data_block[i]);
+	char c = static_cast<char>(data_block[i]);
+	TLOG() << "Adding charachter " << c;
+		  //*writing_pointer += static_cast<char>(data_block[i]);
       }
     }
+    TLOG() << "Sleeping before next block to avoid errors";
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
     --more;
   }

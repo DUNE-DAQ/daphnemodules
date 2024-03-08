@@ -11,12 +11,9 @@ main()
   std::shared_ptr<DAQModule> instdaphnecontroller = make_module("DaphneController", "dummy");
   instdaphnecontroller->init(nlohmann::json{});
   dunedaq::daphnemodules::daphnecontroller::Conf c;
-  c.daphne_list.push_back("10.73.137.104");
-  c.daphne_list.push_back("10.73.137.105");
-  c.daphne_list.push_back("10.73.137.107");
-  c.daphne_list.push_back("10.73.137.109");
-  c.daphne_list.push_back("10.73.137.112");
-  c.daphne_list.push_back("10.73.137.113");
+
+  c.daphne_address = "10.73.137.112";
+  
   nlohmann::json j;
   dunedaq::daphnemodules::daphnecontroller::to_json(j,c);
   instdaphnecontroller->execute_command("conf", "ANY", j );

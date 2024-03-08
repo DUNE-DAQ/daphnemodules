@@ -14,10 +14,8 @@ local types = {
     string:   s.string(  "String",   		   doc="A string"),
     ipaddress: s.string( "IPAddress",              doc="A string containing an IP Address"),   
 
-    daphne_list: s.sequence("DaphneList", self.ipaddress,doc="List of daphne ip addresses to be controlled" ),
-  
     conf: s.record("Conf", [
-                           s.field("daphne_list", self.daphne_list, 
+                           s.field("daphne_address", self.ipaddress, 
                                            doc="addresses of the daphne connection point"),
                            ],
                    doc="Configuration for the the Daphne"),
