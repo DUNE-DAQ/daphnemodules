@@ -54,6 +54,12 @@ namespace dunedaq {
 
 namespace dunedaq::daphnemodules {
 
+  struct command_result{
+    std::string command;
+    std::string result;
+  };
+  
+  
   class DaphneInterface {
 
   public:
@@ -73,6 +79,8 @@ namespace dunedaq::daphnemodules {
  
     bool ping(int timeout_s = 1, int timeout_usec = 0) const noexcept;
 
+    command_result send_command( std::string cmd ) const ;
+    
   protected:
     void close();
 

@@ -54,7 +54,52 @@ bool DaphneInterface::ping(int timeout_s, int timeout_usec) const noexcept {
     return false;
 
 }
-  
+
+
+command_result DaphneInterface::send_command( std::string cmd ) const {
+
+  std::vector<uint64_t> bytes;
+  for (char ch : cmd) {
+    bytes.push_back(static_cast<uint64_t>(ch));
+  }
+  bytes.push_back(0x0d); // dedicated command flag
+
+  // we send the bytes in chunks of 50 words
+  for (size_t i = 0; i < (bytes.size() + 49) / 50; ++i) {
+    std::vector<uint64_t> part(bytes.begin() + i*50,
+			       bytes.begin() + std::min((i+1)*50, bytes.size()));
+    write_buffer(0x90000000, std::move(part));
+  }
+
+  command_result res;
+  int more = 40;
+  while (more > 0) {
+    auto data_block = read_buffer(0x90000000, 50);
+    std::string * writing_pointer = nullptr;
+    for (size_t i = 2; i < data_block.size(); ++i) {
+      if (data_block[i] == 255) {
+	break;
+      } else if (data_block[i] == 1) {
+	// the following data are returning the command that was issued
+	writing_pointer = & res.command;
+      } else if (data_block[i] == 2) {
+	// the following data are the command response
+	writing_pointer = & res.result;
+      } else if (data_block[i] == 3) {
+	// this is the message end
+	writing_pointer = nullptr;
+      } else if (isprint(static_cast<int>(data_block[i]))) {
+	more = 40;
+	*writing_pointer += static_cast<char>(data_block[i]);
+      }
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    --more;
+  }
+
+  return res;
+}
+
 
 std::vector<uint64_t>  DaphneInterface::read(uint8_t command_id,
 					     uint64_t addr, uint8_t size) const {
