@@ -76,19 +76,19 @@ command_result DaphneInterface::send_command( std::string cmd ) const {
   TLOG() << "Command sent, waiting for result";
   
   command_result res;
+  std::string * writing_pointer = nullptr;
+
   int more = 40;
   while (more > 0) {
     auto data_block = read_buffer(0x90000000, 50);
-    std::string * writing_pointer = nullptr;
-    for (size_t i = 2; i < data_block.size(); ++i) {
-      TLOG() << data_block[i];
+    for (size_t i = 0; i < data_block.size(); ++i) {
       if (data_block[i] == 255) {
 	break;
       } else if (data_block[i] == 1) {
 	// the following data are returning the command that was issued
 	writing_pointer = & res.command;
       } else if (data_block[i] == 2) {
-	// the following data are the command response
+	// the following data are the immediate command response
 	writing_pointer = & res.result;
       } else if (data_block[i] == 3) {
 	// this is the message end
@@ -96,11 +96,14 @@ command_result DaphneInterface::send_command( std::string cmd ) const {
       } else if (isprint(static_cast<int>(data_block[i]))) {
 	more = 40;
 	char c = static_cast<char>(data_block[i]);
-	TLOG() << "Adding charachter " << c;
-		  //*writing_pointer += static_cast<char>(data_block[i]);
+	if ( writing_pointer ) {
+	  *writing_pointer += static_cast<char>(data_block[i]);
+	}
+	else {
+	  TLOG() << "Failed adding charachter " <<  c;
+	}
       }
     }
-    TLOG() << "Sleeping before next block to avoid errors";
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
     --more;
   }

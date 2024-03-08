@@ -62,9 +62,9 @@ DaphneController::do_conf(const data_t& conf_as_json)
   }
 
 
-  // auto res = di.send_command("RD VM ALL");
-  // TLOG() << res.command ;
-  // TLOG() << res.result ;
+  auto cmd_res = di.send_command("RD VM ALL");
+  TLOG() << cmd_res.command ;
+  TLOG() << cmd_res.result ;
   
 }
 } // namespace dunedaq::daphnemodules
