@@ -36,7 +36,7 @@ void
 DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
 {
 
-  static std::regex volt_regex(".* VBIAS0= ([^ ]+) VBIAS1= ([^ ]+) VBIAS2= ([^ ]+) VBIAS3= ([^ ]+) VBIAS4= ([^ ]+) POWER\(-5v\)= ([^ ]+) POWER\(\+2\.5v\)= ([^ ]+) POWER\(\+CE\)= ([^ ]+) TEMP\(Celsius\)= ([^ ]+) .*");
+  static std::regex volt_regex(".* VBIAS0= ([^ ]+) VBIAS1= ([^ ]+) VBIAS2= ([^ ]+) VBIAS3= ([^ ]+) VBIAS4= ([^ ]+) POWER.-5v.= ([^ ]+) POWER..2.5v.= ([^ ]+) POWER..CE.= ([^ ]+) TEMP.Celsius.= ([^ ]+) .*");
 
   if ( ! m_interface ) return ;
   
@@ -54,7 +54,7 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
 
   std::vector<double> values(string_values.size());
 
-  for ( int i = 0; i < string_values.size(); ++i ) {
+  for ( int i = 1; i < string_values.size(); ++i ) {
     try {
       values[i] = std::stod( string_values[i] );
     }  catch ( const std::logic_error & e) {
@@ -63,17 +63,17 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
     }
   }
     
-  v_info.v_bias_0 = values[0];
-  v_info.v_bias_1 = values[1];
-  v_info.v_bias_2 = values[2];
-  v_info.v_bias_3 = values[3];
-  v_info.v_bias_4 = values[4];
+  v_info.v_bias_0 = values[1];
+  v_info.v_bias_1 = values[2];
+  v_info.v_bias_2 = values[3];
+  v_info.v_bias_3 = values[4];
+  v_info.v_bias_4 = values[5];
   
-  v_info.power_minus5v = values[5];
-  v_info.power_plus2p5v = values[6];
-  v_info.power_ce = values[7];
+  v_info.power_minus5v = values[6];
+  v_info.power_plus2p5v = values[7];
+  v_info.power_ce = values[8];
   
-  v_info.temperature = values[8];
+  v_info.temperature = values[9];
   
   ci.add(v_info);
 }

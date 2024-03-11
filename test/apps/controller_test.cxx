@@ -20,6 +20,8 @@ main()
   
   dunedaq::opmonlib::InfoCollector info;
   instdaphnecontroller->get_info(info, 0);
+
+  TLOG() << info.get_collected_infos() ;
   
   return 0;
 }
