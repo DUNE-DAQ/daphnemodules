@@ -12,11 +12,17 @@ local info = {
     boolean:  s.boolean( "Boolean",                doc="A boolean"),
     string:   s.string(  "String",                 doc="A string"),   
 
-    info: s.record("Info", [
-       s.field("total_amount",                    self.int8, doc="Total count of some discrete value we care about"),
-       s.field("amount_since_last_get_info_call", self.int4, doc="Change in this discrete value since the last report"),
-    ], doc="This record is for developer education only"),
-
+    voltage_info: s.record("VoltageInfo", [
+       s.field("v_bias_0", self.double8, doc="Volt bias 0"),
+       s.field("v_bias_1", self.double8, doc="Volt bias 1"),
+       s.field("v_bias_2", self.double8, doc="Volt bias 2"),
+       s.field("v_bias_3", self.double8, doc="Volt bias 3"),
+       s.field("v_bias_4", self.double8, doc="Volt bias 4"),
+       s.field("power_minus5v", self.double8, doc="Power(-5V)"),
+       s.field("power_plus2p5v", self.double8, doc="Power(2.5V)"),
+       s.field("power_ce", self.double8, doc="Power(+CE)"),
+       s.field("temperature", self.double8, doc="Temperature in degree celsious"),
+    ], doc="monitoring of the Daphne voltage")
 };
 
 moo.oschema.sort_select(info)

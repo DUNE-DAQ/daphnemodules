@@ -13,10 +13,11 @@
 #include "daphnemodules/daphnecontroller/Nljs.hpp"
 #include "daphnemodules/daphnecontrollerinfo/InfoNljs.hpp"
 
-#include "DaphneInterface.hpp"
-
 #include <string>
 #include <logging/Logging.hpp>
+
+#include <regex>
+#include <stdexcept>
 
 namespace dunedaq::daphnemodules {
 
@@ -34,11 +35,47 @@ DaphneController::init(const data_t& /* structured args */)
 void
 DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
 {
-  daphnecontrollerinfo::Info info;
-  info.total_amount = m_total_amount;
-  info.amount_since_last_get_info_call = m_amount_since_last_get_info_call.exchange(0);
 
-  ci.add(info);
+  static std::regex volt_regex(".* VBIAS0= ([^ ]+) VBIAS1= ([^ ]+) VBIAS2= ([^ ]+) VBIAS3= ([^ ]+) VBIAS4= ([^ ]+) POWER\(-5v\)= ([^ ]+) POWER\(\+2\.5v\)= ([^ ]+) POWER\(\+CE\)= ([^ ]+) TEMP\(Celsius\)= ([^ ]+) .*");
+
+  if ( ! m_interface ) return ;
+  
+  auto cmd_res = m_interface->send_command("RD VM ALL");
+  TLOG() << cmd_res.result ;
+  
+  std::smatch string_values; 
+						 
+  if ( ! std::regex_match( cmd_res.result, string_values, volt_regex ) ) {
+    ers::error( WrongMonitoringString(ERS_HERE, cmd_res.result) );
+    return ;
+  }
+    
+  daphnecontrollerinfo::VoltageInfo v_info;
+
+  std::vector<double> values(string_values.size());
+
+  for ( int i = 0; i < string_values.size(); ++i ) {
+    try {
+      values[i] = std::stod( string_values[i] );
+    }  catch ( const std::logic_error & e) {
+      ers::error( FailedStringConversion(ERS_HERE, string_values[i], e) );
+      return;
+    }
+  }
+    
+  v_info.v_bias_0 = values[0];
+  v_info.v_bias_1 = values[1];
+  v_info.v_bias_2 = values[2];
+  v_info.v_bias_3 = values[3];
+  v_info.v_bias_4 = values[4];
+  
+  v_info.power_minus5v = values[5];
+  v_info.power_plus2p5v = values[6];
+  v_info.power_ce = values[7];
+  
+  v_info.temperature = values[8];
+  
+  ci.add(v_info);
 }
 
 void
@@ -49,20 +86,20 @@ DaphneController::do_conf(const data_t& conf_as_json)
   auto ip = conf_as_cpp.daphne_address;
   TLOG() << "Using daphne at " << ip; 
 
-  DaphneInterface di( ip.c_str(), 2001);
+  m_interface.reset( new  DaphneInterface( ip.c_str(), 2001) );
 
-  auto res = di.read_register(0x9000, 1);
+  auto res = m_interface->read_register(0x9000, 1);
   for ( auto v : res ) {
     TLOG() << v;
   }
   
-  res = di.read_buffer(0x40000000,15);
+  res = m_interface->read_buffer(0x40000000,15);
   for ( auto v : res ) {
     TLOG() << v;
   }
 
 
-  auto cmd_res = di.send_command("RD VM ALL");
+  auto cmd_res = m_interface->send_command("RD VM ALL");
   TLOG() << cmd_res.command ;
   TLOG() << cmd_res.result ;
   

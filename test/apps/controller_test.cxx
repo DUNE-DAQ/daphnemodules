@@ -17,5 +17,10 @@ main()
   nlohmann::json j;
   dunedaq::daphnemodules::daphnecontroller::to_json(j,c);
   instdaphnecontroller->execute_command("conf", "ANY", j );
-return 0;}
+  
+  dunedaq::opmonlib::InfoCollector info;
+  instdaphnecontroller->get_info(info, 0);
+  
+  return 0;
+}
 
