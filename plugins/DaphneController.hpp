@@ -67,6 +67,11 @@ private:
 
   static uint16_t s_frame_alignment_error = 0x3f80;
 
+  // we need to have a mapping to the links from the configuration
+  // 0x500X X in 0 to F
+
+  
+
   
   
   
