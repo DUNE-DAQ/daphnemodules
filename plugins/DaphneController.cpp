@@ -85,9 +85,160 @@ DaphneController::do_conf(const data_t& conf_as_json)
 
   auto ip = conf_as_cpp.daphne_address;
   TLOG() << "Using daphne at " << ip; 
-
+  // Set the slot to the last part of the IP addreess (from 104 to 113)
+  // In the memory map, the slot is a 4 bit register, so we need to check that the maximum is respected
+  
   m_interface.reset( new  DaphneInterface( ip.c_str(), 2001) );
 
+  // -------------------------------------
+  // config timing endpoints
+  uint8_t EDGE_SELECT = 0;
+  uint8_t TIMING_GROUP = 0;
+  uint8_t ENDPOINT_ADDRESS = 0;
+  m_interface->write(0x4001, {0x1});
+  m_interface->write(0x3000, {0x002081 + uint64_t(0x400000 * m_slot)});
+  m_interface->write(0x4003, {1234});
+
+  // we need time for the PLL to lock
+  sleep_for(1s);
+
+  // check register 0x4000, bit 0 LSB
+  // 0 = not locked
+  // 1 = locked
+
+  m_interface->write(0x4002, {1234});
+  sleep_for(1s);
+
+  // check register 0x4000, bit 1 LSB
+  // 0 = not locked
+  // 1 = locked
+
+  // at this point everything that is in register 0x4000 is the status of the timing endpoint
+  // we need to check bit 12 to check if the timing endpoint is valid
+  // 0 = not ok
+  // 1 = ok
+  // should things fail, we can print a lot of messages from register 0x4000
+  
+  //---------------------------------------
+  // config of the analog chain
+  std::string initial_command = "CFG AFE ALL INITIAL";
+  auto result = m_interface->send_command(initial_command);
+  TLOG() << result.result;
+  int nChannels = 40;
+  for (int ch = 0; ch < nChannels; ++ch) {
+    cmd (thing, "WR OFFSET CH " + std::to_string(ch) + " V 1468", true);
+    cmd (thing, "CFG OFFSET CH " + std::to_string(ch) + " GAIN 2", true);
+    // CH OFFSET 2700 if GAIN is 1, 1500 if GAIN is 2
+    // to deconfigure
+    // cmd (thing, "WR OFFSET CH " + std::to_string(ch) + " V 0", true);
+    // cmd (thing, "CFG OFFSET CH " + std::to_string(ch) + " GAIN 1", true);
+
+    // to check if the configuration went throguh we can
+    //cmd (thing, "RD OFFSET CH " + std::to_string(ch), true);
+    // But Manuel said that this is not necessary to be done all the time
+    
+  }
+
+  // mapping from the channels to the AFE
+  // 0-7 -> AFE 0
+  // 8-15 -> AFE 1
+  // 16-23 -> AFE 2
+  // 24-31 -> AFE 3
+  // 32-39 -> AFE 4
+  int nAFEs = 5;
+  for (int AFE = 0; AFE < nAFEs; ++AFE) {
+    cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 52 V 21056", true);
+    // this is a 16 bit register, so the maximu will be ....
+    cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 4 V 24", true);
+    // This is a 5 bits register so the maximum will be ....
+    cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 51 V 16", true);
+    //  This is a 14 bit so the maximum will be
+    cmd (thing, "WR AFE " + std::to_string(AFE) + " VGAIN V 2667", true);
+    /// Maximum 4095 2^12-1
+    
+    // to deconfigure
+    // cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 52 V 0", true);
+    // cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 4 V 0", true);
+    // cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 51 V 0", true);
+    // cmd (thing, "WR AFE " + std::to_string(AFE) + " VGAIN V 0", true);
+
+    // To check these values we can do things like
+    // cmd (thing, "RD AFE " + std::to_string(AFE) + " REG 52", true);
+    // for all these registers and get the values from the replies
+
+    
+    
+  }
+  
+  // ----------------------------------------------
+  // Alignment of the DDR
+  m_interface->write(0x2001, {1234});
+  m_interface->write(0x2001, {1234});
+  m_interface->write(0x2001, {1234});
+  // this is correct to be done 3 times
+
+  // a check of the success can done with the following
+  // trigger spy buffers
+  //thing.write_reg(0x2000, {1234});
+  
+  // read register ch 8 of each afe,   by looping on all the afe we use
+  auto data = thing.read_reg(0x40000000 + (afe * 0x100000) + (ch * 0x10000), 15);  // ch = 8
+  // things are ok when the data is 0x3f80
+  
+  
+  // ---------------------------------------------
+  // set self trigger or full stream
+  // for full stream
+  // thing.write(0x3001, {0xaa}); 
+  // thing.write(0x6001, {0b00000000});   // for safety
+  // check
+  // thing.read(0x3001, 1)
+  // the result should be 0xaa
+
+  // self_trigger
+  //  thing.write(0x3001, {0x3});
+  //  thing.write(0x6000, {700});  // threshold, to be configured 14 bits from configuration
+  // thing.write(0x6001, {0b11111111});   // this is a 40 bit regsiter, so I could construct this number from the enabled channels
+  // check 
+  // thing.read(0x3001, 1)
+  // the result should be 0x3
+  // 
+
+
+  // In the case of of full stream, we can only stream data from 16 channels at maximum
+  // This is because of badnwidth.
+  // So if we run in fullstream we need to set which channes to stream out
+  // We need to assign each channel to a link (streamSender). We have 4 links for each board.
+  // write in register 0x500X X in 0 to F the channel that is supposed to be streamed out.
+  // X is the identifier of a output physically in 4 cables
+  // The channles are not identified with an id from 0-39, they have a different identifier to represent the
+  // cables in the fron of the board. They are grouped in 8 
+  // Conf ch -> DAQ ch
+  // 0-7     -> 0-7
+  // 8-15    -> 10-17
+  // 16-23   -> 20-27
+  // 24-31   -> 30-37
+  // 32-39   -> 40-47
+
+  // the configuration of which link should be as first come first serve.
+  // to a maximum of 16 channels
+  
+  // we get a list of 
+  // Let's say I want to see 0x5001
+  //                         0x5004 10
+  // To be discussed - channel/link sorting
+  // -----------------------------------------
+  // thing.write_reg(0x2000, {1234});         
+  // 
+
+
+
+
+
+
+
+
+  
   auto res = m_interface->read_register(0x9000, 1);
   for ( auto v : res ) {
     TLOG() << v;
@@ -98,10 +249,7 @@ DaphneController::do_conf(const data_t& conf_as_json)
     TLOG() << v;
   }
 
-
-  auto cmd_res = m_interface->send_command("RD VM ALL");
-  TLOG() << cmd_res.command ;
-  TLOG() << cmd_res.result ;
+  
   
 }
 } // namespace dunedaq::daphnemodules

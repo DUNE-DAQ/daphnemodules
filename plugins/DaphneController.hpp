@@ -58,6 +58,18 @@ private:
   void do_conf(const data_t&);
 
   std::unique_ptr<DaphneInterface> m_interface;
+  uint8_t m_slot;
+  static int s_max_channels = 40;
+  // somehow we  need to store which channles are used
+
+  // all the values have to come from configuration
+  // CH OFFSET 2700 if GAIN is 1, 1500 if GAIN is 2
+
+  static uint16_t s_frame_alignment_error = 0x3f80;
+
+  
+  
+  
 };
 
 } // namespace dunedaq::daphnemodules
