@@ -32,6 +32,31 @@ namespace dunedaq {
 		     ((std::string)str)
                    )
 
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     InvalidIPAddress,
+                     "String " << str << " is not a valid IP",
+		     ((std::string)str)
+                   )
+
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     InvalidSlot,
+                     "Invalid slot " << slot << " obtained from IP " << ip,
+		     ((unit8_t)slot) ((std::string)ip)
+		   )
+
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     PLLNotLocked,
+                     mm << " not locked",
+		     ((std::string)mm)
+		   )
+
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     TimingEndpointNotReady,
+                     "Timing endpoint not ready, full status: " << status
+		     ((std::string)status)
+		   )
+  
+  
 }
 
 namespace dunedaq::daphnemodules {
@@ -57,6 +82,9 @@ private:
   // Commands DaphneController can receive
   void do_conf(const data_t&);
 
+  // specific actions
+  void configure_timing_endpoints();
+  
   std::unique_ptr<DaphneInterface> m_interface;
   uint8_t m_slot;
   static int s_max_channels = 40;

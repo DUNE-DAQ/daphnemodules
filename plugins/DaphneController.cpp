@@ -18,6 +18,9 @@
 
 #include <regex>
 #include <stdexcept>
+#include <cmath>
+#include <chrono>
+#include <bitset>
 
 namespace dunedaq::daphnemodules {
 
@@ -81,43 +84,34 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
 void
 DaphneController::do_conf(const data_t& conf_as_json)
 {
+  auto start_time = std::chrono::high_resolution_clock::now();
+  
   auto conf_as_cpp = conf_as_json.get<daphnecontroller::Conf>();
 
-  auto ip = conf_as_cpp.daphne_address;
-  TLOG() << "Using daphne at " << ip; 
-  // Set the slot to the last part of the IP addreess (from 104 to 113)
-  // In the memory map, the slot is a 4 bit register, so we need to check that the maximum is respected
+  auto ip_string = conf_as_cpp.daphne_address;
+
+  static std::regex ip_regex("[0-9]+.[0-9]+.[0-9]+.([0-9]+)");
+
+  td::smatch matches; 
+  
+  if ( ! std::regex_match( ip_string, matches, ip_regex) ) {
+    throw InvalidIPAddress(ERS_HERE, ip_string);
+  }
+
+  auto last = std::atoi(matches[1]);
+  m_slot = last % 100;
+  if ( m_slot >= 16 ) {
+    // Set the slot to the last part of the IP addreess (from 104 to 113)
+    // the slot used laster in the code is a 4 bit register, so we need to check we are not overflowing
+    throw InvalidSlot(ERS_HERE, m_slot, ip_string);
+  }
+
+  TLOG() << "Using daphne at " << ip << " with slot " << m_slot; 
   
   m_interface.reset( new  DaphneInterface( ip.c_str(), 2001) );
 
-  // -------------------------------------
-  // config timing endpoints
-  uint8_t EDGE_SELECT = 0;
-  uint8_t TIMING_GROUP = 0;
-  uint8_t ENDPOINT_ADDRESS = 0;
-  m_interface->write(0x4001, {0x1});
-  m_interface->write(0x3000, {0x002081 + uint64_t(0x400000 * m_slot)});
-  m_interface->write(0x4003, {1234});
-
-  // we need time for the PLL to lock
-  sleep_for(1s);
-
-  // check register 0x4000, bit 0 LSB
-  // 0 = not locked
-  // 1 = locked
-
-  m_interface->write(0x4002, {1234});
-  sleep_for(1s);
-
-  // check register 0x4000, bit 1 LSB
-  // 0 = not locked
-  // 1 = locked
-
-  // at this point everything that is in register 0x4000 is the status of the timing endpoint
-  // we need to check bit 12 to check if the timing endpoint is valid
-  // 0 = not ok
-  // 1 = ok
-  // should things fail, we can print a lot of messages from register 0x4000
+  configure_timing_endpoint();
+  
   
   //---------------------------------------
   // config of the analog chain
@@ -249,9 +243,53 @@ DaphneController::do_conf(const data_t& conf_as_json)
     TLOG() << v;
   }
 
-  
+  auto end_time = std::chrono::high_resolution_clock::now();
+
+  auto duration = duration_cast<microseconds>(end_time - start_time);
+  TLOG() << "Board configured in " << duration << " ms";
   
 }
+
+
+void
+DaphneController::configure_timing_endpoints() {
+
+  m_interface->write_register(0x4001, {0x1});
+  m_interface->write_register(0x3000, {0x002081 + uint64_t(0x400000 * m_slot)});
+  m_interface->write_register(0x4003, {1234});
+
+  // we need time for the PLL to lock
+  sleep_for(1s);
+
+  auto register_check = m_interface->read_register(0x4000, 1);
+  std::bitset<16> r(register_check[0]);
+  if ( ! r[0] ) {
+    throw PLLNotLocked(ERS_HERE, "MMCM0" );
+  }
+
+  m_interface->write(0x4002, {1234});
+  sleep_for(1s);
+
+  register_check = m_interface->read_register(0x4000, 1);
+  r = std::bitset<16>(register_check[0]);
+  if ( ! r[1] ) {
+    throw PLLNotLocked(ERS_HERE, "MMCM1" );
+  }
+
+  // at this point everything that is in register 0x4000 is the status of the timing endpoint
+  // we need to check bit 12 to check if the timing endpoint is valid
+  // 0 = not ok
+  // 1 = ok
+  // should things fail, we can print a lot of messages from register 0x4000
+  register_check = m_interface->read_register(0x4000, 1);
+  r = std::bitset<16>(register_check[0]);
+  if ( ! r[12] ) {
+    throw TimingEndpointNotReady(ERS_HERE, r.to_string() );
+  }
+
+}
+
+  
 } // namespace dunedaq::daphnemodules
 
 DEFINE_DUNE_DAQ_MODULE(dunedaq::daphnemodules::DaphneController)
