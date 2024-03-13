@@ -16,8 +16,11 @@
 #include <atomic>
 #include <limits>
 #include <string>
+#include <array>
 
 #include "DaphneInterface.hpp"
+
+#include "daphnemodules/daphnecontroller/Structs.hpp"
 
 namespace dunedaq {
   ERS_DECLARE_ISSUE( daphnemodules,
@@ -49,7 +52,12 @@ namespace dunedaq {
                      "Timing endpoint not ready, full status: " << status,
 		     ((std::string)status)
 		   )
-  
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     InvalidChannelConfiguration,
+                     "Channel " << id << "has invaliud configuration, offset: " << offset << ", gain:" << gain,
+		     ((uint32_t)id)((uint32_t)offset)((uint32_t)gain)
+		   )
+
   
 }
 
@@ -82,7 +90,12 @@ private:
   
   std::unique_ptr<DaphneInterface> m_interface;
   uint8_t m_slot;
-  //static int s_max_channels = 40;
+
+  static const int s_max_channels = 40;
+  std::array<daphnecontroller::ChannelConf, s_max_channels> m_channel_confs;
+  // this array is indexed in the [0-40) range
+
+  
   // somehow we  need to store which channles are used
 
   // all the values have to come from configuration

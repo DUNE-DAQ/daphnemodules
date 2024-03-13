@@ -24,8 +24,8 @@ DaphneInterface::DaphneInterface( const char* ipaddr, int port ) {
   if ( ret <= 0 ) 
     throw InvalidIPAddress(ERS_HERE, ipaddr);
  
-  // if ( ! ping() )
-  //   throw FailedPing(ERS_HERE, ipaddr, port );
+  if (  ping() )
+    throw FailedPing(ERS_HERE, ipaddr, port );
 
 }
 
@@ -42,7 +42,9 @@ bool DaphneInterface::ping(int timeout_s, int timeout_usec) const noexcept {
   // Something like this should work.
 
   // Reference:  https://bbs.archlinux.org/viewtopic.php?id=213878
- 
+
+  // read 0xaa55 returns 0xdeadbeef
+
   struct timeval timeout;
   timeout.tv_sec  = timeout_s ;
   timeout.tv_usec = timeout_usec ;

@@ -111,6 +111,24 @@ DaphneController::do_conf(const data_t& conf_as_json)
   
   m_interface.reset( new  DaphneInterface( ip_string.c_str(), 2001) );
 
+  auto channel_conf = conf_as_cpp.channels;
+
+  for ( const auto & c : channel_conf ) {
+    //CH OFFSET maximum is 2700 if GAIN is 1, 1500 if GAIN is 2
+    if ( c.conf.gain != 1 && c.conf.gain != 2 ) {
+      throw InvalidChannelConfiguration(ERS_HERE, c.id, c.conf.offset, c.conf.gain);
+    }
+    if ( c.conf.gain == 1 ) {
+      if ( c.conf.offset > 2700 ) 
+	throw InvalidChannelConfiguration(ERS_HERE, c.id, c.conf.offset, c.conf.gain);
+    } else if ( c.conf.gain == 2 ) {
+      if ( c.conf.offset > 1500 ) 
+	throw InvalidChannelConfiguration(ERS_HERE, c.id, c.conf.offset, c.conf.gain);
+    }
+           
+    m_channel_confs[c.id] = c.conf;
+  }
+  
   configure_timing_endpoints();
   
   configure_analog_chain();
