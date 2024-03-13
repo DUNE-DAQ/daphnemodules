@@ -77,7 +77,7 @@ namespace dunedaq::daphnemodules {
     std::vector<uint64_t> read_buffer(uint64_t addr, uint8_t size) const { return read(0x08, addr, size) ; }
     void write_buffer(uint64_t addr, std::vector<uint64_t> && data) const { write(0x09, addr, std::move(data)) ; }
  
-    bool ping(int timeout_s = 1, int timeout_usec = 0) const noexcept;
+    bool validate_connection() const ;
 
     command_result send_command( std::string cmd ) const ;
     

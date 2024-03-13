@@ -125,6 +125,10 @@ DaphneController::do_conf(const data_t& conf_as_json)
       if ( c.conf.offset > 1500 ) 
 	throw InvalidChannelConfiguration(ERS_HERE, c.id, c.conf.offset, c.conf.gain);
     }
+
+    if ( c.id > DaphneController::s_max_channels ) {
+      throw InvalidChannelConfiguration(ERS_HERE, c.id, c.conf.offset, c.conf.gain);
+    }
            
     m_channel_confs[c.id] = c.conf;
   }
@@ -280,15 +284,22 @@ void DaphneController::configure_analog_chain() {
   TLOG() << "Configuring analog chain";
   
   auto result = m_interface->send_command("CFG AFE ALL INITIAL");
-  TLOG() << result.result;
-  // int nChannels = 40;
-  // for (int ch = 0; ch < nChannels; ++ch) {
-  //   cmd (thing, "WR OFFSET CH " + std::to_string(ch) + " V 1468", true);
-  //   cmd (thing, "CFG OFFSET CH " + std::to_string(ch) + " GAIN 2", true);
-  //   // CH OFFSET maximum is 2700 if GAIN is 1, 1500 if GAIN is 2
-  //   // to deconfigure
-  //   // cmd (thing, "WR OFFSET CH " + std::to_string(ch) + " V 0", true);
-  //   // cmd (thing, "CFG OFFSET CH " + std::to_string(ch) + " GAIN 1", true);
+  TLOG() << result.command << " -> " << result.result;
+
+  for ( size_t ch = 0; ch < m_channel_confs.size() ; ++ch ) {
+
+    result = m_interface->send_command(
+      "WR OFFSET CH " + std::to_string(ch) + " V " + std::to_string(m_channel_confs[ch].offset) );
+    TLOG() << result.command << " -> " << result.result;
+
+    result = m_interface -> send_command(
+      "CFG OFFSET CH " + std::to_string(ch) + " GAIN " + std::to_string(m_channel_confs[ch].gain) );
+    TLOG() << result.command << " -> " << result.result;
+
+    // the defaul values of offset and gain are set so that they correspond to the setting to disable the channel
+    // hence, this loop does both the job of enabling and disebling
+    
+  }
 
   //   // to check if the configuration went throguh we can
   //   //cmd (thing, "RD OFFSET CH " + std::to_string(ch), true);

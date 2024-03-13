@@ -24,7 +24,7 @@ DaphneInterface::DaphneInterface( const char* ipaddr, int port ) {
   if ( ret <= 0 ) 
     throw InvalidIPAddress(ERS_HERE, ipaddr);
  
-  if (  ping() )
+  if ( ! validate_connection() )
     throw FailedPing(ERS_HERE, ipaddr, port );
 
 }
@@ -36,25 +36,13 @@ void DaphneInterface::close() {
 }
 
 
-bool DaphneInterface::ping(int timeout_s, int timeout_usec) const noexcept {
+bool DaphneInterface::validate_connection() const {
 
-  // MR: We should ping the board here. And not with a system call
-  // Something like this should work.
 
-  // Reference:  https://bbs.archlinux.org/viewtopic.php?id=213878
+  auto ret = read_register( 0xaa55, 1);
 
-  // read 0xaa55 returns 0xdeadbeef
-
-  struct timeval timeout;
-  timeout.tv_sec  = timeout_s ;
-  timeout.tv_usec = timeout_usec ;
-  setsockopt(m_connection_id, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout));
-  setsockopt(m_connection_id, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout, sizeof(timeout));
-  
-  if (connect(m_connection_id, (struct sockaddr *) & m_target, sizeof(m_target)) != 0)
-    return true;
-  else
-    return false;
+  static const uint8_t good_value = 0xdeadbeef; 
+  return ret[0] == good_value ;
 
 }
 
