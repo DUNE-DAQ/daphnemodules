@@ -13,12 +13,30 @@ local types = {
     boolean:  s.boolean( "Boolean",                doc="A boolean"),
     string:   s.string(  "String",   		   doc="A string"),
     ipaddress: s.string( "IPAddress",              doc="A string containing an IP Address"),   
+    channel_id: s.number( "ChannelId", "u4",       doc="ChannelID in the [0-40) range"),   
+
+    channel_conf : s.record("ChannelConf", [
+    	                                   s.field("offset", self.uint4, 0, doc="Pedestal of the channel"),
+				           s.field("gain",   self.uint4, 1, doc="Gain"),
+	                                   ], doc = "Channel info" ),
+
+    channel : s.record("Channel", [
+ 	                          s.field( "id",   self.channel_id, 1000, doc = "id of the properties"),
+                                  s.field( "conf", self.channel_conf, doc = "Properties of the specific channel"),
+                 	          ], doc = "Configuration coupled with its ID" ),
+
+    channels : s.sequence( "Channels", self.channel,
+                           doc = "Configuration for all channels" ),
+				  
+                       
 
     conf: s.record("Conf", [
                            s.field("daphne_address", self.ipaddress, 
                                            doc="addresses of the daphne connection point"),
+                           s.field("channels", self.channels, 
+                                   doc = "Configuration for all the channels") ,
                            ],
-                   doc="Configuration for the the Daphne"),
+                           doc="Configuration for the the Daphne"),
 
 };
 

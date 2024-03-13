@@ -33,15 +33,9 @@ namespace dunedaq {
                    )
 
   ERS_DECLARE_ISSUE( daphnemodules,
-		     InvalidIPAddress,
-                     "String " << str << " is not a valid IP",
-		     ((std::string)str)
-                   )
-
-  ERS_DECLARE_ISSUE( daphnemodules,
 		     InvalidSlot,
                      "Invalid slot " << slot << " obtained from IP " << ip,
-		     ((unit8_t)slot) ((std::string)ip)
+		     ((uint8_t)slot) ((std::string)ip)
 		   )
 
   ERS_DECLARE_ISSUE( daphnemodules,
@@ -52,7 +46,7 @@ namespace dunedaq {
 
   ERS_DECLARE_ISSUE( daphnemodules,
 		     TimingEndpointNotReady,
-                     "Timing endpoint not ready, full status: " << status
+                     "Timing endpoint not ready, full status: " << status,
 		     ((std::string)status)
 		   )
   
@@ -84,16 +78,17 @@ private:
 
   // specific actions
   void configure_timing_endpoints();
+  void configure_analog_chain();
   
   std::unique_ptr<DaphneInterface> m_interface;
   uint8_t m_slot;
-  static int s_max_channels = 40;
+  //static int s_max_channels = 40;
   // somehow we  need to store which channles are used
 
   // all the values have to come from configuration
   // CH OFFSET 2700 if GAIN is 1, 1500 if GAIN is 2
 
-  static uint16_t s_frame_alignment_error = 0x3f80;
+  static const uint16_t s_frame_alignment_error = 0x3f80;
 
   // we need to have a mapping to the links from the configuration
   // 0x500X X in 0 to F

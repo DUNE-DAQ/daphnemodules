@@ -93,13 +93,13 @@ DaphneController::do_conf(const data_t& conf_as_json)
 
   static std::regex ip_regex("[0-9]+.[0-9]+.[0-9]+.([0-9]+)");
 
-  td::smatch matches; 
+  std::smatch matches; 
   
   if ( ! std::regex_match( ip_string, matches, ip_regex) ) {
     throw InvalidIPAddress(ERS_HERE, ip_string);
   }
 
-  auto last = std::atoi(matches[1]);
+  auto last = std::stoi(matches[1]);
   m_slot = last % 100;
   if ( m_slot >= 16 ) {
     // Set the slot to the last part of the IP addreess (from 104 to 113)
@@ -107,69 +107,20 @@ DaphneController::do_conf(const data_t& conf_as_json)
     throw InvalidSlot(ERS_HERE, m_slot, ip_string);
   }
 
-  TLOG() << "Using daphne at " << ip << " with slot " << m_slot; 
+  TLOG() << "Using daphne at " << ip_string << " with slot " << m_slot; 
   
-  m_interface.reset( new  DaphneInterface( ip.c_str(), 2001) );
+  m_interface.reset( new  DaphneInterface( ip_string.c_str(), 2001) );
 
-  configure_timing_endpoint();
+  configure_timing_endpoints();
   
+  configure_analog_chain();
   
-  //---------------------------------------
-  // config of the analog chain
-  std::string initial_command = "CFG AFE ALL INITIAL";
-  auto result = m_interface->send_command(initial_command);
-  TLOG() << result.result;
-  int nChannels = 40;
-  for (int ch = 0; ch < nChannels; ++ch) {
-    cmd (thing, "WR OFFSET CH " + std::to_string(ch) + " V 1468", true);
-    cmd (thing, "CFG OFFSET CH " + std::to_string(ch) + " GAIN 2", true);
-    // CH OFFSET 2700 if GAIN is 1, 1500 if GAIN is 2
-    // to deconfigure
-    // cmd (thing, "WR OFFSET CH " + std::to_string(ch) + " V 0", true);
-    // cmd (thing, "CFG OFFSET CH " + std::to_string(ch) + " GAIN 1", true);
-
-    // to check if the configuration went throguh we can
-    //cmd (thing, "RD OFFSET CH " + std::to_string(ch), true);
-    // But Manuel said that this is not necessary to be done all the time
-    
-  }
-
-  // mapping from the channels to the AFE
-  // 0-7 -> AFE 0
-  // 8-15 -> AFE 1
-  // 16-23 -> AFE 2
-  // 24-31 -> AFE 3
-  // 32-39 -> AFE 4
-  int nAFEs = 5;
-  for (int AFE = 0; AFE < nAFEs; ++AFE) {
-    cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 52 V 21056", true);
-    // this is a 16 bit register, so the maximu will be ....
-    cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 4 V 24", true);
-    // This is a 5 bits register so the maximum will be ....
-    cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 51 V 16", true);
-    //  This is a 14 bit so the maximum will be
-    cmd (thing, "WR AFE " + std::to_string(AFE) + " VGAIN V 2667", true);
-    /// Maximum 4095 2^12-1
-    
-    // to deconfigure
-    // cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 52 V 0", true);
-    // cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 4 V 0", true);
-    // cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 51 V 0", true);
-    // cmd (thing, "WR AFE " + std::to_string(AFE) + " VGAIN V 0", true);
-
-    // To check these values we can do things like
-    // cmd (thing, "RD AFE " + std::to_string(AFE) + " REG 52", true);
-    // for all these registers and get the values from the replies
-
-    
-    
-  }
   
   // ----------------------------------------------
   // Alignment of the DDR
-  m_interface->write(0x2001, {1234});
-  m_interface->write(0x2001, {1234});
-  m_interface->write(0x2001, {1234});
+  m_interface->write_register(0x2001, {1234});
+  m_interface->write_register(0x2001, {1234});
+  m_interface->write_register(0x2001, {1234});
   // this is correct to be done 3 times
 
   // a check of the success can done with the following
@@ -177,7 +128,7 @@ DaphneController::do_conf(const data_t& conf_as_json)
   //thing.write_reg(0x2000, {1234});
   
   // read register ch 8 of each afe,   by looping on all the afe we use
-  auto data = thing.read_reg(0x40000000 + (afe * 0x100000) + (ch * 0x10000), 15);  // ch = 8
+  //  auto data = m_interface->read_register(0x40000000 + (afe * 0x100000) + (ch * 0x10000), 15);  // ch = 8
   // things are ok when the data is 0x3f80
   
   
@@ -246,8 +197,8 @@ DaphneController::do_conf(const data_t& conf_as_json)
 
   auto end_time = std::chrono::high_resolution_clock::now();
 
-  auto duration = duration_cast<microseconds>(end_time - start_time);
-  TLOG() << "Board configured in " << duration << " ms";
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+  TLOG() << "Board configured in " << duration.count() << " microseconds";
   
 }
 
@@ -255,6 +206,7 @@ DaphneController::do_conf(const data_t& conf_as_json)
 void
 DaphneController::configure_timing_endpoints() {
 
+  TLOG() << "Configuring timing endpoint";
   m_interface->write_register(0x4001, {0x1});
   m_interface->write_register(0x3000, {0x002081 + uint64_t(0x400000 * m_slot)});
   m_interface->write_register(0x4003, {1234});
@@ -274,7 +226,7 @@ DaphneController::configure_timing_endpoints() {
     throw PLLNotLocked(ERS_HERE, "MMCM0");
   }
   
-  m_interface->write(0x4002, {1234});
+  m_interface->write_buffer(0x4002, {1234});
 
   // waiting for the PLL to lock
   counter = 0;
@@ -295,12 +247,69 @@ DaphneController::configure_timing_endpoints() {
   // 0 = not ok
   // 1 = ok
   // should things fail, we can print a lot of messages from register 0x4000
-  register_check = m_interface->read_register(0x4000, 1);
-  r = std::bitset<16>(register_check[0]);
-  if ( ! r[12] ) {
-    throw TimingEndpointNotReady(ERS_HERE, r.to_string() );
+  auto register_check = m_interface->read_register(0x4000, 1);
+  check = std::bitset<16>(register_check[0]);
+  if ( ! check[12] ) {
+    throw TimingEndpointNotReady(ERS_HERE, check.to_string() );
   }
 
+  TLOG() << "Done donfiguring timing endpoint";
+
+}
+
+void DaphneController::configure_analog_chain() {
+
+  TLOG() << "Configuring analog chain";
+  
+  auto result = m_interface->send_command("CFG AFE ALL INITIAL");
+  TLOG() << result.result;
+  // int nChannels = 40;
+  // for (int ch = 0; ch < nChannels; ++ch) {
+  //   cmd (thing, "WR OFFSET CH " + std::to_string(ch) + " V 1468", true);
+  //   cmd (thing, "CFG OFFSET CH " + std::to_string(ch) + " GAIN 2", true);
+  //   // CH OFFSET maximum is 2700 if GAIN is 1, 1500 if GAIN is 2
+  //   // to deconfigure
+  //   // cmd (thing, "WR OFFSET CH " + std::to_string(ch) + " V 0", true);
+  //   // cmd (thing, "CFG OFFSET CH " + std::to_string(ch) + " GAIN 1", true);
+
+  //   // to check if the configuration went throguh we can
+  //   //cmd (thing, "RD OFFSET CH " + std::to_string(ch), true);
+  //   // But Manuel said that this is not necessary to be done all the time
+    
+  // }
+
+  // // mapping from the channels to the AFE
+  // // 0-7 -> AFE 0
+  // // 8-15 -> AFE 1
+  // // 16-23 -> AFE 2
+  // // 24-31 -> AFE 3
+  // // 32-39 -> AFE 4
+  // int nAFEs = 5;
+  // for (int AFE = 0; AFE < nAFEs; ++AFE) {
+  //   cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 52 V 21056", true);
+  //   // this is a 16 bit register, so the maximu will be ....
+  //   cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 4 V 24", true);
+  //   // This is a 5 bits register so the maximum will be ....
+  //   cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 51 V 16", true);
+  //   //  This is a 14 bit so the maximum will be
+  //   cmd (thing, "WR AFE " + std::to_string(AFE) + " VGAIN V 2667", true);
+  //   /// Maximum 4095 2^12-1
+    
+  //   // to deconfigure
+  //   // cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 52 V 0", true);
+  //   // cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 4 V 0", true);
+  //   // cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 51 V 0", true);
+  //   // cmd (thing, "WR AFE " + std::to_string(AFE) + " VGAIN V 0", true);
+
+  //   // To check these values we can do things like
+  //   // cmd (thing, "RD AFE " + std::to_string(AFE) + " REG 52", true);
+  //   // for all these registers and get the values from the replies
+
+    
+    
+  // }
+
+  
 }
 
   
