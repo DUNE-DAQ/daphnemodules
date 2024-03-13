@@ -21,6 +21,7 @@
 #include <cmath>
 #include <chrono>
 #include <bitset>
+#include <thread>
 
 namespace dunedaq::daphnemodules {
 
@@ -258,24 +259,37 @@ DaphneController::configure_timing_endpoints() {
   m_interface->write_register(0x3000, {0x002081 + uint64_t(0x400000 * m_slot)});
   m_interface->write_register(0x4003, {1234});
 
-  // we need time for the PLL to lock
-  sleep_for(1s);
+  // waiting for the PLL to lock
+  std::bitset<16> check;
+  int counter = 0;
+  do {
+    ++counter;
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    auto register_check = m_interface->read_register(0x4000, 1);
+    check = std::bitset<16>(register_check[0]);
+    if ( counter > 200 ) break;
+  } while (!check[0]);
 
-  auto register_check = m_interface->read_register(0x4000, 1);
-  std::bitset<16> r(register_check[0]);
-  if ( ! r[0] ) {
-    throw PLLNotLocked(ERS_HERE, "MMCM0" );
+  if ( ! check[0] ) {
+    throw PLLNotLocked(ERS_HERE, "MMCM0");
   }
-
+  
   m_interface->write(0x4002, {1234});
-  sleep_for(1s);
 
-  register_check = m_interface->read_register(0x4000, 1);
-  r = std::bitset<16>(register_check[0]);
-  if ( ! r[1] ) {
-    throw PLLNotLocked(ERS_HERE, "MMCM1" );
+  // waiting for the PLL to lock
+  counter = 0;
+  do {
+    ++counter;
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    auto register_check = m_interface->read_register(0x4000, 1);
+    check = std::bitset<16>(register_check[0]);
+    if ( counter > 200 ) break;
+  } while (!check[1]);
+
+  if ( ! check[1] ) {
+    throw PLLNotLocked(ERS_HERE, "MMCM1");
   }
-
+  
   // at this point everything that is in register 0x4000 is the status of the timing endpoint
   // we need to check bit 12 to check if the timing endpoint is valid
   // 0 = not ok
