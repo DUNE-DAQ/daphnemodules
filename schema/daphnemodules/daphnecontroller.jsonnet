@@ -27,14 +27,29 @@ local types = {
 
     channels : s.sequence( "Channels", self.channel,
                            doc = "Configuration for all channels" ),
-				  
-                       
+
+    afe_conf : s.record( "AFEConf", [
+                                    s.field( "reg_52", self.uint4, doc = "value for reg 52 of the AFE, 16 bit register" ),
+				    s.field( "reg_4" , self.uint4, doc = "value for reg 4  of the AFE, 5 bit register" ),
+				    s.field( "reg_51", self.uint4, doc = "Value for reg 51 of the AFE, 14 bit register" ),
+				    s.field( "v_gain", self.uint4, doc = "Value for V gain of the AFE, 12 bit register" ),
+				    ], doc="Configuration of the AFE" ),
+
+
+    afe : s.record( "AFE", [
+    	                   s.field( "id", self.channel_id, 1000, doc = "id of the configuration"),
+                           s.field( "conf", self.afe_conf, doc = "Configuration of the specific AFE"),
+			   ] , doc = "Configuration couples with its ID, ID in [0,5) range" ),
+			   
+    afes : s.sequence( "AFEs", self.afe, doc="configuration for all AFEs" ),
 
     conf: s.record("Conf", [
                            s.field("daphne_address", self.ipaddress, 
                                            doc="addresses of the daphne connection point"),
                            s.field("channels", self.channels, 
                                    doc = "Configuration for all the channels") ,
+	                   s.field("afes", self.afes,
+			           doc = "Configuration for all AFEs" ),
                            ],
                            doc="Configuration for the the Daphne"),
 
