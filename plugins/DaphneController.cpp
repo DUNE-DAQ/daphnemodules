@@ -111,6 +111,7 @@ DaphneController::do_conf(const data_t& conf_as_json)
   
   m_interface.reset( new  DaphneInterface( ip_string.c_str(), 2001) );
 
+  // channel configuration
   auto channel_conf = conf_as_cpp.channels;
 
   for ( const auto & c : channel_conf ) {
@@ -126,11 +127,57 @@ DaphneController::do_conf(const data_t& conf_as_json)
 	throw InvalidChannelConfiguration(ERS_HERE, c.id, c.conf.offset, c.conf.gain);
     }
 
-    if ( c.id > DaphneController::s_max_channels ) {
+    if ( c.id >= DaphneController::s_max_channels ) {
       throw InvalidChannelConfiguration(ERS_HERE, c.id, c.conf.offset, c.conf.gain);
     }
            
     m_channel_confs[c.id] = c.conf;
+  }
+
+  // afe configuration
+  auto afe_conf = conf_as_cpp.afes;
+
+  for ( const auto & afe : afe_conf ) {
+    // an afe only serves 8 channels.
+    // Since channels can be disabled (offset = 0) we first check if at least one of the channel of the AFE
+    // is enabled, otherwise the corresponding AFE is left in its default configuration, which is the disabled
+
+    // the channel depend on the id of the AFE, so first we check if the AFE ID is valid
+    if ( afe.id >= DaphneController::s_max_afes ) 
+      throw InvalidAFEConfiguration(ERS_HERE, afe.id,
+				    afe.conf.reg_52, afe.conf.reg_4, afe.conf.reg_51, afe.conf.v_gain);
+
+    bool used = false;
+    for ( auto ch = afe.id * 8 ; ch < (afe.id+1)*8 ; ++ch ) {
+      if ( m_channel_confs[ch].offset > 0 ) {
+	used = true;
+	break;
+      }
+    }
+
+    if ( used ) {
+      if ( afe.conf.reg_52 >= 65536 )
+	// this is a 16 bit register
+	throw InvalidAFEConfiguration(ERS_HERE, afe.id,
+				      afe.conf.reg_52, afe.conf.reg_4, afe.conf.reg_51, afe.conf.v_gain);
+
+      if ( afe.conf.reg_4 >= 32 )
+	// this is a 5 bit register
+        throw InvalidAFEConfiguration(ERS_HERE, afe.id,
+                                      afe.conf.reg_52, afe.conf.reg_4, afe.conf.reg_51, afe.conf.v_gain);
+
+      if ( afe.conf.reg_51 >= 16384 )
+	// this is a 14 bit register
+	throw InvalidAFEConfiguration(ERS_HERE, afe.id,
+				      afe.conf.reg_52, afe.conf.reg_4, afe.conf.reg_51, afe.conf.v_gain);
+
+      if ( afe.conf.v_gain >= 4096 )
+	// this is a 12 bit register
+	throw InvalidAFEConfiguration(ERS_HERE, afe.id,
+				      afe.conf.reg_52, afe.conf.reg_4, afe.conf.reg_51, afe.conf.v_gain);
+
+      m_afe_confs[afe.id] = afe.conf;
+    }
   }
   
   configure_timing_endpoints();

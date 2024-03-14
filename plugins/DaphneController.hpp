@@ -54,8 +54,17 @@ namespace dunedaq {
 		   )
   ERS_DECLARE_ISSUE( daphnemodules,
 		     InvalidChannelConfiguration,
-                     "Channel " << id << "has invaliud configuration, offset: " << offset << ", gain:" << gain,
+                     "Channel " << id << "has invalid configuration, offset: " << offset << ", gain:" << gain,
 		     ((uint32_t)id)((uint32_t)offset)((uint32_t)gain)
+		   )
+
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     InvalidAFEConfiguration,
+                     "AFE " << id << "has invalid configuration, reg52: " << reg52
+		            << ", reg4: "  << reg4
+                            << ", reg51: " << reg51
+		     << ", vgain: " << vgain,
+		     ((uint32_t)id)((uint32_t)reg52)((uint32_t)reg4)((uint32_t)reg51)((uint32_t)vgain)
 		   )
 
   
@@ -94,6 +103,9 @@ private:
   static const int s_max_channels = 40;
   std::array<daphnecontroller::ChannelConf, s_max_channels> m_channel_confs;
   // this array is indexed in the [0-40) range
+
+  static const int s_max_afes = 5;
+  std::array<daphnecontroller::AFEConf, s_max_afes> m_afe_confs;
 
   
   // somehow we  need to store which channles are used

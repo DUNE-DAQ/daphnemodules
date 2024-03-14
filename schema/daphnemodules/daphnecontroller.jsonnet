@@ -29,10 +29,10 @@ local types = {
                            doc = "Configuration for all channels" ),
 
     afe_conf : s.record( "AFEConf", [
-                                    s.field( "reg_52", self.uint4, doc = "value for reg 52 of the AFE, 16 bit register" ),
-				    s.field( "reg_4" , self.uint4, doc = "value for reg 4  of the AFE, 5 bit register" ),
-				    s.field( "reg_51", self.uint4, doc = "Value for reg 51 of the AFE, 14 bit register" ),
-				    s.field( "v_gain", self.uint4, doc = "Value for V gain of the AFE, 12 bit register" ),
+                                    s.field( "reg_52", self.uint4, 0, doc = "value for reg 52 of the AFE, 16 bit register" ),
+				    s.field( "reg_4" , self.uint4, 0, doc = "value for reg 4  of the AFE, 5 bit register" ),
+				    s.field( "reg_51", self.uint4, 0, doc = "Value for reg 51 of the AFE, 14 bit register" ),
+				    s.field( "v_gain", self.uint4, 0, doc = "Value for V gain of the AFE, 12 bit register" ),
 				    ], doc="Configuration of the AFE" ),
 
 
