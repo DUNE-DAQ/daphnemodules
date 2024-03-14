@@ -352,40 +352,28 @@ void DaphneController::configure_analog_chain() {
   //   //cmd (thing, "RD OFFSET CH " + std::to_string(ch), true);
   //   // But Manuel said that this is not necessary to be done all the time
     
-  // }
+  for ( size_t afe = 0; afe < m_afe_confs.size() ; ++afe) {
+    result = m_interface -> send_command(
+	"WR AFE " + std::to_string(afe) + " REG 52 V " + std::to_string(m_afe_confs[afe].reg_52) );
+    TLOG() << result.command << " -> " << result.result;
 
-  // // mapping from the channels to the AFE
-  // // 0-7 -> AFE 0
-  // // 8-15 -> AFE 1
-  // // 16-23 -> AFE 2
-  // // 24-31 -> AFE 3
-  // // 32-39 -> AFE 4
-  // int nAFEs = 5;
-  // for (int AFE = 0; AFE < nAFEs; ++AFE) {
-  //   cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 52 V 21056", true);
-  //   // this is a 16 bit register, so the maximu will be ....
-  //   cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 4 V 24", true);
-  //   // This is a 5 bits register so the maximum will be ....
-  //   cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 51 V 16", true);
-  //   //  This is a 14 bit so the maximum will be
-  //   cmd (thing, "WR AFE " + std::to_string(AFE) + " VGAIN V 2667", true);
-  //   /// Maximum 4095 2^12-1
-    
-  //   // to deconfigure
-  //   // cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 52 V 0", true);
-  //   // cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 4 V 0", true);
-  //   // cmd (thing, "WR AFE " + std::to_string(AFE) + " REG 51 V 0", true);
-  //   // cmd (thing, "WR AFE " + std::to_string(AFE) + " VGAIN V 0", true);
+    result = m_interface -> send_command(
+	"WR AFE " + std::to_string(afe) + " REG 4 V " + std::to_string(m_afe_confs[afe].reg_4) );
+    TLOG() << result.command << " -> " << result.result;
 
+    result = m_interface -> send_command(
+	"WR AFE " + std::to_string(afe) + " REG 51 V " + std::to_string(m_afe_confs[afe].reg_51) );
+    TLOG() << result.command << " -> " << result.result;
+
+    result = m_interface -> send_command(
+	"WR AFE " + std::to_string(afe) + " VGAIN V " + std::to_string(m_afe_confs[afe].v_gain) );
+    TLOG() << result.command << " -> " << result.result;
+
+  }
   //   // To check these values we can do things like
   //   // cmd (thing, "RD AFE " + std::to_string(AFE) + " REG 52", true);
   //   // for all these registers and get the values from the replies
 
-    
-    
-  // }
-
-  
 }
 
   

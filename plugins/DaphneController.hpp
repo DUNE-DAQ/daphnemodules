@@ -106,13 +106,9 @@ private:
 
   static const int s_max_afes = 5;
   std::array<daphnecontroller::AFEConf, s_max_afes> m_afe_confs;
-
+  // mapping from the channels to the AFE
+  // 0-7 -> AFE 0,  8-15 -> AFE 1, 16-23 -> AFE 2, 24-31 -> AFE 3, 32-39 -> AFE 4 
   
-  // somehow we  need to store which channles are used
-
-  // all the values have to come from configuration
-  // CH OFFSET 2700 if GAIN is 1, 1500 if GAIN is 2
-
   static const uint16_t s_frame_alignment_error = 0x3f80;
 
   // we need to have a mapping to the links from the configuration
