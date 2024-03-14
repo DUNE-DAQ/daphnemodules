@@ -185,20 +185,6 @@ DaphneController::do_conf(const data_t& conf_as_json)
   configure_analog_chain();
   
   
-  // ----------------------------------------------
-  // Alignment of the DDR
-  m_interface->write_register(0x2001, {1234});
-  m_interface->write_register(0x2001, {1234});
-  m_interface->write_register(0x2001, {1234});
-  // this is correct to be done 3 times
-
-  // a check of the success can done with the following
-  // trigger spy buffers
-  //thing.write_reg(0x2000, {1234});
-  
-  // read register ch 8 of each afe,   by looping on all the afe we use
-  //  auto data = m_interface->read_register(0x40000000 + (afe * 0x100000) + (ch * 0x10000), 15);  // ch = 8
-  // things are ok when the data is 0x3f80
   
   
   // ---------------------------------------------
@@ -376,7 +362,35 @@ void DaphneController::configure_analog_chain() {
 
 }
 
+
+void DaphneController::align_DDR() {
+
+  m_interface->write_register(0x2001, {1234});
+  m_interface->write_register(0x2001, {1234});
+  m_interface->write_register(0x2001, {1234});
+  // this is correct to be done 3 times
+
+  // --------------------------------------------
+  // checking if the alignement is achieved
+  // --------------------------------------------
+  m_interface->write_register(0x2000, {1234});
+  // this trigger the spy buffers
+
+  // read register ch 8 of each afe,   by looping on all the afe we use
+  for ( size_t afe = 0; afe < m_afe_confs.size() ; ++afe ) {
+    if ( m_afe_confs[afe].v_gain > 0 ) {
+      auto data = m_interface->read_register(0x40000000 + (afe * 0x100000) + (8 * 0x10000), 15);  // ch = 8
+
+      // things are ok when the data is 0x3f80
+      if ( data[0] != DaphneController::s_frame_alignment_good ) 
+	throw DDRNotAligned(ERS_HERE, afe, data[0] );
+    }
+  }
   
+  
+}
+
+
 } // namespace dunedaq::daphnemodules
 
 DEFINE_DUNE_DAQ_MODULE(dunedaq::daphnemodules::DaphneController)

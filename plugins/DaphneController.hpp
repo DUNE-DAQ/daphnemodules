@@ -67,6 +67,11 @@ namespace dunedaq {
 		     ((uint32_t)id)((uint32_t)reg52)((uint32_t)reg4)((uint32_t)reg51)((uint32_t)vgain)
 		   )
 
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     DDRNotAligned,
+                     "AFE "<< afe << " DDR not aligned, check value: " << check,
+		     ((uint16_t)afe)((uint64_t)check)
+		   )
   
 }
 
@@ -96,6 +101,7 @@ private:
   // specific actions
   void configure_timing_endpoints();
   void configure_analog_chain();
+  void align_DDR();
   
   std::unique_ptr<DaphneInterface> m_interface;
   uint8_t m_slot;
@@ -109,7 +115,7 @@ private:
   // mapping from the channels to the AFE
   // 0-7 -> AFE 0,  8-15 -> AFE 1, 16-23 -> AFE 2, 24-31 -> AFE 3, 32-39 -> AFE 4 
   
-  static const uint16_t s_frame_alignment_error = 0x3f80;
+  static const uint16_t s_frame_alignment_good = 0x3f80;
 
   // we need to have a mapping to the links from the configuration
   // 0x500X X in 0 to F
