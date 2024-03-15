@@ -28,6 +28,31 @@ local types = {
     channels : s.sequence( "Channels", self.channel,
                            doc = "Configuration for all channels" ),
 
+    adc_conf : s.record( "ADCConf, [
+                                 s.field( "resolution",    self.boolean, false, doc="true=12bit, false=14bit"),
+                                 s.field( "output_format", self.boolean, true, 
+                                          doc="true=Offset Binary, false=2's complement"),
+                                 s.field( "SB_first",          self.boolean, true, 
+                                          doc="Which Significant bit comes first, true=MSB, false=LSB" ),
+                                 ], doc="info to generate Reg4 value" ),
+
+    pga_conf : s.record( "PGAConf, [
+                                  s.field( "lpf_cut_frequency", self.uint4,
+				           doc="cut frequency, only 4 values acceptable. 0=15MHz, 2=20MHz, 3=30MHz, 4=10MHz"),
+                                  s.field( "integrator_disable", self.boolean, true,
+				           doc="true=disabled, false=enabled" ),
+                                  s.field( "gain",       self.boolean, false, doc="true=30 dB, false=24 dB"),
+                                 ], doc="info to generate Reg51 value" ),
+
+    lna_conf : s.record( "LNAConf, [
+                                   s.field( "clamp", self.uint4, 0,
+				            doc="0=auto setting, 1=1.5 Vpp, 2=1.15 Vpp, 3=0.6 Vpp"),
+                                   s.field( "integrator_disable", self.bool, true,
+				            doc="true=disabled, false=enabled"),
+                                   s.field( "gain", self.uint4, 2,
+				            doc="0=18 dB, 1=24 dB, 2=12 dB"),
+                                   ], doc="info to generate Reg52 value" ),
+
     afe_conf : s.record( "AFEConf", [
                                     s.field( "reg_52", self.uint4, 0, doc = "value for reg 52 of the AFE, 16 bit register" ),
 				    s.field( "reg_4" , self.uint4, 0, doc = "value for reg 4  of the AFE, 5 bit register" ),

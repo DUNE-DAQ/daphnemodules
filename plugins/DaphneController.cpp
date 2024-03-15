@@ -40,8 +40,11 @@ void
 DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
 {
 
-  static std::regex volt_regex(".* VBIAS0= ([^ ]+) VBIAS1= ([^ ]+) VBIAS2= ([^ ]+) VBIAS3= ([^ ]+) VBIAS4= ([^ ]+) POWER.-5v.= ([^ ]+) POWER..2.5v.= ([^ ]+) POWER..CE.= ([^ ]+) TEMP.Celsius.= ([^ ]+) .*");
+  static const std::regex volt_regex(".* VBIAS0= ([^ ]+) VBIAS1= ([^ ]+) VBIAS2= ([^ ]+) VBIAS3= ([^ ]+) VBIAS4= ([^ ]+) POWER.-5v.= ([^ ]+) POWER..2.5v.= ([^ ]+) POWER..CE.= ([^ ]+) TEMP.Celsius.= ([^ ]+) .*");
 
+  static const std::regex current_regex(".* Voltage.mV.= ([^ ]+) .*");
+
+  
   if ( ! m_interface ) return ;
   
   auto cmd_res = m_interface->send_command("RD VM ALL");
@@ -80,6 +83,39 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
   v_info.temperature = values[9];
   
   ci.add(v_info);
+
+  // //current monitor
+  // for ( size_t ch = 0; ch < m_channel_confs.size() ; ++ch ) {
+  //   if ( m_channel_confs[ch].offset > 0 ) {
+  //     auto current_res = m_interface->send_command("RD CM CH " + std::to_string(ch) );
+  //     TLOG() << current_res.command << " -> " << current_res.result ; 
+  //   }
+    
+
+  // // monitor of the ADC
+  // m_interface->write_register(0x2000, {1234});
+  // // this trigger the spy buffers
+  
+  // // read 100 values for each channel, register ch 8 of each afe,   by looping on all the afe we use
+  // for ( size_t afe = 0; afe < m_afe_confs.size() ; ++afe ) {
+  //   if ( m_afe_confs[afe].v_gain > 0 ) {
+  //     for ( size_t ch = 0; ch < m_channel_confs.size() ; ++ch ) {
+  // 	if ( m_channel_confs[ch].offset > 0 ) {
+  // 	  auto data = m_interface->read_register(0x40000000 + (afe * 0x100000) + (ch * 0x10000), 50);  // first 50
+  // 	  // data[0]
+
+  // 	  data = m_interface->read_register(0x40000000 + (afe * 0x100000) + (ch * 0x10000) +50, 50);  // second 50
+
+  // 	}
+
+      
+      
+  //   }
+  // }
+
+
+
+  
 }
 
 void
@@ -337,7 +373,16 @@ void DaphneController::configure_analog_chain() {
   //   // to check if the configuration went throguh we can
   //   //cmd (thing, "RD OFFSET CH " + std::to_string(ch), true);
   //   // But Manuel said that this is not necessary to be done all the time
-    
+
+  // Reg 51 will not configure the clamp level, we default it to 1XX becuase we are in Low noise mode
+  // and we alwaus want to disable the clamp
+
+  // Reg 51 exceptions
+  // - [4:0] set to 0
+  // - [5]   set to 0
+  // - [7:6] set to 0
+  // - [8]   set to 0
+  
   for ( size_t afe = 0; afe < m_afe_confs.size() ; ++afe) {
     result = m_interface -> send_command(
 	"WR AFE " + std::to_string(afe) + " REG 52 V " + std::to_string(m_afe_confs[afe].reg_52) );
