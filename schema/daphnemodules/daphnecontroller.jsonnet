@@ -43,6 +43,14 @@ local types = {
 			   
     afes : s.sequence( "AFEs", self.afe, doc="configuration for all AFEs" ),
 
+
+    channel_list : s.sequence( "ChannelList", self.channel_id, doc="List of channels"),
+				  
+    full_stream : s.record( "FullStream", [
+                            s.field( "channels", self.channel_list,
+			             doc="List of channel to be streamed in full stream mode, max 16 channels")
+		            ], doc = "Configuration for full stream case" ),
+
     conf: s.record("Conf", [
                            s.field("daphne_address", self.ipaddress, 
                                            doc="addresses of the daphne connection point"),

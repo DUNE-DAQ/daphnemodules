@@ -184,7 +184,7 @@ DaphneController::do_conf(const data_t& conf_as_json)
   
   configure_analog_chain();
   
-  
+  align_DDR();
   
   
   // ---------------------------------------------
@@ -365,6 +365,8 @@ void DaphneController::configure_analog_chain() {
 
 void DaphneController::align_DDR() {
 
+  TLOG() << "Aligning DDR";
+  
   m_interface->write_register(0x2001, {1234});
   m_interface->write_register(0x2001, {1234});
   m_interface->write_register(0x2001, {1234});
