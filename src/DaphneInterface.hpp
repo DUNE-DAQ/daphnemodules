@@ -35,7 +35,6 @@ namespace dunedaq {
 		     "Invalid address: " << ip,
 		     ((std::string)ip)
 		   ) 
-
   
   ERS_DECLARE_ISSUE( daphnemodules,
 		     FailedPing,
@@ -48,6 +47,14 @@ namespace dunedaq {
 		     "Failed to call " << command,
 		     ((std::string)command)
 		   ) 
+  
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     InvalidAFEConfiguration,
+		     "Invalid AFE Configuration AFE Id" << afe.id << 'Register 52' << afe.conf.reg_52 <<  
+		     'Register 4' << afe.conf.reg_4 << 'Register 52' << afe.conf.reg_52 << 
+		     'Offset Gain' << afe.conf.v_gain << 'BIAS' << afe.conf.v_bias << afe.conf.v_biasctrl,
+		     ((std::string)afe.id)((std::string)afe.conf.reg_52)((std::string)afe.conf.reg_4)((std::string)afe.conf.reg_52)
+                     ((std::string)afe.conf.v_gain)((std::string)afe.conf.v_bias)((std::string)afe.conf.v_biasctrl) 
 
   } // dunedaq namespace
 

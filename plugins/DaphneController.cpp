@@ -148,23 +148,35 @@ DaphneController::do_conf(const data_t& conf_as_json)
   m_interface.reset( new  DaphneInterface( ip_string.c_str(), 2001) );
 
   // channel configuration
+  // there is another variable we use to configure each channel the TRIM control:
+  // the command to drive it is: 'WR TRIM CH <id_channel> <value>'
+  // and value should be in the range 0 - 4095
+  
+  if ( c.conf.v_biasctrl > 4095 ) 
+      throw InvalidAFEConfiguration(ERS_HERE, afe.id, afe.conf.reg_52, afe.conf.reg_4, 
+			afe.conf.reg_51, afe.conf.v_gain, afe.conf.v_bias,afe.conf.v_biasctrl);
+ 
   auto channel_conf = conf_as_cpp.channels;
 
   for ( const auto & c : channel_conf ) {
+    //CH TRIM maximum is 4095
+    if ( c.conf.trim > 4095 ) 
+      throw InvalidChannelConfiguration(ERS_HERE, c.id, c.conf.trim, c.conf.offset, c.conf.gain);
+
     //CH OFFSET maximum is 2700 if GAIN is 1, 1500 if GAIN is 2
     if ( c.conf.gain != 1 && c.conf.gain != 2 ) {
-      throw InvalidChannelConfiguration(ERS_HERE, c.id, c.conf.offset, c.conf.gain);
+      throw InvalidChannelConfiguration(ERS_HERE, c.id, c.conf.trim, c.conf.offset, c.conf.gain);
     }
     if ( c.conf.gain == 1 ) {
       if ( c.conf.offset > 2700 ) 
-	throw InvalidChannelConfiguration(ERS_HERE, c.id, c.conf.offset, c.conf.gain);
+	throw InvalidChannelConfiguration(ERS_HERE, c.id, c.conf.trim, c.conf.offset, c.conf.gain);
     } else if ( c.conf.gain == 2 ) {
       if ( c.conf.offset > 1500 ) 
-	throw InvalidChannelConfiguration(ERS_HERE, c.id, c.conf.offset, c.conf.gain);
+	throw InvalidChannelConfiguration(ERS_HERE, c.id, c.conf.trim, c.conf.offset, c.conf.gain);
     }
 
     if ( c.id >= DaphneController::s_max_channels ) {
-      throw InvalidChannelConfiguration(ERS_HERE, c.id, c.conf.offset, c.conf.gain);
+      throw InvalidChannelConfiguration(ERS_HERE, c.id, c.conf.trim, c.conf.offset, c.conf.gain);
     }
            
     m_channel_confs[c.id] = c.conf;
@@ -179,9 +191,14 @@ DaphneController::do_conf(const data_t& conf_as_json)
     // is enabled, otherwise the corresponding AFE is left in its default configuration, which is the disabled
 
     // the channel depend on the id of the AFE, so first we check if the AFE ID is valid
+    // added v_bias controls the bias per AFE, and shares similar properties to v_gain
+    // max value this variable can take in hardware is 80V 
+    // max value it should take in configuration is 1500DAC ~ 55V
+
+
     if ( afe.id >= DaphneController::s_max_afes ) 
-      throw InvalidAFEConfiguration(ERS_HERE, afe.id,
-				    afe.conf.reg_52, afe.conf.reg_4, afe.conf.reg_51, afe.conf.v_gain);
+      throw InvalidAFEConfiguration(ERS_HERE, afe.id, afe.conf.reg_52, 
+				afe.conf.reg_4, afe.conf.reg_51, afe.conf.v_gain, afe.conf.v_bias);
 
     bool used = false;
     for ( auto ch = afe.id * 8 ; ch < (afe.id+1)*8 ; ++ch ) {
@@ -194,24 +211,28 @@ DaphneController::do_conf(const data_t& conf_as_json)
     if ( used ) {
       if ( afe.conf.reg_52 >= 65536 )
 	// this is a 16 bit register
-	throw InvalidAFEConfiguration(ERS_HERE, afe.id,
-				      afe.conf.reg_52, afe.conf.reg_4, afe.conf.reg_51, afe.conf.v_gain);
+        throw InvalidAFEConfiguration(ERS_HERE, afe.id, afe.conf.reg_52, afe.conf.reg_4, 
+			afe.conf.reg_51, afe.conf.v_gain, afe.conf.v_bias,afe.conf.v_biasctrl);
 
       if ( afe.conf.reg_4 >= 32 )
 	// this is a 5 bit register
-        throw InvalidAFEConfiguration(ERS_HERE, afe.id,
-                                      afe.conf.reg_52, afe.conf.reg_4, afe.conf.reg_51, afe.conf.v_gain);
+        throw InvalidAFEConfiguration(ERS_HERE, afe.id, afe.conf.reg_52, afe.conf.reg_4, 
+			afe.conf.reg_51, afe.conf.v_gain, afe.conf.v_bias,afe.conf.v_biasctrl;
 
       if ( afe.conf.reg_51 >= 16384 )
 	// this is a 14 bit register
-	throw InvalidAFEConfiguration(ERS_HERE, afe.id,
-				      afe.conf.reg_52, afe.conf.reg_4, afe.conf.reg_51, afe.conf.v_gain);
+        throw InvalidAFEConfiguration(ERS_HERE, afe.id, afe.conf.reg_52, afe.conf.reg_4, 
+			afe.conf.reg_51, afe.conf.v_gain, afe.conf.v_bias,afe.conf.v_biasctrl);
 
       if ( afe.conf.v_gain >= 4096 )
 	// this is a 12 bit register
-	throw InvalidAFEConfiguration(ERS_HERE, afe.id,
-				      afe.conf.reg_52, afe.conf.reg_4, afe.conf.reg_51, afe.conf.v_gain);
+        throw InvalidAFEConfiguration(ERS_HERE, afe.id, afe.conf.reg_52, afe.conf.reg_4, 
+			afe.conf.reg_51, afe.conf.v_gain, afe.conf.v_bias,afe.conf.v_biasctrl);
 
+      if ( afe.conf.v_bias >= 1500 )
+	// this is a 12 bit register
+        throw InvalidAFEConfiguration(ERS_HERE, afe.id, afe.conf.reg_52, afe.conf.reg_4, 
+			afe.conf.reg_51, afe.conf.v_gain, afe.conf.v_bias,afe.conf.v_biasctrl);
       m_afe_confs[afe.id] = afe.conf;
     }
   }
@@ -358,6 +379,10 @@ void DaphneController::configure_analog_chain() {
   for ( size_t ch = 0; ch < m_channel_confs.size() ; ++ch ) {
 
     result = m_interface->send_command(
+      "WR TRIM CH " + std::to_string(ch) + " V " + std::to_string(m_channel_confs[ch].trim) );
+    TLOG() << result.command << " -> " << result.result;
+    
+    result = m_interface->send_command(
       "WR OFFSET CH " + std::to_string(ch) + " V " + std::to_string(m_channel_confs[ch].offset) );
     TLOG() << result.command << " -> " << result.result;
 
@@ -400,6 +425,9 @@ void DaphneController::configure_analog_chain() {
 	"WR AFE " + std::to_string(afe) + " VGAIN V " + std::to_string(m_afe_confs[afe].v_gain) );
     TLOG() << result.command << " -> " << result.result;
 
+    result = m_interface -> send_command(
+	"WR BIASSET AFE " + std::to_string(afe) + " V " + std::to_string(m_afe_confs[afe].v_bias) );
+    TLOG() << result.command << " -> " << result.result;
   }
   //   // To check these values we can do things like
   //   // cmd (thing, "RD AFE " + std::to_string(AFE) + " REG 52", true);
