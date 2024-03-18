@@ -110,8 +110,15 @@ private:
   std::array<daphnecontroller::ChannelConf, s_max_channels> m_channel_confs;
   // this array is indexed in the [0-40) range
 
+  struct AFEConf {
+    uint16_t v_gain = 0;  // 12 bit register
+    uint8_t  reg4   = 0;  // 4  bit register
+    uint16_t reg51 = 0;   // 14 bit register
+    uint16_t reg52 = 0;   // 16 bit register
+  };
+  
   static const int s_max_afes = 5;
-  std::array<daphnecontroller::AFEConf, s_max_afes> m_afe_confs;
+  std::array<AFEConf, s_max_afes> m_afe_confs;
   // mapping from the channels to the AFE
   // 0-7 -> AFE 0,  8-15 -> AFE 1, 16-23 -> AFE 2, 24-31 -> AFE 3, 32-39 -> AFE 4 
   
