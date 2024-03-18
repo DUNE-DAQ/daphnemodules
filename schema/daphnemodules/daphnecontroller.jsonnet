@@ -70,6 +70,14 @@ local types = {
                                      doc="List of channel to be streamed in full stream mode, max 16 channels")
                             ], doc = "Configuration for full stream case" ),
 
+    self_stream : s.record( "SelfTrigger", [
+                            s.field( "threshold", self.uint4,
+                                     doc="14 bits registry for the threshold of the self triggering")
+                            ], doc = "Configuration for full stream case" ),
+
+    trigger_conf : s.oneOf("TriggerConf", [self.full_stream, self.self_stream],
+                           doc="Possible configuration for trigger modes" ),
+
     conf: s.record("Conf", [
                            s.field("daphne_address", self.ipaddress,
                                    doc="addresses of the daphne connection point"),
@@ -77,10 +85,10 @@ local types = {
                                    doc = "Configuration for all the channels") ,
                            s.field("afes", self.afes,
                                    doc = "Configuration for all AFEs" ),
-                            ],
-                            doc="Configuration for a Daphne board"),
-
-
+			   s.field("trigger", self.trigger_conf,
+                              	   doc="trigger	mode"),
+                           ],
+                           doc="Configuration for a Daphne board"),
 };
 
 moo.oschema.sort_select(types, ns)
