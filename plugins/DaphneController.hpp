@@ -17,6 +17,7 @@
 #include <limits>
 #include <string>
 #include <array>
+#include <mutex>
 
 #include "DaphneInterface.hpp"
 
@@ -52,6 +53,13 @@ namespace dunedaq {
                      "Timing endpoint not ready, full status: " << status,
 		     ((std::string)status)
 		   )
+
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     InvalidBiasControl,
+                     bias << " bigger than 4095",
+		     ((uint64_t)bias)
+		   )
+
   ERS_DECLARE_ISSUE( daphnemodules,
 		     InvalidChannelConfiguration,
                      "Channel " << id << "has invalid configuration, offset: " << offset << ", gain:" << gain,
@@ -88,7 +96,7 @@ class DaphneController : public dunedaq::appfwk::DAQModule
 public:
   explicit DaphneController(const std::string& name);
 
-  void init(const data_t&) override;
+  void init(const data_t&) override {;}
 
   void get_info(opmonlib::InfoCollector&, int /*level*/) override;
 
@@ -105,13 +113,18 @@ private:
   void do_conf(const data_t&);
 
   // specific actions
+  void create_interface( const std::string & ip ) ;
+  void validate_configuration(const daphnecontroller::Conf &);   
   void configure_timing_endpoints();
   void configure_analog_chain();
   void align_DDR();
-  
-  std::unique_ptr<DaphneInterface> m_interface;
-  uint8_t m_slot;
 
+  std::unique_ptr<DaphneInterface> m_interface;
+  std::mutex m_mutex;  // mutex for interface
+
+  uint8_t  m_slot;
+  uint16_t m_bias_ctrl;
+  
   static const int s_max_channels = 40;
   std::array<daphnecontroller::ChannelConf, s_max_channels> m_channel_confs;
   // this array is indexed in the [0-40) range

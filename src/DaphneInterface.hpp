@@ -19,6 +19,7 @@
 #include <cstring>
 #include <unistd.h>
 #include <memory>
+#include <mutex>
 
 #include <ers/ers.hpp>
 
@@ -90,6 +91,8 @@ namespace dunedaq::daphnemodules {
   private:
     int m_connection_id = -1;
     sockaddr_in m_target;
+    mutable std::mutex m_access_mutex;
+    mutable std::mutex m_command_mutex;
   }; 
   
 

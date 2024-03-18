@@ -38,10 +38,9 @@ void DaphneInterface::close() {
 
 bool DaphneInterface::validate_connection() const {
 
-
   auto ret = read_register( 0xaa55, 1);
 
-  static const uint8_t good_value = 0xdeadbeef; 
+  static const uint64_t good_value = 0xdeadbeef; 
   return ret[0] == good_value ;
 
 }
@@ -56,6 +55,8 @@ command_result DaphneInterface::send_command( std::string cmd ) const {
   }
   bytes.push_back(0x0d); // dedicated command flag
 
+  const std::lock_guard<std::mutex> lock(m_command_mutex);
+  
   // we send the bytes in chunks of 50 words
   for (size_t i = 0; i < (bytes.size() + 49) / 50; ++i) {
     std::vector<uint64_t> part(bytes.begin() + i*50,
@@ -105,6 +106,8 @@ command_result DaphneInterface::send_command( std::string cmd ) const {
 std::vector<uint64_t>  DaphneInterface::read(uint8_t command_id,
 					     uint64_t addr, uint8_t size) const {
 
+  const std::lock_guard<std::mutex> lock(m_access_mutex);
+
   uint8_t cmd[10];
   cmd[0] = command_id;
   cmd[1] = size;
@@ -141,6 +144,8 @@ std::vector<uint64_t>  DaphneInterface::read(uint8_t command_id,
 
 void  DaphneInterface::write(uint8_t command_id, uint64_t addr, std::vector<uint64_t> && data)  const {
 
+  const std::lock_guard<std::mutex> lock(m_access_mutex);
+  
   uint8_t cmd[10 + (8 * data.size())];
   cmd[0] = command_id;
   cmd[1] = data.size();

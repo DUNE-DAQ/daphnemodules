@@ -31,10 +31,6 @@ DaphneController::DaphneController(const std::string& name)
   register_command("conf", &DaphneController::do_conf);
 }
 
-void
-DaphneController::init(const data_t& /* structured args */)
-{
-}
 
 void
 DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
@@ -42,8 +38,9 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
 
   static const std::regex volt_regex(".* VBIAS0= ([^ ]+) VBIAS1= ([^ ]+) VBIAS2= ([^ ]+) VBIAS3= ([^ ]+) VBIAS4= ([^ ]+) POWER.-5v.= ([^ ]+) POWER..2.5v.= ([^ ]+) POWER..CE.= ([^ ]+) TEMP.Celsius.= ([^ ]+) .*");
 
-  static const std::regex current_regex(".* Voltage.mV.= ([^ ]+) .*");
-
+  // this lock is not completely necessary because of the internal locks in the interface
+  // but it's a safety measure to make sure that this does not interfere with complex operations
+  const std::lock_guard<std::mutex> lock(m_mutex);
   
   if ( ! m_interface ) return ;
   
@@ -125,10 +122,97 @@ DaphneController::do_conf(const data_t& conf_as_json)
   
   auto conf_as_cpp = conf_as_json.get<daphnecontroller::Conf>();
 
-  auto ip_string = conf_as_cpp.daphne_address;
+  // during configuration no other operations are allowed
+  const std::lock_guard<std::mutex> lock(m_mutex);
+  
+  create_interface(conf_as_cpp.daphne_address);
+
+  validate_configuration(conf_as_cpp);
+  
+  
+  configure_timing_endpoints();
+  
+  configure_analog_chain();
+  
+  align_DDR();
+  
+  
+  // ---------------------------------------------
+  // set self trigger or full stream
+  // for full stream
+  // thing.write(0x3001, {0xaa}); 
+  // thing.write(0x6001, {0b00000000});   // for safety
+  // check
+  // thing.read(0x3001, 1)
+  // the result should be 0xaa
+
+  // self_trigger
+  //  thing.write(0x3001, {0x3});
+  //  thing.write(0x6000, {700});  // threshold, to be configured 14 bits from configuration
+  // thing.write(0x6001, {0b11111111});   // this is a 40 bit regsiter, so I could construct this number from the enabled channels
+  // check 
+  // thing.read(0x3001, 1)
+  // the result should be 0x3
+  // 
+
+
+  // In the case of of full stream, we can only stream data from 16 channels at maximum
+  // This is because of badnwidth.
+  // So if we run in fullstream we need to set which channes to stream out
+  // We need to assign each channel to a link (streamSender). We have 4 links for each board.
+  // write in register 0x500X X in 0 to F the channel that is supposed to be streamed out.
+  // X is the identifier of a output physically in 4 cables
+  // The channles are not identified with an id from 0-39, they have a different identifier to represent the
+  // cables in the fron of the board. They are grouped in 8 
+  // Conf ch -> DAQ ch
+  // 0-7     -> 0-7
+  // 8-15    -> 10-17
+  // 16-23   -> 20-27
+  // 24-31   -> 30-37
+  // 32-39   -> 40-47
+
+  // the configuration of which link should be as first come first serve.
+  // to a maximum of 16 channels
+  
+  // we get a list of 
+  // Let's say I want to see 0x5001
+  //                         0x5004 10
+  // To be discussed - channel/link sorting
+  // -----------------------------------------
+  // thing.write_reg(0x2000, {1234});         
+  // 
+
+
+
+
+
+
+
+
+  
+  auto res = m_interface->read_register(0x9000, 1);
+  for ( auto v : res ) {
+    TLOG() << v;
+  }
+  
+  res = m_interface->read_buffer(0x40000000,15);
+  for ( auto v : res ) {
+    TLOG() << v;
+  }
+
+  auto end_time = std::chrono::high_resolution_clock::now();
+
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+  TLOG() << "Board configured in " << duration.count() << " microseconds";
+  
+}
+
+
+void
+DaphneController::create_interface(const std::string & ip) {
 
   static std::regex ip_regex("[0-9]+.[0-9]+.[0-9]+.([0-9]+)");
-
+  
   std::smatch matches; 
   
   if ( ! std::regex_match( ip_string, matches, ip_regex) ) {
@@ -144,19 +228,24 @@ DaphneController::do_conf(const data_t& conf_as_json)
   }
 
   TLOG() << "Using daphne at " << ip_string << " with slot " << m_slot; 
-  
+
   m_interface.reset( new  DaphneInterface( ip_string.c_str(), 2001) );
+  
+}
+
+void
+DaphneController::validate_configuration(const daphnecontroller::Conf & c) {
 
   // channel configuration
   // there is another variable we use to configure each channel the TRIM control:
   // the command to drive it is: 'WR TRIM CH <id_channel> <value>'
   // and value should be in the range 0 - 4095
+  
   // BIASCTRL is configured for the entired board and the max value is 4095
-  auto v_biasctrl = conf_as_cpp.biasctrl;
+  if ( c.biasctrl > 4095 ) 
+    throw InvalidBiasControl(ERS_HERE, c.biasctrl);
 
-  if ( c.conf.v_biasctrl > 4095 ) 
-      throw InvalidBiasCtrlConfiguration(ERS_HERE, afe.id, afe.conf.reg_52, afe.conf.reg_4, 
-			afe.conf.reg_51, afe.conf.v_gain, afe.conf.v_bias);
+  m_biasctrl = c.biasctrl;
  
   auto channel_conf = conf_as_cpp.channels;
 
@@ -238,84 +327,10 @@ DaphneController::do_conf(const data_t& conf_as_json)
       m_afe_confs[afe.id] = afe.conf;
     }
   }
-  
-  configure_timing_endpoints();
-  
-  configure_analog_chain();
-  
-  align_DDR();
-  
-  
-  // ---------------------------------------------
-  // set self trigger or full stream
-  // for full stream
-  // thing.write(0x3001, {0xaa}); 
-  // thing.write(0x6001, {0b00000000});   // for safety
-  // check
-  // thing.read(0x3001, 1)
-  // the result should be 0xaa
 
-  // self_trigger
-  //  thing.write(0x3001, {0x3});
-  //  thing.write(0x6000, {700});  // threshold, to be configured 14 bits from configuration
-  // thing.write(0x6001, {0b11111111});   // this is a 40 bit regsiter, so I could construct this number from the enabled channels
-  // check 
-  // thing.read(0x3001, 1)
-  // the result should be 0x3
-  // 
-
-
-  // In the case of of full stream, we can only stream data from 16 channels at maximum
-  // This is because of badnwidth.
-  // So if we run in fullstream we need to set which channes to stream out
-  // We need to assign each channel to a link (streamSender). We have 4 links for each board.
-  // write in register 0x500X X in 0 to F the channel that is supposed to be streamed out.
-  // X is the identifier of a output physically in 4 cables
-  // The channles are not identified with an id from 0-39, they have a different identifier to represent the
-  // cables in the fron of the board. They are grouped in 8 
-  // Conf ch -> DAQ ch
-  // 0-7     -> 0-7
-  // 8-15    -> 10-17
-  // 16-23   -> 20-27
-  // 24-31   -> 30-37
-  // 32-39   -> 40-47
-
-  // the configuration of which link should be as first come first serve.
-  // to a maximum of 16 channels
-  
-  // we get a list of 
-  // Let's say I want to see 0x5001
-  //                         0x5004 10
-  // To be discussed - channel/link sorting
-  // -----------------------------------------
-  // thing.write_reg(0x2000, {1234});         
-  // 
-
-
-
-
-
-
-
-
-  
-  auto res = m_interface->read_register(0x9000, 1);
-  for ( auto v : res ) {
-    TLOG() << v;
-  }
-  
-  res = m_interface->read_buffer(0x40000000,15);
-  for ( auto v : res ) {
-    TLOG() << v;
-  }
-
-  auto end_time = std::chrono::high_resolution_clock::now();
-
-  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
-  TLOG() << "Board configured in " << duration.count() << " microseconds";
-  
 }
 
+ 
 
 void
 DaphneController::configure_timing_endpoints() {

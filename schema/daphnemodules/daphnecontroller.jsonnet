@@ -16,8 +16,9 @@ local types = {
     channel_id: s.number( "ChannelId", "u4",       doc="ChannelID in the [0-40) range"),   
 
     channel_conf : s.record("ChannelConf", [
-    	                                   s.field("offset", self.uint4, 0, doc="Pedestal of the channel"),
 				           s.field("gain",   self.uint4, 1, doc="Gain"),
+       	                                   s.field("offset", self.uint4, 0, doc="Pedestal of the channel"),
+					   s.field("trim"    self.uint4, 0, doc="trim value for the channel"),
 	                                   ], doc = "Channel info" ),
 
     channel : s.record("Channel", [
@@ -68,6 +69,8 @@ local types = {
     conf: s.record("Conf", [
                            s.field("daphne_address", self.ipaddress,
                                    doc="addresses of the daphne connection point"),
+                           s.field("biasctrl", self.uint4,
+                                   doc="V Bias Control"),
                            s.field("channels", self.channels,
                                    doc = "Configuration for all the channels") ,
                            s.field("afes", self.afes,
