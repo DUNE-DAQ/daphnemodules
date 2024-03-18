@@ -24,28 +24,7 @@ local info = {
        s.field("temperature", self.double8, doc="Temperature in degree celsious"),
     ], doc="monitoring of the Daphne voltage"),
 
-    adc_info: s.record("ADCInfo", [
-       s.field("average", self.double8, doc="Volt bias 0"),
-       s.field("min", self.double8, doc="Volt bias 1"),
-       s.field("max", self.double8, doc="Volt bias 2"),
-    ], doc="monitoring of the ADC channel to see if we are generating rubbish"),
-    
-    current_info: s.record("CurentInfo", [
-       s.field("current", self.double8, doc=""),
-    ], doc="monitoring of the Daphne voltage"),
-
-    current_info: s.record("CurentInfo", [
-       s.field("ch0", self.double8, doc=""),
-       s.field("ch1", self.double8, doc=""),
-       s.field("ch2", self.double8, doc=""),
-       s.field("ch3", self.double8, doc=""),
-       s.field("ch4", self.double8, doc=""),
-       s.field("ch5", self.double8, doc=""),
-       s.field("ch6", self.double8, doc=""),
-       s.field("ch7", self.double8, doc=""),
-    ], doc="monitoring of the Daphne voltage"),
-
-    
+   
 };
 
 moo.oschema.sort_select(info)
