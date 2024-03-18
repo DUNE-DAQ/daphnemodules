@@ -67,6 +67,12 @@ namespace dunedaq {
 		     ((uint32_t)id)((uint32_t)reg52)((uint32_t)reg4)((uint32_t)reg51)((uint32_t)vgain)
 		   )
 
+   ERS_DECLARE_ISSUE( daphnemodules,
+                     InvalidBiasCtrlConfiguration,
+                     "Invalid BiasCtrl Configuration " << v_biasctrl,
+                     ((std::string)v_biasctrl)
+                   )
+  
   ERS_DECLARE_ISSUE( daphnemodules,
 		     DDRNotAligned,
                      "AFE "<< afe << " DDR not aligned, check value: " << check,

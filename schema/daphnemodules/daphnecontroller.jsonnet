@@ -65,19 +65,6 @@ local types = {
  
     channel_list : s.sequence( "ChannelList", self.channel_id, doc="List of channels"),
 
-    full_stream : s.record( "FullStream", [
-                            s.field( "channels", self.channel_list,
-                                     doc="List of channel to be streamed in full stream mode, max 16 channels")
-                            ], doc = "Configuration for full stream case" ),
-
-    self_stream : s.record( "SelfTrigger", [
-                            s.field( "threshold", self.uint4,
-                                     doc="14 bits registry for the threshold of the self triggering")
-                            ], doc = "Configuration for full stream case" ),
-
-    trigger_conf : s.oneOf("TriggerConf", [self.full_stream, self.self_stream],
-                           doc="Possible configuration for trigger modes" ),
-
     conf: s.record("Conf", [
                            s.field("daphne_address", self.ipaddress,
                                    doc="addresses of the daphne connection point"),
@@ -85,8 +72,10 @@ local types = {
                                    doc = "Configuration for all the channels") ,
                            s.field("afes", self.afes,
                                    doc = "Configuration for all AFEs" ),
-			   s.field("trigger", self.trigger_conf,
-                              	   doc="trigger	mode"),
+			   s.field("seff_trigger_threshold", self.uint4, 0,
+			           doc="Configuration for full stream case" ),
+			   s.field("full_stream_channels", self.channel_list,
+                                   doc="List of channel to be streamed in full stream mode, max 16 channels. Used only if threshold is 0")	   
                            ],
                            doc="Configuration for a Daphne board"),
 };
