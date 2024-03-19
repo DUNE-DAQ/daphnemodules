@@ -92,6 +92,18 @@ namespace dunedaq {
 		     ((uint32_t)id)((uint32_t)clamp)((uint32_t)gain)
 		     )
 
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     InvalidThreshold,
+                     "Invalid threshold: " << threshold,
+		     ((uint32_t)threshold)
+		     )
+
+    ERS_DECLARE_ISSUE( daphnemodules,
+		       TooManyChannels,
+                     "Too many full stream channels. Total requested:  " << tot,
+		     ((size_t)tot)
+		     )
+
   
    ERS_DECLARE_ISSUE( daphnemodules,
                      InvalidBiasCtrlConfiguration,
@@ -148,6 +160,7 @@ private:
 
   uint8_t  m_slot;
   uint16_t m_bias_ctrl;
+  uint16_t m_self_threshold;
   
   static const ChannelId s_max_channels = 40;
   std::array<daphnecontroller::ChannelConf, s_max_channels> m_channel_confs;
@@ -165,6 +178,8 @@ private:
   std::array<AFEConf, s_max_afes> m_afe_confs;
   // mapping from the channels to the AFE
   // 0-7 -> AFE 0,  8-15 -> AFE 1, 16-23 -> AFE 2, 24-31 -> AFE 3, 32-39 -> AFE 4 
+
+  std::vector<ChannelId> m_full_stream_channels;
   
   static const uint16_t s_frame_alignment_good = 0x3f80;
 

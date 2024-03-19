@@ -361,8 +361,30 @@ DaphneController::validate_configuration(const daphnecontroller::Conf & c) {
 
       m_afe_confs[afe.id] = afe_conf;
     }
-  }
+  }  // loop over the AFE
 
+  // configuring the trigger mode
+  if ( afe.self_trigger_threshold > 16383 )
+    // this is a 14 bit register
+    InvalidThreshold(ERS_HERE, afe.self_trigger_threshold);
+
+  m_self_threshold = afe.self_trigger_threshold;
+
+  if ( m_self_threshold == 0 ) {
+    // we need to set the list of channels to broadcast
+    for ( const auto & ch : afe.full_stream_channels ) {
+      if ( ch >= DaphneController::s_max_channels ) 
+	throw InvalidChannelId(ERS_HERE, ch, DaphneController::s_max_channels);
+
+      m_full_stream_channels.push_back(ch);
+
+      if (m_full_stream_channels.size()>16) {
+	// we can only stream 16 channels at most
+	throw TooManyChannels( ERS_HERE, afe.full_stream_channels.size() );
+      }
+    }
+  }
+  
 }
 
  
