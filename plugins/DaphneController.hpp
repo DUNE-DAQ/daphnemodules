@@ -61,20 +61,38 @@ namespace dunedaq {
 		   )
 
   ERS_DECLARE_ISSUE( daphnemodules,
+		     InvalidChannelId,
+                     "Channel " << id <<'/' << max << " not available", 
+		     ((uint32_t)id)((uint32_t)max)
+		   )
+
+  
+  ERS_DECLARE_ISSUE( daphnemodules,
 		     InvalidChannelConfiguration,
-                     "Channel " << id << "has invalid configuration, offset: " << offset << ", gain:" << gain,
-		     ((uint32_t)id)((uint32_t)offset)((uint32_t)gain)
+                     "Channel " << id << " has invalid configuration, trim: " << trim << ", offset: " << offset << ", gain:" << gain,
+		     ((uint32_t)id)((uint32_t)trim)((uint32_t)offset)((uint32_t)gain)
 		   )
 
   ERS_DECLARE_ISSUE( daphnemodules,
-		     InvalidAFEConfiguration,
-                     "AFE " << id << "has invalid configuration, reg52: " << reg52
-		            << ", reg4: "  << reg4
-                            << ", reg51: " << reg51
-		     << ", vgain: " << vgain,
-		     ((uint32_t)id)((uint32_t)reg52)((uint32_t)reg4)((uint32_t)reg51)((uint32_t)vgain)
+		     InvalidAFEVoltage,
+                     "AFE " << id << " has invalid voltage, gain: " << gain << ", bias: " << bias,
+		     ((uint32_t)id)((uint32_t)gain)((uint32_t)bias)
+		   )
+  
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     InvalidPGAConf,
+                     "AFE " << id << " has invalid PGA conf (reg51), cut selection: " << cut,
+		     ((uint32_t)id)((uint32_t)cut)
 		   )
 
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     InvalidLNAConf,
+                     "AFE " << id << " has invalid LNA conf (reg52), clamp: " << clamp
+		     << ", gain: " << gain,
+		     ((uint32_t)id)((uint32_t)clamp)((uint32_t)gain)
+		     )
+
+  
    ERS_DECLARE_ISSUE( daphnemodules,
                      InvalidBiasCtrlConfiguration,
                      "Invalid BiasCtrl Configuration " << v_biasctrl,
@@ -109,6 +127,8 @@ public:
 
 private:
 
+  using ChannelId = uint8_t;
+  
   // Commands DaphneController can receive
   void do_conf(const data_t&);
 
@@ -119,24 +139,29 @@ private:
   void configure_analog_chain();
   void align_DDR();
 
+  bool channel_used( ChannelId id ) const {
+    return m_channel_confs[id].offset > 0;
+  }
+  
   std::unique_ptr<DaphneInterface> m_interface;
   std::mutex m_mutex;  // mutex for interface
 
   uint8_t  m_slot;
   uint16_t m_bias_ctrl;
   
-  static const int s_max_channels = 40;
+  static const ChannelId s_max_channels = 40;
   std::array<daphnecontroller::ChannelConf, s_max_channels> m_channel_confs;
   // this array is indexed in the [0-40) range
 
   struct AFEConf {
     uint16_t v_gain = 0;  // 12 bit register
+    uint16_t v_bias = 0;  // 12 bit register
     uint8_t  reg4   = 0;  // 4  bit register
     uint16_t reg51 = 0;   // 14 bit register
     uint16_t reg52 = 0;   // 16 bit register
   };
   
-  static const int s_max_afes = 5;
+  static const ChannelId s_max_afes = 5;
   std::array<AFEConf, s_max_afes> m_afe_confs;
   // mapping from the channels to the AFE
   // 0-7 -> AFE 0,  8-15 -> AFE 1, 16-23 -> AFE 2, 24-31 -> AFE 3, 32-39 -> AFE 4 

@@ -58,7 +58,7 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
 
   std::vector<double> values(string_values.size());
 
-  for ( int i = 1; i < string_values.size(); ++i ) {
+  for ( size_t i = 1; i < string_values.size(); ++i ) {
     try {
       values[i] = std::stod( string_values[i] );
     }  catch ( const std::logic_error & e) {
@@ -215,8 +215,8 @@ DaphneController::create_interface(const std::string & ip) {
   
   std::smatch matches; 
   
-  if ( ! std::regex_match( ip_string, matches, ip_regex) ) {
-    throw InvalidIPAddress(ERS_HERE, ip_string);
+  if ( ! std::regex_match( ip, matches, ip_regex) ) {
+    throw InvalidIPAddress(ERS_HERE, ip);
   }
 
   auto last = std::stoi(matches[1]);
@@ -224,12 +224,12 @@ DaphneController::create_interface(const std::string & ip) {
   if ( m_slot >= 16 ) {
     // Set the slot to the last part of the IP addreess (from 104 to 113)
     // the slot used laster in the code is a 4 bit register, so we need to check we are not overflowing
-    throw InvalidSlot(ERS_HERE, m_slot, ip_string);
+    throw InvalidSlot(ERS_HERE, m_slot, ip);
   }
 
-  TLOG() << "Using daphne at " << ip_string << " with slot " << m_slot; 
+  TLOG() << "Using daphne at " << ip << " with slot " << m_slot; 
 
-  m_interface.reset( new  DaphneInterface( ip_string.c_str(), 2001) );
+  m_interface.reset( new  DaphneInterface( ip.c_str(), 2001) );
   
 }
 
@@ -245,11 +245,16 @@ DaphneController::validate_configuration(const daphnecontroller::Conf & c) {
   if ( c.biasctrl > 4095 ) 
     throw InvalidBiasControl(ERS_HERE, c.biasctrl);
 
-  m_biasctrl = c.biasctrl;
+  m_bias_ctrl = c.biasctrl;
  
-  auto channel_conf = conf_as_cpp.channels;
+  const auto & channel_conf = c.channels;
 
   for ( const auto & c : channel_conf ) {
+
+    if ( c.id >= DaphneController::s_max_channels ) {
+      throw InvalidChannelId(ERS_HERE, c.id, DaphneController::s_max_channels);
+    }
+    
     //CH TRIM maximum is 4095
     if ( c.conf.trim > 4095 ) 
       throw InvalidChannelConfiguration(ERS_HERE, c.id, c.conf.trim, c.conf.offset, c.conf.gain);
@@ -265,16 +270,12 @@ DaphneController::validate_configuration(const daphnecontroller::Conf & c) {
       if ( c.conf.offset > 1500 ) 
 	throw InvalidChannelConfiguration(ERS_HERE, c.id, c.conf.trim, c.conf.offset, c.conf.gain);
     }
-
-    if ( c.id >= DaphneController::s_max_channels ) {
-      throw InvalidChannelConfiguration(ERS_HERE, c.id, c.conf.trim, c.conf.offset, c.conf.gain);
-    }
            
     m_channel_confs[c.id] = c.conf;
   }
 
   // afe configuration
-  auto afe_conf = conf_as_cpp.afes;
+  const auto & afe_conf = c.afes;
 
   for ( const auto & afe : afe_conf ) {
     // an afe only serves 8 channels.
@@ -288,43 +289,77 @@ DaphneController::validate_configuration(const daphnecontroller::Conf & c) {
 
 
     if ( afe.id >= DaphneController::s_max_afes ) 
-      throw InvalidAFEConfiguration(ERS_HERE, afe.id, afe.conf.reg_52, 
-				afe.conf.reg_4, afe.conf.reg_51, afe.conf.v_gain, afe.conf.v_bias);
+      throw InvalidChannelId( ERS_HERE, afe.id, DaphneController::s_max_afes);
 
     bool used = false;
     for ( auto ch = afe.id * 8 ; ch < (afe.id+1)*8 ; ++ch ) {
-      if ( m_channel_confs[ch].offset > 0 ) {
+      if ( channel_used(ch) ) {
 	used = true;
 	break;
       }
     }
 
     if ( used ) {
-      if ( afe.conf.reg_52 >= 65536 )
-	// this is a 16 bit register
-        throw InvalidAFEConfiguration(ERS_HERE, afe.id, afe.conf.reg_52, afe.conf.reg_4, 
-			afe.conf.reg_51, afe.conf.v_gain, afe.conf.v_bias);
 
-      if ( afe.conf.reg_4 >= 32 )
-	// this is a 5 bit register
-        throw InvalidAFEConfiguration(ERS_HERE, afe.id, afe.conf.reg_52, afe.conf.reg_4, 
-			afe.conf.reg_51, afe.conf.v_gain, afe.conf.v_bias;
-
-      if ( afe.conf.reg_51 >= 16384 )
-	// this is a 14 bit register
-        throw InvalidAFEConfiguration(ERS_HERE, afe.id, afe.conf.reg_52, afe.conf.reg_4, 
-			afe.conf.reg_51, afe.conf.v_gain, afe.conf.v_bias);
-
-      if ( afe.conf.v_gain >= 4096 )
+      AFEConf afe_conf;
+      
+      if ( afe.v_gain >= 4096 )
 	// this is a 12 bit register
-        throw InvalidAFEConfiguration(ERS_HERE, afe.id, afe.conf.reg_52, afe.conf.reg_4, 
-			afe.conf.reg_51, afe.conf.v_gain, afe.conf.v_bias);
+        throw InvalidAFEVoltage(ERS_HERE, afe.id, afe.v_gain, afe.v_bias);
 
-      if ( afe.conf.v_bias >= 1500 )
+      afe_conf.v_gain = afe.v_gain;
+      
+      if ( afe.v_bias >= 1500 )
 	// this is a 12 bit register
-        throw InvalidAFEConfiguration(ERS_HERE, afe.id, afe.conf.reg_52, afe.conf.reg_4, 
-			afe.conf.reg_51, afe.conf.v_gain, afe.conf.v_bias);
-      m_afe_confs[afe.id] = afe.conf;
+	// but the bias have to be under a certain value to operate in cold temperature
+	// The maximum value depends on the brand of the SiPM, but it's always smaller than 1500 anyway
+	throw InvalidAFEVoltage(ERS_HERE, afe.id, afe.v_gain, afe.v_bias);
+
+      afe_conf.v_bias = afe.v_bias;
+
+      // ADC, reg 4 has no parsing as it's all made of booleans
+      std::bitset<5> reg4;
+      // bits 0 and 2 are reserved
+      reg4[1] = afe.adc.resolution;
+      reg4[3] = afe.adc.output_format;
+      reg4[4] = afe.adc.SB_first;
+
+      afe_conf.reg4 = (decltype(afe_conf.reg4)) reg4.to_ulong() ;
+
+      // PGA, reg 51
+      std::bitset<14> reg51(afe.pga.lpf_cut_frequnecy);
+      if ( afe.pga.lpf_cut_frequnecy != 0 && afe.pga.lpf_cut_frequnecy != 2 && afe.pga.lpf_cut_frequnecy != 4 )
+	throw InvalidPGAConf(ERS_HERE, afe.id, afe.pga.lpf_cut_frequnecy);
+      
+      reg51 <<= 1;
+      reg[4] = afe.pga.integrator_disable;
+      reg[7] = true;  // clamp is always disabled and we are in low noise mode
+      reg[13] = age.pga.gain;
+      
+      afe_conf.reg51 = (decltype(afe_conf.reg51)) reg51.to_ulong() ;
+
+      // LNA, reg52
+      std::bitset<16> reg52;
+      if ( afe.lna.clamp > 3 ) // only 4 options allowed
+	throw InvalidLNAConf(ERS_HERE, afe.id, afe.lna.clamp, afe.lna.gain);
+	
+      decltype(reg52) clamp(afe.lna.clamp);
+      clamp <<= 6;
+
+      reg52[12] = afe.lna.integrator_disable;
+
+      if ( afe.lna.gain > 2 )  // only 3 options allowed
+	throw InvalidLNAConf(ERS_HERE, afe.id, afe.lna.clamp, afe.lna.gain);
+
+      decltype(reg52) gain(afe.lna.gain);
+      clamp <<= 13;
+
+      reg52 |= clamp;
+      reg52 |= gain;
+
+      afe_conf.reg52 = (decltype(afe_conf.reg52)) reg52.to_ulong() ;
+
+      m_afe_confs[afe.id] = afe_conf;
     }
   }
 

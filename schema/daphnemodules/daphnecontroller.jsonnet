@@ -18,7 +18,7 @@ local types = {
     channel_conf : s.record("ChannelConf", [
 				           s.field("gain",   self.uint4, 1, doc="Gain"),
        	                                   s.field("offset", self.uint4, 0, doc="Pedestal of the channel"),
-					   s.field("trim"    self.uint4, 0, doc="trim value for the channel"),
+					   s.field("trim",   self.uint4, 0, doc="trim value for the channel"),
 	                                   ], doc = "Channel info" ),
 
     channel : s.record("Channel", [
@@ -57,6 +57,7 @@ local types = {
     afe : s.record( "AFE", [
                            s.field( "id", self.channel_id, doc = "id of the configuration"),
                            s.field( "v_gain", self.uint4, 0, doc = "Value for V gain of the AFE, 12 bit register" ),
+                           s.field( "v_bias", self.uint4, 0, doc = "Value for V gain of the AFE, 12 bit register" ),
                            s.field( "adc",    self.adc_conf, doc="configuration for the ADC"),
                            s.field( "pga",    self.pga_conf, doc="configuration for the PGA"),
                            s.field( "lna",    self.lna_conf, doc="configuration for the LNA"),
@@ -75,7 +76,7 @@ local types = {
                                    doc = "Configuration for all the channels") ,
                            s.field("afes", self.afes,
                                    doc = "Configuration for all AFEs" ),
-			   s.field("seff_trigger_threshold", self.uint4, 0,
+			   s.field("self_trigger_threshold", self.uint4, 0,
 			           doc="Configuration for full stream case" ),
 			   s.field("full_stream_channels", self.channel_list,
                                    doc="List of channel to be streamed in full stream mode, max 16 channels. Used only if threshold is 0")	   
