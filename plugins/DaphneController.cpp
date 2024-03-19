@@ -487,7 +487,7 @@ DaphneController::configure_trigger_mode() {
 
   if ( m_self_threshold > 0 ) {
     // se are in self trigger mode
-    m_interface->write_register(0x3001, {0xff});
+    m_interface->write_register(0x3001, {0x3});  // only link0 is enabled
     m_interface->write_register(0x6000, {m_self_threshold});
 
     std::bitset<DaphneController::s_max_channels> mask;
