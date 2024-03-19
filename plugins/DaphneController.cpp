@@ -183,23 +183,6 @@ DaphneController::do_conf(const data_t& conf_as_json)
   // 
 
 
-
-
-
-
-
-
-  
-  auto res = m_interface->read_register(0x9000, 1);
-  for ( auto v : res ) {
-    TLOG() << v;
-  }
-  
-  res = m_interface->read_buffer(0x40000000,15);
-  for ( auto v : res ) {
-    TLOG() << v;
-  }
-
   auto end_time = std::chrono::high_resolution_clock::now();
 
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
@@ -249,29 +232,29 @@ DaphneController::validate_configuration(const daphnecontroller::Conf & c) {
  
   const auto & channel_conf = c.channels;
 
-  for ( const auto & c : channel_conf ) {
+  for ( const auto & ch : channel_conf ) {
 
-    if ( c.id >= DaphneController::s_max_channels ) {
-      throw InvalidChannelId(ERS_HERE, c.id, DaphneController::s_max_channels);
+    if ( ch.id >= DaphneController::s_max_channels ) {
+      throw InvalidChannelId(ERS_HERE, ch.id, DaphneController::s_max_channels);
     }
     
     //CH TRIM maximum is 4095
-    if ( c.conf.trim > 4095 ) 
-      throw InvalidChannelConfiguration(ERS_HERE, c.id, c.conf.trim, c.conf.offset, c.conf.gain);
+    if ( ch.conf.trim > 4095 ) 
+      throw InvalidChannelConfiguration(ERS_HERE, ch.id, ch.conf.trim, ch.conf.offset, ch.conf.gain);
 
     //CH OFFSET maximum is 2700 if GAIN is 1, 1500 if GAIN is 2
-    if ( c.conf.gain != 1 && c.conf.gain != 2 ) {
-      throw InvalidChannelConfiguration(ERS_HERE, c.id, c.conf.trim, c.conf.offset, c.conf.gain);
+    if ( ch.conf.gain != 1 && ch.conf.gain != 2 ) {
+      throw InvalidChannelConfiguration(ERS_HERE, ch.id, ch.conf.trim, ch.conf.offset, ch.conf.gain);
     }
-    if ( c.conf.gain == 1 ) {
-      if ( c.conf.offset > 2700 ) 
-	throw InvalidChannelConfiguration(ERS_HERE, c.id, c.conf.trim, c.conf.offset, c.conf.gain);
-    } else if ( c.conf.gain == 2 ) {
-      if ( c.conf.offset > 1500 ) 
-	throw InvalidChannelConfiguration(ERS_HERE, c.id, c.conf.trim, c.conf.offset, c.conf.gain);
+    if ( ch.conf.gain == 1 ) {
+      if ( ch.conf.offset > 2700 ) 
+	throw InvalidChannelConfiguration(ERS_HERE, ch.id, ch.conf.trim, ch.conf.offset, ch.conf.gain);
+    } else if ( ch.conf.gain == 2 ) {
+      if ( ch.conf.offset > 1500 ) 
+	throw InvalidChannelConfiguration(ERS_HERE, ch.id, ch.conf.trim, ch.conf.offset, ch.conf.gain);
     }
            
-    m_channel_confs[c.id] = c.conf;
+    m_channel_confs[ch.id] = ch.conf;
   }
 
   // afe configuration
@@ -327,14 +310,14 @@ DaphneController::validate_configuration(const daphnecontroller::Conf & c) {
       afe_conf.reg4 = (decltype(afe_conf.reg4)) reg4.to_ulong() ;
 
       // PGA, reg 51
-      std::bitset<14> reg51(afe.pga.lpf_cut_frequnecy);
-      if ( afe.pga.lpf_cut_frequnecy != 0 && afe.pga.lpf_cut_frequnecy != 2 && afe.pga.lpf_cut_frequnecy != 4 )
-	throw InvalidPGAConf(ERS_HERE, afe.id, afe.pga.lpf_cut_frequnecy);
+      std::bitset<14> reg51(afe.pga.lpf_cut_frequency);
+      if ( afe.pga.lpf_cut_frequency != 0 && afe.pga.lpf_cut_frequency != 2 && afe.pga.lpf_cut_frequency != 4 )
+	throw InvalidPGAConf(ERS_HERE, afe.id, afe.pga.lpf_cut_frequency);
       
       reg51 <<= 1;
-      reg[4] = afe.pga.integrator_disable;
-      reg[7] = true;  // clamp is always disabled and we are in low noise mode
-      reg[13] = age.pga.gain;
+      reg51[4] = afe.pga.integrator_disable;
+      reg51[7] = true;  // clamp is always disabled and we are in low noise mode
+      reg51[13] = afe.pga.gain;
       
       afe_conf.reg51 = (decltype(afe_conf.reg51)) reg51.to_ulong() ;
 
@@ -364,15 +347,15 @@ DaphneController::validate_configuration(const daphnecontroller::Conf & c) {
   }  // loop over the AFE
 
   // configuring the trigger mode
-  if ( afe.self_trigger_threshold > 16383 )
+  if ( c.self_trigger_threshold > 16383 )
     // this is a 14 bit register
-    InvalidThreshold(ERS_HERE, afe.self_trigger_threshold);
+    InvalidThreshold(ERS_HERE, c.self_trigger_threshold);
 
-  m_self_threshold = afe.self_trigger_threshold;
+  m_self_threshold = c.self_trigger_threshold;
 
   if ( m_self_threshold == 0 ) {
     // we need to set the list of channels to broadcast
-    for ( const auto & ch : afe.full_stream_channels ) {
+    for ( const auto & ch : c.full_stream_channels ) {
       if ( ch >= DaphneController::s_max_channels ) 
 	throw InvalidChannelId(ERS_HERE, ch, DaphneController::s_max_channels);
 
@@ -380,7 +363,7 @@ DaphneController::validate_configuration(const daphnecontroller::Conf & c) {
 
       if (m_full_stream_channels.size()>16) {
 	// we can only stream 16 channels at most
-	throw TooManyChannels( ERS_HERE, afe.full_stream_channels.size() );
+	throw TooManyChannels( ERS_HERE, c.full_stream_channels.size() );
       }
     }
   }
@@ -450,7 +433,7 @@ void DaphneController::configure_analog_chain() {
   auto result = m_interface->send_command("CFG AFE ALL INITIAL");
   TLOG() << result.command << " -> " << result.result;
 
-  auto result = m_interface->send_command("WR VBIASCTRL V " + std::to_string(v_biasctrl));
+  result = m_interface->send_command("WR VBIASCTRL V " + std::to_string(m_bias_ctrl));
   TLOG() << result.command << " -> " << result.result;
   
   for ( size_t ch = 0; ch < m_channel_confs.size() ; ++ch ) {
@@ -470,32 +453,23 @@ void DaphneController::configure_analog_chain() {
     // the defaul values of offset and gain are set so that they correspond to the setting to disable the channel
     // hence, this loop does both the job of enabling and disebling
     
-  }
+  } // channel loop
 
   //   // to check if the configuration went throguh we can
   //   //cmd (thing, "RD OFFSET CH " + std::to_string(ch), true);
   //   // But Manuel said that this is not necessary to be done all the time
 
-  // Reg 51 will not configure the clamp level, we default it to 1XX becuase we are in Low noise mode
-  // and we alwaus want to disable the clamp
-
-  // Reg 51 exceptions
-  // - [4:0] set to 0
-  // - [5]   set to 0
-  // - [7:6] set to 0
-  // - [8]   set to 0
-  
   for ( size_t afe = 0; afe < m_afe_confs.size() ; ++afe) {
     result = m_interface -> send_command(
-	"WR AFE " + std::to_string(afe) + " REG 52 V " + std::to_string(m_afe_confs[afe].reg_52) );
+	"WR AFE " + std::to_string(afe) + " REG 52 V " + std::to_string(m_afe_confs[afe].reg52) );
     TLOG() << result.command << " -> " << result.result;
 
     result = m_interface -> send_command(
-	"WR AFE " + std::to_string(afe) + " REG 4 V " + std::to_string(m_afe_confs[afe].reg_4) );
+	"WR AFE " + std::to_string(afe) + " REG 4 V " + std::to_string(m_afe_confs[afe].reg4) );
     TLOG() << result.command << " -> " << result.result;
 
     result = m_interface -> send_command(
-	"WR AFE " + std::to_string(afe) + " REG 51 V " + std::to_string(m_afe_confs[afe].reg_51) );
+	"WR AFE " + std::to_string(afe) + " REG 51 V " + std::to_string(m_afe_confs[afe].reg51) );
     TLOG() << result.command << " -> " << result.result;
 
     result = m_interface -> send_command(
@@ -505,7 +479,9 @@ void DaphneController::configure_analog_chain() {
     result = m_interface -> send_command(
 	"WR BIASSET AFE " + std::to_string(afe) + " V " + std::to_string(m_afe_confs[afe].v_bias) );
     TLOG() << result.command << " -> " << result.result;
-  }
+
+  } // afe loop
+  
   //   // To check these values we can do things like
   //   // cmd (thing, "RD AFE " + std::to_string(AFE) + " REG 52", true);
   //   // for all these registers and get the values from the replies
@@ -538,7 +514,6 @@ void DaphneController::align_DDR() {
 	throw DDRNotAligned(ERS_HERE, afe, data[0] );
     }
   }
-  
   
 }
 
