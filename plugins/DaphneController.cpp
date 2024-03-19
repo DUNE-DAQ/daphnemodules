@@ -136,43 +136,7 @@ DaphneController::do_conf(const data_t& conf_as_json)
   
   align_DDR();
   
-  
-  // ---------------------------------------------
-  // set self trigger or full stream
-  // for full stream
-  // thing.write(0x3001, {0xaa}); 
-  // thing.write(0x6001, {0b00000000});   // for safety
-  // check
-  // thing.read(0x3001, 1)
-  // the result should be 0xaa
-
-  // self_trigger
-  //  thing.write(0x3001, {0x3});
-  //  thing.write(0x6000, {700});  // threshold, to be configured 14 bits from configuration
-  // thing.write(0x6001, {0b11111111});   // this is a 40 bit regsiter, so I could construct this number from the enabled channels
-  // check 
-  // thing.read(0x3001, 1)
-  // the result should be 0x3
-  // 
-
-
-  // In the case of of full stream, we can only stream data from 16 channels at maximum
-  // This is because of badnwidth.
-  // So if we run in fullstream we need to set which channes to stream out
-  // We need to assign each channel to a link (streamSender). We have 4 links for each board.
-  // write in register 0x500X X in 0 to F the channel that is supposed to be streamed out.
-  // X is the identifier of a output physically in 4 cables
-  // The channles are not identified with an id from 0-39, they have a different identifier to represent the
-  // cables in the fron of the board. They are grouped in 8 
-  // Conf ch -> DAQ ch
-  // 0-7     -> 0-7
-  // 8-15    -> 10-17
-  // 16-23   -> 20-27
-  // 24-31   -> 30-37
-  // 32-39   -> 40-47
-
-  // the configuration of which link should be as first come first serve.
-  // to a maximum of 16 channels
+  configure_trigger_mode();
   
   // we get a list of 
   // Let's say I want to see 0x5001
@@ -518,6 +482,57 @@ void DaphneController::align_DDR() {
 }
 
 
+void
+DaphneController::configure_trigger_mode() {
+
+  if ( m_self_threshold > 0 ) {
+    // se are in self trigger mode
+    m_interface->write_register(0x3001, {0xff});
+    m_interface->write_register(0x6000, {m_self_threshold});
+
+    std::bitset<DaphneController::s_max_channels> mask;
+    // we unmask all the channels that are enabled
+    for ( ChannelId ch = 0; ch < m_channel_confs.size(); ++ch ) {
+      if ( channel_used(ch) )
+	mask[ch] = true;
+    }
+    m_interface->write_register(0x6001, {(uint64_t)mask.to_ulong()});
+
+    // check 
+    // thing.read(0x3001, 1)
+    // the result should be 0x3
+
+  } else {
+    m_interface->write_register(0x3001, {0xaa});
+    m_interface->write_register(0x6000, {0});  // for safety we mask everything
+
+    size_t stream_id = 0;
+    for ( const auto & ch : m_full_stream_channels ) {
+
+      // The channles are not identified with an id from 0-39, they have a different identifier to represent the
+      // cables in the fron of the board. They are grouped in 8 
+      // Conf ch -> DAQ ch
+      // 0-7     -> 0-7
+      // 8-15    -> 10-17
+      // 16-23   -> 20-27
+      // 24-31   -> 30-37
+      // 32-39   -> 40-47
+
+      auto reg = 0x5000 + stream_id; // stream is first come first served basis
+      auto value = (ch/8)*10 + ch%8;
+
+      m_interface->write_register(reg, {(uint64_t)value});
+
+      ++stream_id;
+    }
+    // check 
+    // thing.read(0x3001, 1)
+    // the result should be 0xaa
+    // 
+  }
+
+}
+  
 } // namespace dunedaq::daphnemodules
 
 DEFINE_DUNE_DAQ_MODULE(dunedaq::daphnemodules::DaphneController)

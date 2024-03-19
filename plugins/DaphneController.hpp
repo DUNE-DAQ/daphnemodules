@@ -150,6 +150,7 @@ private:
   void configure_timing_endpoints();
   void configure_analog_chain();
   void align_DDR();
+  void configure_trigger_mode();
 
   bool channel_used( ChannelId id ) const {
     return m_channel_confs[id].offset > 0;
