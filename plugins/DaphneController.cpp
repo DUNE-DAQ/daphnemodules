@@ -461,12 +461,16 @@ void DaphneController::align_DDR() {
   m_interface->write_register(0x2001, {1234});
   // this is correct to be done 3 times
 
+  std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  // this is necessary to give time to the board to align the AFE DDR
+  // Otherwise further checks become pointless
+
   // --------------------------------------------
   // checking if the alignement is achieved
   // --------------------------------------------
   m_interface->write_register(0x2000, {1234});
   // this trigger the spy buffers
-
+    
   // read register ch 8 of each afe,   by looping on all the afe we use
   for ( size_t afe = 0; afe < m_afe_confs.size() ; ++afe ) {
     if ( m_afe_confs[afe].v_gain > 0 ) {
