@@ -12,8 +12,32 @@ main()
   instdaphnecontroller->init(nlohmann::json{});
   dunedaq::daphnemodules::daphnecontroller::Conf c;
 
-  c.daphne_address = "10.73.137.112";
+  c.daphne_address = "10.73.137.113";
+  c.self_trigger_threshold = 50;
+  c.biasctrl = 0;
+
+  dunedaq::daphnemodules::daphnecontroller::ChannelConf chc;
+  chc.gain = 2;
+  chc.offset = 1050;
+
+  for (size_t i = 1; i < 10; i+=2 ) {
+    dunedaq::daphnemodules::daphnecontroller::Channel temp;
+    temp.conf = chc;
+    temp.id = i;
+    c.channels.push_back(temp);
+  }
   
+  for ( size_t i = 0; i < 2; ++i ) {
+    dunedaq::daphnemodules::daphnecontroller::AFE a;
+    a.id = i;
+    a.v_gain = 2666;
+
+    a.pga.lpf_cut_frequency = 0;
+    a.pga.gain = false;
+
+    c.afes.push_back(a);
+  }
+    
   nlohmann::json j;
   dunedaq::daphnemodules::daphnecontroller::to_json(j,c);
   instdaphnecontroller->execute_command("conf", "ANY", j );
