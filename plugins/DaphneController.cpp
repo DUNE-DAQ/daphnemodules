@@ -129,7 +129,6 @@ DaphneController::do_conf(const data_t& conf_as_json)
 
   validate_configuration(conf_as_cpp);
   
-  
   configure_timing_endpoints();
   
   configure_analog_chain();
@@ -174,7 +173,7 @@ DaphneController::create_interface(const std::string & ip) {
     throw InvalidSlot(ERS_HERE, m_slot, ip);
   }
 
-  TLOG() << "Using daphne at " << ip << " with slot " << m_slot; 
+  TLOG() << "Using daphne at " << ip << " with slot " << (int)m_slot; 
 
   m_interface.reset( new  DaphneInterface( ip.c_str(), 2001) );
   
