@@ -373,7 +373,8 @@ DaphneController::configure_timing_endpoints() {
   if ( ! check[1] ) {
     throw PLLNotLocked(ERS_HERE, "MMCM1");
   }
-  
+  // there's a necessary delay to let DAPHNE receive and compare the timestamp
+  std::this_thread::sleep_for(std::chrono::milliseconds(700)); 
   // at this point everything that is in register 0x4000 is the status of the timing endpoint
   // we need to check bit 12 to check if the timing endpoint is valid
   // 0 = not ok
