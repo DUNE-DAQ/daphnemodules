@@ -15,7 +15,9 @@
 
 #include <string>
 #include <logging/Logging.hpp>
-
+#include <fstream>
+#include <iomanip>
+#include <ctime>
 #include <regex>
 #include <stdexcept>
 #include <cmath>
@@ -29,6 +31,7 @@ DaphneController::DaphneController(const std::string& name)
   : dunedaq::appfwk::DAQModule(name)
 {
   register_command("conf", &DaphneController::do_conf);
+  register_command("dump_buffers", &DaphneController::dump_buffers);
 }
 
 
@@ -109,10 +112,7 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
       
   //   }
   // }
-
-
-
-  
+ 
 }
 
 void
@@ -546,6 +546,60 @@ DaphneController::configure_trigger_mode() {
   }
 
 }
+
+
+void
+DaphneController::dump_buffers(const data_t& conf_as_json)
+{
+  auto start_time = std::chrono::high_resolution_clock::now();
+  
+  auto conf_as_cpp = conf_as_json.get<daphnecontroller::DumpBuffers>();
+
+  // during dumping no other operations are allowed
+  const std::lock_guard<std::mutex> lock(m_mutex);
+
+  std::string file_name(conf_as_cpp.directory);
+  file_name += "spy_buffers_" + std::to_string(m_slot);
+
+  auto t = std::time(nullptr);
+  auto tm = *std::localtime(&t);
+  std::ostringstream oss;
+  oss << std::put_time(&tm, "%Y-%m-%dT%H-%M-%S");
+  file_name += '_' + oss.str() + ".txt";
+
+  std::ofstream file(file_name);
+  
+  m_interface->write_register(0x2000, {1234});
+  // this trigger the spy buffers
+
+  for ( size_t ch = 0; ch < m_channel_confs.size(); ++ch) {
+    if ( ! channel_used(ch) ) continue;
+
+    size_t entries = 
+    // loop over the events 
+  }
+  
+  // read register ch 8 of each afe,   by looping on all the afe we use
+  for ( size_t afe = 0; afe < m_afe_confs.size() ; ++afe ) {
+    if ( m_afe_confs[afe].v_gain > 0 ) {
+      
+      auto data = m_interface->read_register(0x40000000 + (afe * 0x100000) + (8 * 0x10000), 15);  // ch = 8
+
+      // things are ok when the data is 0x3f80
+      if ( data[0] != DaphneController::s_frame_alignment_good ) 
+	throw DDRNotAligned(ERS_HERE, afe, data[0] );
+    }
+  }
+  
+  
+
+  auto end_time = std::chrono::high_resolution_clock::now();
+
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+  TLOG() << "Buffers dumped in " << duration.count() << " microseconds";
+  
+}
+
   
 } // namespace dunedaq::daphnemodules
 

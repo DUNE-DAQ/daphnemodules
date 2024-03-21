@@ -143,7 +143,8 @@ private:
   
   // Commands DaphneController can receive
   void do_conf(const data_t&);
-
+  void dump_buffers(const data_t&);
+  
   // specific actions
   void create_interface( const std::string & ip ) ;
   void validate_configuration(const daphnecontroller::Conf &);   
@@ -184,13 +185,6 @@ private:
   
   static const uint16_t s_frame_alignment_good = 0x3f80;
 
-  // we need to have a mapping to the links from the configuration
-  // 0x500X X in 0 to F
-
-  
-
-  
-  
   
 };
 

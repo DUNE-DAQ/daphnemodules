@@ -82,6 +82,13 @@ local types = {
                                    doc="List of channel to be streamed in full stream mode, max 16 channels. Used only if threshold is 0")	   
                            ],
                            doc="Configuration for a Daphne board"),
+
+    dump_buffers : s.record("DumpBuffers", [
+                                           s.field("n_samples", self.uint4, 1024,
+					           doc="Number of samples to take, defaults to the maximum depth"),
+				           s.field("directory", self.string, "./",
+					           "Directory that contain the file"),
+				           ], doc = "Configuration of the dump buffers command"),
 };
 
 moo.oschema.sort_select(types, ns)
