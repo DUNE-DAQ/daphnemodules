@@ -24,6 +24,7 @@
 #include <chrono>
 #include <bitset>
 #include <thread>
+#include <algorithm>
 
 namespace dunedaq::daphnemodules {
 
@@ -559,6 +560,7 @@ DaphneController::dump_buffers(const data_t& conf_as_json)
   const std::lock_guard<std::mutex> lock(m_mutex);
 
   std::string file_name(conf_as_cpp.directory);
+  if ( file_name.back() != '/' ) file_name += '/';
   file_name += "spy_buffers_" + std::to_string(m_slot);
 
   auto t = std::time(nullptr);
@@ -567,17 +569,35 @@ DaphneController::dump_buffers(const data_t& conf_as_json)
   oss << std::put_time(&tm, "%Y-%m-%dT%H-%M-%S");
   file_name += '_' + oss.str() + ".txt";
 
-  std::ofstream file(file_name);
+  size_t entries = std::min(conf_as_cpp.n_samples, (decltype(conf_as_cpp.n_samples)) 1024);
+  const size_t max_batch_size = 50;
   
   m_interface->write_register(0x2000, {1234});
   // this trigger the spy buffers
 
+  std::ofstream file(file_name);
+    
   for ( size_t ch = 0; ch < m_channel_confs.size(); ++ch) {
     if ( ! channel_used(ch) ) continue;
+    
+    auto afe   = ch / 8;
+    auto ch_id = ch % 8;
 
-    size_t entries = 
-    // loop over the events 
-  }
+    file << "AFE "<< afe << " CH " << ch_id;
+   
+    size_t counter = 0;
+    while ( counter < entries ) {
+      auto n_points = counter + max_batch_size > entries ? entries-counter : max_batch_size;
+      auto data = m_interface->read_register(0x40000000 + (afe * 0x100000) + (ch_id * 0x10000) + counter, n_points);
+      counter += n_points;
+      for ( const auto & e : data ) {
+	file << " " << e;
+      }
+     
+    } // loop over the queries for the same channel
+
+    file << std::endl;
+  } // loop over the channels 
   
   // read register ch 8 of each afe,   by looping on all the afe we use
   for ( size_t afe = 0; afe < m_afe_confs.size() ; ++afe ) {

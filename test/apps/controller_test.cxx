@@ -46,6 +46,16 @@ main()
   instdaphnecontroller->get_info(info, 0);
 
   TLOG() << info.get_collected_infos() ;
+
+  dunedaq::daphnemodules::daphnecontroller::DumpBuffers b;
+  b.directory = "./";
+  b.n_samples = 60;
+
+  nlohmann::json j_buffer;
+  dunedaq::daphnemodules::daphnecontroller::to_json(j_buffer,b);
+  instdaphnecontroller->execute_command("dump_buffers", "ANY", j_buffer );
+
+  
   
   return 0;
 }
