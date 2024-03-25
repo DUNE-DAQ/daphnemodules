@@ -27,10 +27,10 @@ def get_daphnemodules_app(nickname, slots, host="localhost"):
 
     for s in slots:
         ip = ip_base + str(100+s)
-        modules += [DAQModule(name = f"nickname{s}", 
+        modules += [DAQModule(name = f"{nickname}{s}", 
                               plugin = "DaphneController", 
                               conf = daphnecontroller.Conf(daphne_address=ip
-                                )
+                             )
                     )]
 
     mgraph = ModuleGraph(modules)

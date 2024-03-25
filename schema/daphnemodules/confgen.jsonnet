@@ -24,13 +24,15 @@ local cs = {
     string:   s.string(  "String",   		   doc="A string"),   
     monitoring_dest: s.enum(     "MonitoringDest", ["local", "cern", "pocket"]),
 
-    daphnemodules: s.record("daphnemodules", [
-        s.field( "ip_address", self.string, doc="IP of the daphne"),
+    slotlist : s.sequence( "slotlist", self.uint4, doc="list of slots" ),
+
+    daphne: s.record("daphne", [
+        s.field( "slots", self.slotlist, default=[],  doc="List of the daphne to use, identified by slot"),
     ]),
 
-    daphnemodules_gen: s.record("daphnemodules_gen", [
+    daphne_gen: s.record("daphne_gen", [
         s.field("boot", bootgen.boot, default=bootgen.boot, doc="Boot parameters"),
-        s.field("daphnemodules", self.daphnemodules, default=self.daphnemodules, doc="daphnemodules Conf parameters"),
+        s.field("daphne", self.daphne, default=self.daphne, doc="daphnemodules Conf parameters"),
     ]),
 };
 
