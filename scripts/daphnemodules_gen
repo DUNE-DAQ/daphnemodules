@@ -20,10 +20,10 @@ moo.io.default_load_path = get_moo_model_path()
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 @click.command(context_settings=CONTEXT_SETTINGS)
 @generate_cli_from_schema('daphnemodules/confgen.jsonnet', 'daphnemodules_gen')
-@click.option('--slot', '-s', multiple=True, type=int)
+@click.option('--slot', '-s', multiple=True)
 @click.argument('json_dir', type=click.Path())
 
-def cli(config, json_dir, slots):
+def cli(config, slots, json_dir):
 
     if os.path.exists(json_dir):
         raise RuntimeError(f"Directory {json_dir} already exists")
@@ -38,8 +38,8 @@ def cli(config, json_dir, slots):
 
 ##    moo.otypes.load_types('daphnemodules/confgen.jsonnet')
 ##    import dunedaq.daphnemodules.confgen as confgen
-    moo.otypes.load_types('daqconf/confgen.jsonnet')
-    import dunedaq.daqconf.confgen as daqconfgen
+    moo.otypes.load_types('daqconf/bootgen.jsonnet')
+    import dunedaq.daqconf.bootgen as bootgen
 
     console.log(f"\nIndividual configuration records before any command line overrides: ")    
 
