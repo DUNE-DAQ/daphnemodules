@@ -58,7 +58,7 @@ def cli(config,
 
     the_system = System()
 
-    the_system.apps["daphnemodulesapp"] = daphnemodulesapp_gen.get_daphnemodules_app(
+    the_system.apps["daphneapp"] = daphnemodulesapp_gen.get_daphnemodules_app(
         nickname = "daphne_controller",
         slots = daphne_block.slots
     )

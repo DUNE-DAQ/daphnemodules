@@ -26,10 +26,18 @@ def get_daphnemodules_app(nickname, slots, host="localhost"):
     modules = []
 
     for s in slots:
+        if s not in allowed_slots :
+            raise AttributeError("%s is an invalid slot" % s)
+        
         ip = ip_base + str(100+s)
-        modules += [DAQModule(name = f"{nickname}{s}", 
+        modules += [DAQModule(name = f"{nickname}_{s}", 
                               plugin = "DaphneController", 
-                              conf = daphnecontroller.Conf(daphne_address=ip
+                              conf = daphnecontroller.Conf(
+                                  daphne_address=ip,
+                                  biasctrl=0,
+                                  channels=[],
+                                  afes=[],
+                                  full_stream_channels=[]
                              )
                     )]
 
