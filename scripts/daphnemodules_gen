@@ -20,8 +20,10 @@ moo.io.default_load_path = get_moo_model_path()
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 @click.command(context_settings=CONTEXT_SETTINGS)
 @generate_cli_from_schema('daphnemodules/confgen.jsonnet', 'daphnemodules_gen')
+@click.option('--slot', '-s', multiple=True, type=int)
 @click.argument('json_dir', type=click.Path())
-def cli(config, json_dir):
+
+def cli(config, json_dir, slots):
 
     if os.path.exists(json_dir):
         raise RuntimeError(f"Directory {json_dir} already exists")
@@ -34,8 +36,8 @@ def cli(config, json_dir):
     # Get our config objects
     # Loading this one another time... (first time in config_file.generate_cli_from_schema)    
 
-    moo.otypes.load_types('daphnemodules/confgen.jsonnet')
-    import dunedaq.daphnemodules.confgen as confgen
+##    moo.otypes.load_types('daphnemodules/confgen.jsonnet')
+##    import dunedaq.daphnemodules.confgen as confgen
     moo.otypes.load_types('daqconf/confgen.jsonnet')
     import dunedaq.daqconf.confgen as daqconfgen
 
@@ -59,9 +61,8 @@ def cli(config, json_dir):
     the_system = System()
     
     the_system.apps["daphnemodulesapp"] = daphnemodulesapp_gen.get_daphnemodules_app(
-        nickname = "the_solo_app", 
-	num_daphnecontrollers = daphnemodules.num_daphnecontrollers,
-	some_configured_value = daphnemodules.some_configured_value
+        nickname = "daphne_controller", 
+	slots = slots
     )
 
     ####################################################################                                  

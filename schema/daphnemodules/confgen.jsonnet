@@ -1,8 +1,13 @@
 // This is the configuration schema for daphnemodules
 
 local moo = import "moo.jsonnet";
-local sdc = import "daqconf/confgen.jsonnet";
-local daqconf = moo.oschema.hier(sdc).dunedaq.daqconf.confgen;
+local nc = moo.oschema.numeric_constraints;
+
+local stypes = import "daqconf/types.jsonnet";
+local types = moo.oschema.hier(stypes).dunedaq.daqconf.types;
+
+local sboot = import "daqconf/bootgen.jsonnet";
+local bootgen = moo.oschema.hier(sboot).dunedaq.daqconf.bootgen;
 
 local ns = "dunedaq.daphnemodules.confgen";
 local s = moo.oschema.schema(ns);
@@ -20,15 +25,14 @@ local cs = {
     monitoring_dest: s.enum(     "MonitoringDest", ["local", "cern", "pocket"]),
 
     daphnemodules: s.record("daphnemodules", [
-        s.field( "some_configured_value", self.int4, default=31415, doc="A value which configures the DaphneController DAQModule instance"),
-        s.field( "num_daphnecontrollers", self.int4, default=1, doc="A value which configures the number of instances of DaphneController"),
+        s.field( "ip_address", self.string, doc="IP of the daphne"),
     ]),
 
     daphnemodules_gen: s.record("daphnemodules_gen", [
-        s.field("boot", daqconf.boot, default=daqconf.boot, doc="Boot parameters"),
-        s.field("daphnemodules", self.daphnemodules, default=self.daphnemodules, doc="daphnemodules parameters"),
+        s.field("boot", bootgen.boot, default=bootgen.boot, doc="Boot parameters"),
+        s.field("daphnemodules", self.daphnemodules, default=self.daphnemodules, doc="daphnemodules Conf parameters"),
     ]),
 };
 
 // Output a topologically sorted array.
-sdc + moo.oschema.sort_select(cs, ns)
+sboot + moo.oschema.sort_select(cs, ns)
