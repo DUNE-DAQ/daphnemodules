@@ -17,12 +17,12 @@ from daqconf.core.daqmodule import DAQModule
 
 ip_base = "10.73.137."
 n_afe = 5
-n_channels = 4
+n_channels = 40
 
 
-def get_daphnemodules_app(nickname="daphne",
+def get_daphnemodules_app(
                           slots : tuple,
-                          biasctr : int,
+                          biasctrl : int,
                           afe_gain : int,
                           channel_gain : int,
                           channel_offset : int,
@@ -30,6 +30,7 @@ def get_daphnemodules_app(nickname="daphne",
                           pga : daphnecontroller.PGAConf,
                           lna : daphnecontroller.LNAConf,
                           map_file = None,  ## for now
+                          nickname="daphne",
                           host="localhost"):
     """
     Here the configuration for an entire daq_application instance using DAQModules from daphnemodules is generated.
@@ -47,7 +48,7 @@ def get_daphnemodules_app(nickname="daphne",
                 id=afe,
                 v_gain=afe_gain,
                 v_bias = 0, # or from the map_file
-                adc = add,
+                adc = adc,
                 pga = pga,
                 lna = lna
             ) )
@@ -65,18 +66,18 @@ def get_daphnemodules_app(nickname="daphne",
             
         conf = daphnecontroller.Conf(
             daphne_address=ip,
-            biasctrl=biasctr,
+            biasctrl=biasctrl,
             afes = afes,
             channels = channels,
             self_trigger_threshold = 0,  ## from the map
             full_stream_channels = []  ## from the map
         )
 
-        modules += [DAQModule(name = f"daphne_{s}", 
+        modules += [DAQModule(name = f"controller_{s}", 
                               plugin = "DaphneController", 
                               conf = conf
-                             )
-                    )]
+                              )
+                    ]
 
     mgraph = ModuleGraph(modules)
     daphnemodules_app = App(modulegraph = mgraph, host = host, name = nickname)

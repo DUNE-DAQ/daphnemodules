@@ -38,7 +38,7 @@ local types = {
                                  ], doc="info to generate Reg4 value" ),
 
     pga_conf : s.record( "PGAConf", [
-                                  s.field( "lpf_cut_frequency", self.uint4,
+                                  s.field( "lpf_cut_frequency", self.uint4, 0,
 				           doc="cut frequency, only 4 values acceptable. 0=15MHz, 2=20MHz, 3=30MHz, 4=10MHz"),
                                   s.field( "integrator_disable", self.boolean, true,
 				           doc="true=disabled, false=enabled" ),

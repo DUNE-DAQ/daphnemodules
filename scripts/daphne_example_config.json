@@ -5,14 +5,7 @@
       "opmon_impl": "local",
       "ers_impl": "local"
   },
-    "daphne": {
-	"slots": [13],
-	"biasctrl" : [500]
-    },
-    "daphne":  [
-	{  "slots": 13,
-	   "biasctrl" : 500
-	}
-	]
-
+    "daphne":  {
+	"slots": [13,4]
+    }
 }

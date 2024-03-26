@@ -32,12 +32,20 @@ local cs = {
     daphne_input: s.record("DaphneInput", [
         s.field( "slots", self.slotlist, default=[4,5,7,9,11,12,13],
 		 doc="List of the daphne to use, identified by slot"),
-	s.field( "biasctr", self.uint4, default = 4095,
+	s.field( "biasctrl", self.uint4, default = 4095,
 		 doc = "Biasctr to be used for all boards"),
+	s.field( "afe_gain", self.uint4, default = 2667,
+		 doc = "Gain to be used for all afes across the boards" ),
 	s.field( "channel_gain", self.uint4, default = 2,
 		 doc = "Gain to be used for all channels across the boards" ),
+	s.field( "channel_offset", self.uint4, default = 1468,
+		 doc = "Offset to be used for all channels across the boards" ),
 	s.field( "adc", daphneconf.ADCConf, default = daphneconf.ADCConf,
 		 doc = "Commond ADC configuration for all the AFEs across the boards" ),
+	s.field( "pga", daphneconf.PGAConf, default = daphneconf.PGAConf,
+		 doc = "Commond PGA configuration for all the AFEs across the boards" ),
+	s.field( "lna", daphneconf.LNAConf, default = daphneconf.LNAConf,
+		 doc = "Commond LNA configuration for all the AFEs across the boards" ),
     ]),
 
     daphne_gen: s.record("daphne_gen", [
@@ -47,4 +55,4 @@ local cs = {
 };
 
 // Output a topologically sorted array.
-sboot + moo.oschema.sort_select(cs, ns)
+sboot + sdaphne + moo.oschema.sort_select(cs, ns)

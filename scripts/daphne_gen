@@ -21,9 +21,11 @@ moo.io.default_load_path = get_moo_model_path()
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 @click.command(context_settings=CONTEXT_SETTINGS)
 @generate_cli_from_schema('daphnemodules/confgen.jsonnet', 'daphne_gen')
+@click.option("--host", type=str, default='np04-srv-015', help="host of the Daphne application")
 @click.argument('json_dir', type=click.Path())
 
 def cli(config,
+        host,
         json_dir):
 
     if os.path.exists(json_dir):
@@ -58,8 +60,16 @@ def cli(config,
     the_system = System()
 
     the_system.apps["daphneapp"] = daphnemodulesapp_gen.get_daphnemodules_app(
-        nickname = "daphne_controller",
-        slots = daphne_block.slots
+        host=host,
+        nickname = "controller",
+        slots = daphne_block.slots,
+        biasctrl = daphne_block.biasctrl,
+        afe_gain = daphne_block.afe_gain,
+        channel_gain = daphne_block.channel_gain,
+        channel_offset = daphne_block.channel_offset,
+        adc = daphne_block.adc,
+        pga = daphne_block.pga,
+        lna = daphne_block.lna
     )
 
     ####################################################################                                  
