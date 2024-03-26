@@ -39,14 +39,13 @@ def cli(config,
     import dunedaq.daqconf.bootgen as bootgen
     moo.otypes.load_types('daphnemodules/confgen.jsonnet')
     import dunedaq.daphnemodules.confgen as daphnegen
-
     
     console.log(f"\nIndividual configuration records before any command line overrides: ")    
 
     boot = bootgen.boot(**config_data.boot)
     console.log(f"boot configuration object: {boot.pod()}")
 
-    daphne_block = daphnegen.daphne(**config_data.daphne)
+    daphne_block = daphnegen.DaphneInput(**config_data.daphne)
     console.log(f"daphnemodules configuration object: {daphne_block.pod()}")
 
 #    console.log(f"\nIndividual configuration records after any command line overrides: ")

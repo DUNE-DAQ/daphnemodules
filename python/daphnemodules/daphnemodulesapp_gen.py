@@ -16,9 +16,21 @@ from daqconf.core.app import App, ModuleGraph
 from daqconf.core.daqmodule import DAQModule
 
 ip_base = "10.73.137."
-allowed_slots = [13]
+n_afe = 5
+n_channels = 4
 
-def get_daphnemodules_app(nickname, slots, host="localhost"):
+
+def get_daphnemodules_app(nickname="daphne",
+                          slots : tuple,
+                          biasctr : int,
+                          afe_gain : int,
+                          channel_gain : int,
+                          channel_offset : int,
+                          adc : daphnecontroller.ADCConf,
+                          pga : daphnecontroller.PGAConf,
+                          lna : daphnecontroller.LNAConf,
+                          map_file = None,  ## for now
+                          host="localhost"):
     """
     Here the configuration for an entire daq_application instance using DAQModules from daphnemodules is generated.
     """
@@ -26,18 +38,43 @@ def get_daphnemodules_app(nickname, slots, host="localhost"):
     modules = []
 
     for s in slots:
-        if s not in allowed_slots :
-            raise AttributeError("%s is an invalid slot" % s)
         
         ip = ip_base + str(100+s)
-        modules += [DAQModule(name = f"{nickname}_{s}", 
+
+        afes = []
+        for afe in range(n_afe) :
+            afes.append( daphnecontroller.AFE(
+                id=afe,
+                v_gain=afe_gain,
+                v_bias = 0, # or from the map_file
+                adc = add,
+                pga = pga,
+                lna = lna
+            ) )
+
+        channels=[]
+        for ch in range(n_channels) :
+            channels.append( daphnecontroller.Channel(
+                id = ch,
+                conf = daphnecontroller.ChannelConf(
+                    gain = channel_gain,
+                    offset = channel_offset
+                    # trim from the map
+                )
+            ) )
+            
+        conf = daphnecontroller.Conf(
+            daphne_address=ip,
+            biasctrl=biasctr,
+            afes = afes,
+            channels = channels,
+            self_trigger_threshold = 0,  ## from the map
+            full_stream_channels = []  ## from the map
+        )
+
+        modules += [DAQModule(name = f"daphne_{s}", 
                               plugin = "DaphneController", 
-                              conf = daphnecontroller.Conf(
-                                  daphne_address=ip,
-                                  biasctrl=0,
-                                  channels=[],
-                                  afes=[],
-                                  full_stream_channels=[]
+                              conf = conf
                              )
                     )]
 

@@ -9,6 +9,9 @@ local types = moo.oschema.hier(stypes).dunedaq.daqconf.types;
 local sboot = import "daqconf/bootgen.jsonnet";
 local bootgen = moo.oschema.hier(sboot).dunedaq.daqconf.bootgen;
 
+local sdaphne = import "daphnemodules/daphnecontroller.jsonnet";
+local daphneconf = moo.oschema.hier(sdaphne).dunedaq.daphnemodules.daphnecontroller;
+
 local ns = "dunedaq.daphnemodules.confgen";
 local s = moo.oschema.schema(ns);
 
@@ -26,13 +29,20 @@ local cs = {
 
     slotlist : s.sequence( "slotlist", self.uint4, doc="list of slots" ),
 
-    daphne: s.record("daphne", [
-        s.field( "slots", self.slotlist, default=[],  doc="List of the daphne to use, identified by slot"),
+    daphne_input: s.record("DaphneInput", [
+        s.field( "slots", self.slotlist, default=[4,5,7,9,11,12,13],
+		 doc="List of the daphne to use, identified by slot"),
+	s.field( "biasctr", self.uint4, default = 4095,
+		 doc = "Biasctr to be used for all boards"),
+	s.field( "channel_gain", self.uint4, default = 2,
+		 doc = "Gain to be used for all channels across the boards" ),
+	s.field( "adc", daphneconf.ADCConf, default = daphneconf.ADCConf,
+		 doc = "Commond ADC configuration for all the AFEs across the boards" ),
     ]),
 
     daphne_gen: s.record("daphne_gen", [
         s.field("boot", bootgen.boot, default=bootgen.boot, doc="Boot parameters"),
-        s.field("daphne", self.daphne, default=self.daphne, doc="daphnemodules Conf parameters"),
+        s.field("daphne", self.daphne_input, default=self.daphne_input, doc="daphnemodules Conf parameters"),
     ]),
 };
 
