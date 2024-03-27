@@ -49,12 +49,11 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
   if ( ! m_interface ) return ;
   
   auto cmd_res = m_interface->send_command("RD VM ALL");
-  TLOG() << cmd_res.result ;
   
   std::smatch string_values; 
 						 
   if ( ! std::regex_match( cmd_res.result, string_values, volt_regex ) ) {
-    ers::error( WrongMonitoringString(ERS_HERE, cmd_res.result) );
+    ers::error( WrongMonitoringString(ERS_HERE, m_slot, cmd_res.result) );
     return ;
   }
     
@@ -150,7 +149,7 @@ DaphneController::do_conf(const data_t& conf_as_json)
   auto end_time = std::chrono::high_resolution_clock::now();
 
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
-  TLOG() << "Board configured in " << duration.count() << " microseconds";
+  TLOG() << get_name() << ": board configured in " << duration.count() << " microseconds";
   
 }
 
@@ -174,7 +173,7 @@ DaphneController::create_interface(const std::string & ip) {
     throw InvalidSlot(ERS_HERE, m_slot, ip);
   }
 
-  TLOG() << "Using daphne at " << ip << " with slot " << (int)m_slot; 
+  TLOG() << get_name() << ": using daphne at " << ip << " with slot " << (int)m_slot; 
 
   m_interface.reset( new  DaphneInterface( ip.c_str(), 2001) );
   
@@ -339,7 +338,7 @@ DaphneController::validate_configuration(const daphnecontroller::Conf & c) {
 void
 DaphneController::configure_timing_endpoints() {
 
-  TLOG() << "Configuring timing endpoint";
+  TLOG() << get_name() << ": configuring timing endpoint";
   m_interface->write_register(0x4001, {0x1});
   m_interface->write_register(0x3000, {0x002081 + uint64_t(0x400000 * m_slot)});
   m_interface->write_register(0x4003, {1234});
@@ -356,7 +355,7 @@ DaphneController::configure_timing_endpoints() {
   } while (!check[0]);
 
   if ( ! check[0] ) {
-    throw PLLNotLocked(ERS_HERE, "MMCM0");
+    throw PLLNotLocked(ERS_HERE, m_slot, "MMCM0");
   }
   
   m_interface->write_buffer(0x4002, {1234});
@@ -372,7 +371,7 @@ DaphneController::configure_timing_endpoints() {
   } while (!check[1]);
 
   if ( ! check[1] ) {
-    throw PLLNotLocked(ERS_HERE, "MMCM1");
+    throw PLLNotLocked(ERS_HERE, m_slot, "MMCM1");
   }
   
   // at this point everything that is in register 0x4000 is the status of the timing endpoint
@@ -394,16 +393,16 @@ DaphneController::configure_timing_endpoints() {
   } while (!check[12]);
 
   if ( ! check[12] ) {
-    throw TimingEndpointNotReady(ERS_HERE, check.to_string() );
+    throw TimingEndpointNotReady(ERS_HERE, m_slot, check.to_string() );
   }
   
-  TLOG() << "Done donfiguring timing endpoint";
+  TLOG() << get_name() << ": done donfiguring timing endpoint";
 
 }
 
 void DaphneController::configure_analog_chain() {
 
-  TLOG() << "Configuring analog chain";
+  TLOG() << get_name() << ": configuring analog chain";
   
   auto result = m_interface->send_command("CFG AFE ALL INITIAL");
   TLOG() << result.command << " -> " << result.result;
@@ -461,12 +460,15 @@ void DaphneController::configure_analog_chain() {
   //   // cmd (thing, "RD AFE " + std::to_string(AFE) + " REG 52", true);
   //   // for all these registers and get the values from the replies
 
+  TLOG() << get_name() << ": done donfiguring analog chain";
+
+  
 }
 
 
 void DaphneController::align_DDR() {
 
-  TLOG() << "Aligning DDR";
+  TLOG() << get_name() << ": aligning DDR";
   
   m_interface->write_register(0x2001, {1234});
   m_interface->write_register(0x2001, {1234});
@@ -490,16 +492,19 @@ void DaphneController::align_DDR() {
 
       // things are ok when the data is 0x3f80
       if ( data[0] != DaphneController::s_frame_alignment_good ) 
-	throw DDRNotAligned(ERS_HERE, afe, data[0] );
+	throw DDRNotAligned(ERS_HERE, m_slot, afe, data[0] );
     }
   }
-  
+
+  TLOG() << get_name() << ": done aligning DDR";
 }
 
 
 void
 DaphneController::configure_trigger_mode() {
 
+  TLOG() << get_name() << ": Setting trigger mode";
+  
   if ( m_self_threshold > 0 ) {
     // se are in self trigger mode
     m_interface->write_register(0x3001, {0x3});  // only link0 is enabled
@@ -546,6 +551,8 @@ DaphneController::configure_trigger_mode() {
     // 
   }
 
+  TLOG() << get_name() << ": trigger mode configured";
+  
 }
 
 
@@ -573,7 +580,7 @@ DaphneController::dump_buffers(const data_t& conf_as_json)
   const size_t max_batch_size = 50;
   
   m_interface->write_register(0x2000, {1234});
-  // this trigger the spy buffers
+  // this triggers the spy buffers
 
   std::ofstream file(file_name);
     
@@ -599,24 +606,10 @@ DaphneController::dump_buffers(const data_t& conf_as_json)
     file << std::endl;
   } // loop over the channels 
   
-  // read register ch 8 of each afe,   by looping on all the afe we use
-  for ( size_t afe = 0; afe < m_afe_confs.size() ; ++afe ) {
-    if ( m_afe_confs[afe].v_gain > 0 ) {
-      
-      auto data = m_interface->read_register(0x40000000 + (afe * 0x100000) + (8 * 0x10000), 15);  // ch = 8
-
-      // things are ok when the data is 0x3f80
-      if ( data[0] != DaphneController::s_frame_alignment_good ) 
-	throw DDRNotAligned(ERS_HERE, afe, data[0] );
-    }
-  }
-  
-  
-
   auto end_time = std::chrono::high_resolution_clock::now();
 
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
-  TLOG() << "Buffers dumped in " << duration.count() << " microseconds";
+  TLOG() << get_name() << ": buffers dumped in " << duration.count() << " microseconds";
   
 }
 

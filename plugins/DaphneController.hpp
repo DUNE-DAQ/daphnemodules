@@ -26,8 +26,8 @@
 namespace dunedaq {
   ERS_DECLARE_ISSUE( daphnemodules,
                      WrongMonitoringString,
-                     "Response from board was not parsed correctly",
-                     ((std::string)string)
+                     "Board in slot " << slot << ": response from board was not parsed correctly",
+                     ((uint8_t)slot)((std::string)string)
                    )
 
   ERS_DECLARE_ISSUE( daphnemodules,
@@ -44,14 +44,14 @@ namespace dunedaq {
 
   ERS_DECLARE_ISSUE( daphnemodules,
 		     PLLNotLocked,
-                     mm << " not locked",
-		     ((std::string)mm)
+                     "Board in slot " << slot << ": " << mm << " not locked",
+		     ((uint8_t)slot)((std::string)mm)
 		   )
 
   ERS_DECLARE_ISSUE( daphnemodules,
 		     TimingEndpointNotReady,
-                     "Timing endpoint not ready, full status: " << status,
-		     ((std::string)status)
+                     "Board in slot " << slot << ": timing endpoint not ready, full status: " << status,
+		     ((uint8_t)slot)((std::string)status)
 		   )
 
   ERS_DECLARE_ISSUE( daphnemodules,
@@ -113,8 +113,8 @@ namespace dunedaq {
   
   ERS_DECLARE_ISSUE( daphnemodules,
 		     DDRNotAligned,
-                     "AFE "<< afe << " DDR not aligned, check value: " << check,
-		     ((uint16_t)afe)((uint64_t)check)
+                     "board in slot " << slot << ": AFE " << afe << " DDR not aligned, check value: " << check,
+		     ((uint8_t)slot)((uint16_t)afe)((uint64_t)check)
 		   )
   
 }
