@@ -16,6 +16,108 @@
 #include <atomic>
 #include <limits>
 #include <string>
+#include <array>
+#include <mutex>
+
+#include "DaphneInterface.hpp"
+
+#include "daphnemodules/daphnecontroller/Structs.hpp"
+
+namespace dunedaq {
+  ERS_DECLARE_ISSUE( daphnemodules,
+                     WrongMonitoringString,
+                     "Board in slot " << slot << ": response from board was not parsed correctly",
+                     ((uint8_t)slot)((std::string)string)
+                   )
+
+  ERS_DECLARE_ISSUE( daphnemodules,
+                     FailedStringConversion,
+                     "String " << str << " failed to be converted into a number",
+		     ((std::string)str)
+                   )
+
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     InvalidSlot,
+                     "Invalid slot " << slot << " obtained from IP " << ip,
+		     ((uint8_t)slot) ((std::string)ip)
+		   )
+
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     PLLNotLocked,
+                     "Board in slot " << slot << ": " << mm << " not locked",
+		     ((uint8_t)slot)((std::string)mm)
+		   )
+
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     TimingEndpointNotReady,
+                     "Board in slot " << slot << ": timing endpoint not ready, full status: " << status,
+		     ((uint8_t)slot)((std::string)status)
+		   )
+
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     InvalidBiasControl,
+                     bias << " bigger than 4095",
+		     ((uint64_t)bias)
+		   )
+
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     InvalidChannelId,
+                     "Channel " << id <<'/' << max << " not available", 
+		     ((uint32_t)id)((uint32_t)max)
+		   )
+
+  
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     InvalidChannelConfiguration,
+                     "Channel " << id << " has invalid configuration, trim: " << trim << ", offset: " << offset << ", gain:" << gain,
+		     ((uint32_t)id)((uint32_t)trim)((uint32_t)offset)((uint32_t)gain)
+		   )
+
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     InvalidAFEVoltage,
+                     "AFE " << id << " has invalid voltage, gain: " << gain << ", bias: " << bias,
+		     ((uint32_t)id)((uint32_t)gain)((uint32_t)bias)
+		   )
+  
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     InvalidPGAConf,
+                     "AFE " << id << " has invalid PGA conf (reg51), cut selection: " << cut,
+		     ((uint32_t)id)((uint32_t)cut)
+		   )
+
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     InvalidLNAConf,
+                     "AFE " << id << " has invalid LNA conf (reg52), clamp: " << clamp
+		     << ", gain: " << gain,
+		     ((uint32_t)id)((uint32_t)clamp)((uint32_t)gain)
+		     )
+
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     InvalidThreshold,
+                     "Invalid threshold: " << threshold,
+		     ((uint32_t)threshold)
+		     )
+
+    ERS_DECLARE_ISSUE( daphnemodules,
+		       TooManyChannels,
+                     "Too many full stream channels. Total requested:  " << tot,
+		     ((size_t)tot)
+		     )
+
+  
+   ERS_DECLARE_ISSUE( daphnemodules,
+                     InvalidBiasCtrlConfiguration,
+                     "Invalid BiasCtrl Configuration " << v_biasctrl,
+                     ((std::string)v_biasctrl)
+                   )
+  
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     DDRNotAligned,
+                     "board in slot " << slot << ": AFE " << afe << " DDR not aligned, check value: " << check,
+		     ((uint8_t)slot)((uint16_t)afe)((uint64_t)check)
+		   )
+  
+}
 
 namespace dunedaq::daphnemodules {
 
@@ -24,7 +126,7 @@ class DaphneController : public dunedaq::appfwk::DAQModule
 public:
   explicit DaphneController(const std::string& name);
 
-  void init(const data_t&) override;
+  void init(const data_t&) override {;}
 
   void get_info(opmonlib::InfoCollector&, int /*level*/) override;
 
@@ -36,32 +138,54 @@ public:
   ~DaphneController() = default;
 
 private:
+
+  using ChannelId = uint8_t;
+  
   // Commands DaphneController can receive
-
-  // TO daphnemodules DEVELOPERS: PLEASE DELETE THIS FOLLOWING COMMENT AFTER READING IT
-  // For any run control command it is possible for a DAQModule to
-  // register an action that will be executed upon reception of the
-  // command. do_conf is a very common example of this; in
-  // DaphneController.cpp you would implement do_conf so that members of
-  // DaphneController get assigned values from a configuration passed as 
-  // an argument and originating from the CCM system.
-  // To see an example of this value assignment, look at the implementation of 
-  // do_conf in DaphneController.cpp
-
   void do_conf(const data_t&);
+  void dump_buffers(const data_t&);
+  
+  // specific actions
+  void create_interface( const std::string & ip ) ;
+  void validate_configuration(const daphnecontroller::Conf &);   
+  void configure_timing_endpoints();
+  void configure_analog_chain();
+  void align_DDR();
+  void configure_trigger_mode();
 
-  int m_some_configured_value { std::numeric_limits<int>::max() }; // Intentionally-ridiculous value pre-configuration
+  bool channel_used( ChannelId id ) const {
+    return m_channel_confs[id].offset > 0;
+  }
+  
+  std::unique_ptr<DaphneInterface> m_interface;
+  std::mutex m_mutex;  // mutex for interface
 
-  // TO daphnemodules DEVELOPERS: PLEASE DELETE THIS FOLLOWING COMMENT AFTER READING IT 
-  // m_total_amount and m_amount_since_last_get_info_call are examples
-  // of variables whose values get reported to OpMon
-  // (https://github.com/mozilla/opmon) each time get_info() is
-  // called. "amount" represents a (discrete) value which changes as DaphneController
-  // runs and whose value we'd like to keep track of during running;
-  // obviously you'd want to replace this "in real life"
+  uint8_t  m_slot;
+  uint16_t m_bias_ctrl;
+  uint16_t m_self_threshold;
+  
+  static const ChannelId s_max_channels = 40;
+  std::array<daphnecontroller::ChannelConf, s_max_channels> m_channel_confs;
+  // this array is indexed in the [0-40) range
 
-  std::atomic<int64_t> m_total_amount {0};
-  std::atomic<int>     m_amount_since_last_get_info_call {0};
+  struct AFEConf {
+    uint16_t v_gain = 0;  // 12 bit register
+    uint16_t v_bias = 0;  // 12 bit register
+    uint8_t  reg4   = 0;  // 4  bit register
+    uint16_t reg51 = 0;   // 14 bit register
+    uint16_t reg52 = 0;   // 16 bit register
+  };
+  
+  static const ChannelId s_max_afes = 5;
+  std::array<AFEConf, s_max_afes> m_afe_confs;
+  // mapping from the channels to the AFE
+  // 0-7 -> AFE 0,  8-15 -> AFE 1, 16-23 -> AFE 2, 24-31 -> AFE 3, 32-39 -> AFE 4 
+
+  std::vector<ChannelId> m_full_stream_channels;
+  
+  static const uint16_t s_frame_alignment_good = 0x3f80;
+
+  
 };
 
 } // namespace dunedaq::daphnemodules

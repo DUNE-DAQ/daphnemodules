@@ -1,8 +1,16 @@
 // This is the configuration schema for daphnemodules
 
 local moo = import "moo.jsonnet";
-local sdc = import "daqconf/confgen.jsonnet";
-local daqconf = moo.oschema.hier(sdc).dunedaq.daqconf.confgen;
+local nc = moo.oschema.numeric_constraints;
+
+local stypes = import "daqconf/types.jsonnet";
+local types = moo.oschema.hier(stypes).dunedaq.daqconf.types;
+
+local sboot = import "daqconf/bootgen.jsonnet";
+local bootgen = moo.oschema.hier(sboot).dunedaq.daqconf.bootgen;
+
+local sdaphne = import "daphnemodules/daphnecontroller.jsonnet";
+local daphneconf = moo.oschema.hier(sdaphne).dunedaq.daphnemodules.daphnecontroller;
 
 local ns = "dunedaq.daphnemodules.confgen";
 local s = moo.oschema.schema(ns);
@@ -19,16 +27,32 @@ local cs = {
     string:   s.string(  "String",   		   doc="A string"),   
     monitoring_dest: s.enum(     "MonitoringDest", ["local", "cern", "pocket"]),
 
-    daphnemodules: s.record("daphnemodules", [
-        s.field( "some_configured_value", self.int4, default=31415, doc="A value which configures the DaphneController DAQModule instance"),
-        s.field( "num_daphnecontrollers", self.int4, default=1, doc="A value which configures the number of instances of DaphneController"),
+    slotlist : s.sequence( "slotlist", self.uint4, doc="list of slots" ),
+
+    daphne_input: s.record("DaphneInput", [
+        s.field( "slots", self.slotlist, default=[4,5,7,9,11,12,13],
+		 doc="List of the daphne to use, identified by slot"),
+	s.field( "biasctrl", self.uint4, default = 4095,
+		 doc = "Biasctr to be used for all boards"),
+	s.field( "afe_gain", self.uint4, default = 2667,
+		 doc = "Gain to be used for all afes across the boards" ),
+	s.field( "channel_gain", self.uint4, default = 2,
+		 doc = "Gain to be used for all channels across the boards" ),
+	s.field( "channel_offset", self.uint4, default = 1468,
+		 doc = "Offset to be used for all channels across the boards" ),
+	s.field( "adc", daphneconf.ADCConf, default = daphneconf.ADCConf,
+		 doc = "Commond ADC configuration for all the AFEs across the boards" ),
+	s.field( "pga", daphneconf.PGAConf, default = daphneconf.PGAConf,
+		 doc = "Commond PGA configuration for all the AFEs across the boards" ),
+	s.field( "lna", daphneconf.LNAConf, default = daphneconf.LNAConf,
+		 doc = "Commond LNA configuration for all the AFEs across the boards" ),
     ]),
 
-    daphnemodules_gen: s.record("daphnemodules_gen", [
-        s.field("boot", daqconf.boot, default=daqconf.boot, doc="Boot parameters"),
-        s.field("daphnemodules", self.daphnemodules, default=self.daphnemodules, doc="daphnemodules parameters"),
+    daphne_gen: s.record("daphne_gen", [
+        s.field("boot", bootgen.boot, default=bootgen.boot, doc="Boot parameters"),
+        s.field("daphne", self.daphne_input, default=self.daphne_input, doc="daphnemodules Conf parameters"),
     ]),
 };
 
 // Output a topologically sorted array.
-sdc + moo.oschema.sort_select(cs, ns)
+sboot + sdaphne + moo.oschema.sort_select(cs, ns)
