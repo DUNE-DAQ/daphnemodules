@@ -1,14 +1,6 @@
 
-
-# This is a skeleton CMakeLists.txt file, auto-generated on
-# Tue Feb 20 17:12:47 CET 2024.  The developer(s) of this package should delete
-# this comment as well as adding dependent targets, packages,
-# etc. specific to the package. For details on how to write a package,
-# please see
-# https://dune-daq-sw.readthedocs.io/en/latest/packages/daq-cmake/
-
 cmake_minimum_required(VERSION 3.12)
-project(daphnemodules VERSION 0.0.0)
+project(daphnemodules VERSION 1.0.0)
 
 find_package(daq-cmake REQUIRED)
 
