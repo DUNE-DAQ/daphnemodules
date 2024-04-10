@@ -89,9 +89,16 @@ def cli(config,
 
     write_json_files(app_command_datas, system_command_datas, json_dir, verbose=True)
 
+    from daphnemodules.dump_buffer_command_gen import generate_daphne_rc_cmds
+    directory = daphne_block.dump_buffers_directory
+    n_samples = daphne_block.dump_buffers_n_samples
+    console.log(f"{directory}, {n_samples}")
+    generate_daphne_rc_cmds(directory, n_samples, "daphneapp", json_dir)
+    
     console.log(f"daphnemodules app config generated in {json_dir}")
 
     write_metadata_file(json_dir, "daphnemodules_gen", config_file)
+
 
 if __name__ == "__main__":
     try:
