@@ -92,7 +92,7 @@ def cli(config,
     from daphnemodules.dump_buffer_command_gen import generate_daphne_rc_cmds
     directory = daphne_block.dump_buffers_directory
     n_samples = daphne_block.dump_buffers_n_samples
-    console.log(f"{directory}, {n_samples}")
+    console.log(f"dump_buffer command generated and will dump in the {directory} directory, dumping {n_samples} n_samples")
     generate_daphne_rc_cmds(directory, n_samples, "daphneapp", json_dir)
     
     console.log(f"daphnemodules app config generated in {json_dir}")
