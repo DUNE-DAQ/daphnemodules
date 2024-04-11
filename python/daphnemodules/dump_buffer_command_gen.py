@@ -34,7 +34,7 @@ def generate_daphne_rc_cmds(
 
     for c,d in cmds:
         cfg = {        "modules": [
-            {"data": {"directory": directory,"n_samples": n_samples},"match": ""}]
+            {"data": {"directory": directory,"n_samples": n_samples},"match": ""}], "entry_state":"CONFIGURED", "exit_state":"CONFIGURED" 
         }
         with open(f"{data_dir}/{app_name}_{c}.json", 'w') as f:
             json.dump(cfg, f, indent=4, sort_keys=True)
