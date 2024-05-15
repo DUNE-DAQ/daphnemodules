@@ -12,7 +12,7 @@ local types = {
     double8 :  s.number(  "double8", "f8",          doc="A double of 8 bytes"),
     boolean:   s.boolean( "Boolean",                doc="A boolean"),
     string:    s.string(  "String",   		    doc="A string"),
-    daphne_id: s.number(  "DaphneId", "u4"          doc="An ID assigned to the daphne module, it is also the slot of the daphe in the crate"),   
+    daphne_id: s.number(  "DaphneId", "u4",         doc="An ID assigned to the daphne module, it is also the slot of the daphe in the crate"),   
     channel_id: s.number( "ChannelId", "u4",        doc="ChannelID in the [0-40) range, [0,5) for the AFE"),   
 
     gain_entry: s.record("GainEntry", [
@@ -45,42 +45,6 @@ local types = {
 					   s.field("trims",   self.trim_map,   doc="trims"),
 	                                   ], doc = "Channel infos" ),
 
-
-    adc_conf : s.record( "ADCConf", [
-                                 s.field( "resolution",    self.boolean, false, doc="true=12bit, false=14bit"),
-                                 s.field( "output_format", self.boolean, true, 
-                                          doc="true=Offset Binary, false=2s complement"),
-                                 s.field( "SB_first",          self.boolean, true, 
-                                          doc="Which Significant bit comes first, true=MSB, false=LSB" ),
-                                 ], doc="info to generate Reg4 value" ),
-
-    pga_conf : s.record( "PGAConf", [
-                                  s.field( "lpf_cut_frequency", self.uint4, 0,
-				           doc="cut frequency, only 4 values acceptable. 0=15MHz, 2=20MHz, 3=30MHz, 4=10MHz"),
-                                  s.field( "integrator_disable", self.boolean, true,
-				           doc="true=disabled, false=enabled" ),
-                                  s.field( "gain",       self.boolean, false, doc="true=30 dB, false=24 dB"),
-                                 ], doc="info to generate Reg51 value" ),
-
-    lna_conf : s.record( "LNAConf", [
-                                   s.field( "clamp", self.uint4, 0,
-				            doc="0=auto setting, 1=1.5 Vpp, 2=1.15 Vpp, 3=0.6 Vpp"),
-                                   s.field( "integrator_disable", self.boolean, true,
-				            doc="true=disabled, false=enabled"),
-                                   s.field( "gain", self.uint4, 2,
-				            doc="0=18 dB, 1=24 dB, 2=12 dB"),
-                                   ], doc="info to generate Reg52 value" ),
-
-    afe : s.record( "AFE", [
-                           s.field( "id", self.channel_id, doc = "id of the configuration"),
-                           s.field( "v_gain", self.uint4, 0, doc = "Value for V gain of the AFE, 12 bit register" ),
-                           s.field( "v_bias", self.uint4, 0, doc = "Value for V gain of the AFE, 12 bit register" ),
-                           s.field( "adc",    self.adc_conf, doc="configuration for the ADC"),
-                           s.field( "pga",    self.pga_conf, doc="configuration for the PGA"),
-                           s.field( "lna",    self.lna_conf, doc="configuration for the LNA"),
-                           ] , doc = "Configurations coupled with its ID, ID in [0,5) range" ),
-
-    afes : s.sequence( "AFEs", self.afe, doc="configuration for all AFEs" ),
  
     channel_list : s.sequence( "ChannelList", self.channel_id, doc="List of channels"),
 
@@ -96,3 +60,4 @@ local types = {
 };
 
 moo.oschema.sort_select(types, ns)
+
