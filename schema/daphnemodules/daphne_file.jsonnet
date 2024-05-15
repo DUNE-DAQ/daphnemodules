@@ -12,7 +12,7 @@ local types = {
     double8 :  s.number(  "double8", "f8",          doc="A double of 8 bytes"),
     boolean:   s.boolean( "Boolean",                doc="A boolean"),
     string:    s.string(  "String",   		    doc="A string"),
-    daphne_id: s.number(  "DaphneId, "u4"           doc="An ID assigned to the daphne moduel, it is also the slot of the daphe in the crate"),   
+    daphne_id: s.number(  "DaphneId", "u4"          doc="An ID assigned to the daphne module, it is also the slot of the daphe in the crate"),   
     channel_id: s.number( "ChannelId", "u4",        doc="ChannelID in the [0-40) range, [0,5) for the AFE"),   
 
     gain_entry: s.record("GainEntry", [
