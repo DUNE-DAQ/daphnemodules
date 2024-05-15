@@ -13,21 +13,38 @@ local types = {
     boolean:   s.boolean( "Boolean",                doc="A boolean"),
     string:    s.string(  "String",   		    doc="A string"),
     daphne_id: s.number(  "DaphneId, "u4"           doc="An ID assigned to the daphne moduel, it is also the slot of the daphe in the crate"),   
-    channel_id: s.number( "ChannelId", "u4",        doc="ChannelID in the [0-40) range"),   
+    channel_id: s.number( "ChannelId", "u4",        doc="ChannelID in the [0-40) range, [0,5) for the AFE"),   
 
+    gain_entry: s.record("GainEntry", [
+    		                      s.field("channel", self.channel_id),
+				      s.field("gain",   self.uint4),
+				      ], 
+				      doc="Specification for a single channel gain entry"),
+
+    gain_map: s.sequence("Gains", self.gain_entry, doc="Specification for channel gains"),
+    
+    offset_entry: s.record("OffsetEntry", [
+    		                          s.field("channel", self.channel_id),
+					  s.field("offset",  self.uint4),
+				      ], 
+				      doc="Specification for a single channel offset entry"),
+
+    offset_map: s.sequence("Offsets", self.offset_entry, doc="Specification for channel offsets"),
+
+    trim_entry: s.record("TrimEntry", [
+    		                      s.field("channel", self.channel_id),
+				      s.field("trim",    self.uint4),
+				      ], 
+				      doc="Specification for a single channel trim entry"),
+
+    trim_map: s.sequence("Trim", self.trim_entry, doc="Specification for channel trim"),
+    
     channel_conf : s.record("ChannelConf", [
-				           s.field("gain",   self.uint4, 1, doc="Gain"),
-       	                                   s.field("offset", self.uint4, 0, doc="Pedestal of the channel"),
-					   s.field("trim",   self.uint4, 0, doc="trim value for the channel"),
-	                                   ], doc = "Channel info" ),
+				           s.field("gains",   self.gain_map,   doc="Gains"),
+       	                                   s.field("offsets", self.offset_map, doc="Pedestals"),
+					   s.field("trims",   self.trim_map,   doc="trims"),
+	                                   ], doc = "Channel infos" ),
 
-    channel : s.record("Channel", [
- 	                          s.field( "id",   self.channel_id, 1000, doc = "id of the properties"),
-                                  s.field( "conf", self.channel_conf, doc = "Properties of the specific channel"),
-                 	          ], doc = "Configuration coupled with its ID" ),
-
-    channels : s.sequence( "Channels", self.channel,
-                           doc = "Configuration for all channels" ),
 
     adc_conf : s.record( "ADCConf", [
                                  s.field( "resolution",    self.boolean, false, doc="true=12bit, false=14bit"),
@@ -67,28 +84,15 @@ local types = {
  
     channel_list : s.sequence( "ChannelList", self.channel_id, doc="List of channels"),
 
-    conf: s.record("Conf", [
-                           s.field("daphne_address", self.ipaddress,
-                                   doc="addresses of the daphne connection point"),
-                           s.field("biasctrl", self.uint4,
-                                   doc="V Bias Control"),
-                           s.field("channels", self.channels,
-                                   doc = "Configuration for all the channels") ,
-                           s.field("afes", self.afes,
-                                   doc = "Configuration for all AFEs" ),
-			   s.field("self_trigger_threshold", self.uint4, 0,
-			           doc="Configuration for full stream case" ),
-			   s.field("full_stream_channels", self.channel_list,
-                                   doc="List of channel to be streamed in full stream mode, max 16 channels. Used only if threshold is 0")	   
-                           ],
-                           doc="Configuration for a Daphne board"),
+    daphne: s.record( "Daphne", [
+				s.field("slot", self.daphne_id, doc="slot used to identify the daphne"),
+				s.field("afes", s.any, doc="Block to overrired afe properties"),
+				s.field("channels", self.channel_conf, doc="Block to define the channel properties"),
+				s.field("self_trigger_threshold", self.uint4, doc="Configuration for full stream case" ),
+				s.field("full_stream_channels", self.channel_list,
+                                   doc="List of channel to be streamed in full stream mode, max 16 channels. Used only if threshold is 0"), 
+                                ], doc="Block to configure a single daphne" ),
 
-    dump_buffers : s.record("DumpBuffers", [
-                                           s.field("n_samples", self.uint4, 1024,
-					           doc="Number of samples to take, defaults to the maximum depth"),
-				           s.field("directory", self.string, "./",
-					           "Directory that contain the file"),
-				           ], doc = "Configuration of the dump buffers command"),
 };
 
 moo.oschema.sort_select(types, ns)
