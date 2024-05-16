@@ -13,9 +13,9 @@ local types = {
     boolean:  s.boolean( "Boolean",                doc="A boolean"),
     string:   s.string(  "String",   		   doc="A string"),
     
-    ipaddress:  s.string( "IPAddress",             doc="A string containing an IP Address"),   
-    channel_id: s.number( "ChannelId",    "u4",    doc="ChannelID in the [0-40) range, or AFE in the [0,5) range"),
-    slot:       s.number( "Slot",         "u4",    doc="Slot of a Daphne, used to identify the single daphne"),
+    ipaddress:    s.string("IPAddress",           doc="A string containing an IP Address"),   
+    channel_id:   s.number("ChannelId",   "u4",    doc="ChannelID in the [0-40) range, or AFE in the [0,5) range"),
+    slot:         s.number("Slot",        "u4",    doc="Slot of a Daphne, used to identify the single daphne"),
     channel_gain: s.number("ChannelGain", "u4",    doc="Type for the channel gain"),
     offset:       s.number("Offset",      "u4",    doc="Type for channel offset"),
     trim:         s.number("Trim",        "u4",    doc="Type for channel trim"),

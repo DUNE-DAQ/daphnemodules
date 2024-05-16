@@ -17,49 +17,48 @@ local types = {
     boolean:   s.boolean( "Boolean",                doc="A boolean"),
     string:    s.string(  "String",   		    doc="A string"),
 
-    
     gain_entry: s.record("GainEntry", [
-    		                      s.field("channel", sdaphne.channel_id),
-				      s.field("gain",    sdaphne.channel_gain),
+                                      s.field("channel", daphneconf.channel_id ),
+                                      s.field("gain",    daphneconf.channel_gain),
 				      ], 
 				      doc="Specification for a single channel gain entry"),
 
     gain_map: s.sequence("Gains", self.gain_entry, doc="Specification for channel gains"),
-    
-    offset_entry: s.record("OffsetEntry", [
-    		                          s.field("channel", sdaphne.channel_id),
-					  s.field("offset",  sdaphne.offset),
-				          ], 
-				          doc="Specification for a single channel offset entry"),
 
-    offset_map: s.sequence("Offsets", self.offset_entry, 
+    offset_entry: s.record("OffsetEntry", [
+    		                          s.field("channel", daphneconf.channel_id),
+                                          s.field("offset",  daphneconf.offset),
+                                          ],
+                                          doc="Specification for a single channel offset entry"),
+
+    offset_map: s.sequence("Offsets", self.offset_entry,                                                                                                   
                            doc="Specification for channel offsets"),
 
     trim_entry: s.record("TrimEntry", [
-    		                      s.field("channel", sdaphne.channel_id),
-				      s.field("trim",    sdaphne.trim),
-				      ], 
+                                      s.field("channel", daphneconf.channel_id),
+                                      s.field("trim",    daphneconf.trim),
+                                      ],
 				      doc="Specification for a single channel trim entry"),
 
     trim_map: s.sequence("Trim", self.trim_entry, doc="Specification for channel trim"),
-    
+
     channel_conf : s.record("ChannelConf", [
-				           s.field("gains",   self.gain_map,   doc="Gains"),
+                                           s.field("gains",   self.gain_map,   doc="Gains"),
                                            s.field("offsets", self.offset_map, doc="Pedestals"),
-		      		           s.field("trims",   self.trim_map,   doc="trims"),
-	                                   ], 
-					   doc = "Channel infos" ),
+                                           s.field("trims",   self.trim_map,   doc="trims"),
+                                           ],
+                                           doc = "Channel infos" ),
 
     daphne: s.record("Daphne", [
-			       s.field("slot",                   sdaphne.slot,      doc="slot used to identify the daphne"),
-			       s.field("channels",               self.channel_conf, doc="Block to define the channel properties"),
-			       s.field("afes",                   sdaphne.afes,      doc="Block to override daphne AFEs conf"),
-			       s.field("self_trigger_threshold", sdaphne.threshold, doc="Configuration for full stream case" ),
-			       s.field("full_stream_channels",   sdaphne.channel_list,
+                               s.field("slot",                   daphneconf.slot,         doc="slot used to identify the daphne"),
+                               s.field("channels",               self.channel_conf,       doc="Block to define the channel properties"),
+                               s.field("afes",                   daphneconf.afes,         doc="Block to override daphne AFEs conf"),
+                               s.field("self_trigger_threshold", daphneconf.threshold,    doc="Configuration for full stream case" ),
+                               s.field("full_stream_channels",   daphneconf.channel_list,
                                        doc="List of channel to be streamed in full stream mode, max 16 channels")
-                               ], 
+                               ],
                                doc="Block to configure a single daphne" ),
-
+			       
 };
 
 sdaphne + moo.oschema.sort_select(types, ns)
