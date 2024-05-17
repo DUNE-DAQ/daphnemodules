@@ -27,7 +27,7 @@ local cs = {
     string:   s.string(  "String",   		   doc="A string"),   
     monitoring_dest: s.enum(     "MonitoringDest", ["local", "cern", "pocket"]),
 
-    slotlist : s.sequence( "SlotList", sdaphne.slot, doc="list of slots" ),
+    slotlist : s.sequence( "SlotList", self.uint4, doc="list of slots" ),
 
     daphne_input: s.record("DaphneInput", [
         s.field( "slots", self.slotlist, default=[4,5,7,9,11,12,13],
@@ -36,7 +36,7 @@ local cs = {
 		 doc = "Biasctr to be used for all boards"),
 	s.field( "afe_gain", self.uint4, default = 2667,
 		 doc = "Gain to be used for all afes across the boards" ),
-	s.field( "channel_gain", sdaphne.channel_gain, default = 2,
+	s.field( "channel_gain", self.uint4, default = 2,
 		 doc = "Gain to be used for all channels across the boards" ),
 	s.field( "channel_offset", self.uint4, default = 1468,
 		 doc = "Offset to be used for all channels across the boards" ),

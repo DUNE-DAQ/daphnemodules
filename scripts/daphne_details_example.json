@@ -19,7 +19,7 @@
 			"adc" : {
 			    "resolution" : false,
 			    "output_format" : true,
-			    "SB_first" : false,
+			    "SB_first" : false
 			},
 			"pga" : {
 			    "lpf_cut_frequnecy" : 0,

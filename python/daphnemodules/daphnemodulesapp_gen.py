@@ -31,7 +31,7 @@ def get_daphnemodules_app(
                           adc : daphnecontroller.ADCConf,
                           pga : daphnecontroller.PGAConf,
                           lna : daphnecontroller.LNAConf,
-                          map_file = None,  ## for now
+                          map_file,  
                           nickname="daphne",
                           host="localhost"):
     """
@@ -40,12 +40,12 @@ def get_daphnemodules_app(
     The map file, will profvide details to override whatever comes from the inputs
     """
 
-    file = open(map_file)
-    data = json.load(file)
-
     daphnes = {}
-    for c in data['details'] :
-        daphnes[c['id']] = c['conf']
+    if map_file :
+        file = open(map_file)
+        data = json.load(file)
+        for c in data['details'] :
+            daphnes[c['slot']] = c['conf']
     
     modules = []
 
@@ -82,18 +82,20 @@ def get_daphnemodules_app(
                         
         for ch in range(n_channels) :
             conf = None
-                        
+
+            gain = channel_gain     if ch not in ext_gains   else ext_gains[ch]
+            offset = channel_offset if ch not in ext_offsets else ext_offsets[ch]
             if ch in ext_trims :
                 conf = daphnecontroller.ChannelConf(
-                    gain = channel_gain if ch not in ext_gains else ext_gains[ch],
-                    offset = channel_offset if ch not in ext_offsets esle ext_offsets[ch]
+                    gain = gain,
+                    offset = offset, 
                     trim = ext_trims[ch] )
             else :
                 conf = daphnecontroller.ChannelConf(
-                    gain = channel_gain if ch not in ext_gains else ext_gains[ch],
-                    offset = channel_offset if ch not in ext_offsets esle ext_offsets[ch] )
-            channels.append( daphnecontroller.Channel(
-                id = ch, conf = conf ) ) 
+                    gain = gain, 
+                    offset = offset )
+
+            channels.append( daphnecontroller.Channel( id = ch, conf = conf ) ) 
             
         conf = daphnecontroller.Conf(
             daphne_address=ip,

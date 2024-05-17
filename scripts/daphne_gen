@@ -27,6 +27,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 def cli(config,
         host,
+        daphne_file,
         json_dir):
 
     if os.path.exists(json_dir):
