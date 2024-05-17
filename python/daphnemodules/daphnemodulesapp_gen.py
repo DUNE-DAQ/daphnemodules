@@ -71,13 +71,14 @@ def get_daphnemodules_app(
         ext_gains = {}
         ext_offsets = {}
         ext_trims = {}
-        ext_channels = ext_conf['channels']
-        for g in ext_channels['gains'] :
-            ext_gains[g['channel']] = g['gain']
-        for o in ext_channels['offsets'] :
-            ext_offsets[o['channel']=o['offset']
-        for t in ext_channels['trims'] :
-            ext_trims[t['channel']]=t['trim']
+        if  ext_conf :
+            ext_channels = ext_conf['channels']
+            for g in ext_channels['gains'] :
+                ext_gains[g['channel']] = g['gain']
+            for o in ext_channels['offsets'] :
+                ext_offsets[o['channel']]=o['offset']
+            for t in ext_channels['trims'] :
+                ext_trims[t['channel']]=t['trim']
                         
         for ch in range(n_channels) :
             conf = None
