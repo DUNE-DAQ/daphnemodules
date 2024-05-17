@@ -15,6 +15,8 @@ import dunedaq.daphnemodules.daphnecontroller as daphnecontroller
 from daqconf.core.app import App, ModuleGraph
 from daqconf.core.daqmodule import DAQModule
 
+import json
+
 ip_base = "10.73.137."
 n_afe = 5
 n_channels = 40
@@ -34,11 +36,23 @@ def get_daphnemodules_app(
                           host="localhost"):
     """
     Here the configuration for an entire daq_application instance using DAQModules from daphnemodules is generated.
+
+    The map file, will profvide details to override whatever comes from the inputs
     """
 
+    file = open(map_file)
+    data = json.load(file)
+
+    daphnes = {}
+    for c in data['details'] :
+        daphnes[c['id']] = c['conf']
+    
     modules = []
 
     for s in slots:
+
+        ext_conf = None
+        if s in daphnes : ext_conf = daphnes[s]
         
         ip = ip_base + str(100+s)
 
@@ -54,15 +68,31 @@ def get_daphnemodules_app(
             ) )
 
         channels=[]
+        ext_gains = {}
+        ext_offsets = {}
+        ext_trims = {}
+        ext_channels = ext_conf['channels']
+        for g in ext_channels['gains'] :
+            ext_gains[g['channel']] = g['gain']
+        for o in ext_channels['offsets'] :
+            ext_offsets[o['channel']=o['offset']
+        for t in ext_channels['trims'] :
+            ext_trims[t['channel']]=t['trim']
+                        
         for ch in range(n_channels) :
-            channels.append( daphnecontroller.Channel(
-                id = ch,
+            conf = None
+                        
+            if ch in ext_trims :
                 conf = daphnecontroller.ChannelConf(
-                    gain = channel_gain,
-                    offset = channel_offset
-                    # trim from the map
-                )
-            ) )
+                    gain = channel_gain if ch not in ext_gains else ext_gains[ch],
+                    offset = channel_offset if ch not in ext_offsets esle ext_offsets[ch]
+                    trim = ext_trims[ch] )
+            else :
+                conf = daphnecontroller.ChannelConf(
+                    gain = channel_gain if ch not in ext_gains else ext_gains[ch],
+                    offset = channel_offset if ch not in ext_offsets esle ext_offsets[ch] )
+            channels.append( daphnecontroller.Channel(
+                id = ch, conf = conf ) ) 
             
         conf = daphnecontroller.Conf(
             daphne_address=ip,

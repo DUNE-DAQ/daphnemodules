@@ -17,6 +17,28 @@ import dunedaq.daphnemodules.daphnecontroller as daphnectrl
 import dunedaq.daphnemodules.daphne_file      as daphne_file
 
 import json
+import pathlib
 
 
+class 
 
+class DapheFile :
+    """Daphne - Detail  File"""
+    def __init__(self) :
+        self._map = {}
+
+    def load(self, map_ath : str) -> None :
+
+        map_fp = pathlib.Path(map_path)
+        
+        # Opening JSON file
+        with open(map_fp) as f:
+        
+            # returns JSON object as 
+            # a dictionary
+            data = json.load(f)
+
+        self._validate_json(data)
+        
+
+        

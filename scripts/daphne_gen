@@ -22,6 +22,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 @click.command(context_settings=CONTEXT_SETTINGS)
 @generate_cli_from_schema('daphnemodules/confgen.jsonnet', 'daphne_gen')
 @click.option("--host", type=str, default='np04-srv-015', help="host of the Daphne application")
+@click.option('-f', '--daphne-file', type=click.Path(exists=True), default=None, help="daphne json with detailed configuration")
 @click.argument('json_dir', type=click.Path())
 
 def cli(config,
@@ -69,7 +70,8 @@ def cli(config,
         channel_offset = daphne_block.channel_offset,
         adc = daphne_block.adc,
         pga = daphne_block.pga,
-        lna = daphne_block.lna
+        lna = daphne_block.lna,
+        map_file = daphne_file
     )
 
     ####################################################################                                  
