@@ -21,6 +21,16 @@ ip_base = "10.73.137."
 n_afe = 5
 n_channels = 40
 
+def unpack( j : dict, block : str )  -> dict :
+    ret = {}
+    if not j :
+        return ret
+
+    for e in j[block] :
+        ret[e['id']]=e['value']
+
+    return ret
+
 
 def get_daphnemodules_app(
                           slots : tuple,
@@ -44,8 +54,7 @@ def get_daphnemodules_app(
     if map_file :
         file = open(map_file)
         data = json.load(file)
-        for c in data['details'] :
-            daphnes[c['slot']] = c['conf']
+        daphnes = unpack(data, 'details')
     
     modules = []
 
@@ -68,17 +77,11 @@ def get_daphnemodules_app(
             ) )
 
         channels=[]
-        ext_gains = {}
-        ext_offsets = {}
-        ext_trims = {}
-        if  ext_conf :
-            ext_channels = ext_conf['channels']
-            for g in ext_channels['gains'] :
-                ext_gains[g['channel']] = g['gain']
-            for o in ext_channels['offsets'] :
-                ext_offsets[o['channel']]=o['offset']
-            for t in ext_channels['trims'] :
-                ext_trims[t['channel']]=t['trim']
+        if ext_conf :
+            channel_block = ext_conf['channels']
+            ext_gains = unpack(channel_block, 'gains')
+            ext_offsets = unpack(channel_block, 'offsets')
+            ext_trims =   unpack(channel_block, 'trims')
                         
         for ch in range(n_channels) :
             conf = None
@@ -102,8 +105,8 @@ def get_daphnemodules_app(
             biasctrl=biasctrl,
             afes = afes,
             channels = channels,
-            self_trigger_threshold = 0,  ## from the map
-            full_stream_channels = []  ## from the map
+            self_trigger_threshold = 0 if not ext_conf else ext_conf['self_trigger_threshold'],
+            full_stream_channels = []  if not ext_conf else ext_conf['full_stream_channels'] 
         )
 
         modules += [DAQModule(name = f"controller_{s}", 
@@ -116,3 +119,5 @@ def get_daphnemodules_app(
     daphnemodules_app = App(modulegraph = mgraph, host = host, name = nickname)
 
     return daphnemodules_app
+
+
