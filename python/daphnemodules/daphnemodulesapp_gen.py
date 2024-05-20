@@ -31,6 +31,12 @@ def unpack( j : dict, block : str )  -> dict :
 
     return ret
 
+def to_adc( j : dict ) -> daphnecontroller.ADCConf :
+
+def to_pga( j : dict ) -> daphnecontroller.PGAConf :
+
+def to_lna( j : dict ) -> daphnecontroller.LNAConf :
+    
 
 def get_daphnemodules_app(
                           slots : tuple,
@@ -66,11 +72,16 @@ def get_daphnemodules_app(
         ip = ip_base + str(100+s)
 
         afes = []
+        if ext_conf :
+            afe_block = ext_conf['afes']
+            ext_afe_gains = unpack(afe_block, 'v_gains')
+            ext_biases    = unpack(afe_block, 'v_biases')
+            
         for afe in range(n_afe) :
             afes.append( daphnecontroller.AFE(
                 id=afe,
-                v_gain=afe_gain,
-                v_bias = 0, # or from the map_file
+                v_gain=afe_gain if afe not int ext_afe_gains else ext_afe_gains[afe],
+                v_bias = 0      if afe not int ext_biases    else ext_biases[afe],
                 adc = adc,
                 pga = pga,
                 lna = lna

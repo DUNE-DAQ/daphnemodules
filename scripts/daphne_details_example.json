@@ -11,25 +11,30 @@
 		    "offsets": [ {"id" : 3, "value" : 54}],
 		    "trims" : [ {"id" : 4, "value" : 87}]
 		},
-		"afes" :  [
+		"afes" : {
+		    "v_gains" : [ {"id": 3, "value" : 54 } ],
+		    "v_biases" : [ {"id": 2, "value" : 21 } ],
+		},
+		
+		[
 		    {
 			"id" : 2,
-			"v_gain" : 54,
-			"v_bias" : 234,
-			"adc" : {
-			    "resolution" : false,
-			    "output_format" : true,
-			    "SB_first" : false
-			},
-			"pga" : {
-			    "lpf_cut_frequnecy" : 0,
-			    "integrator_disable" : false,
-			    "gain" : true
-			},
-			"lna" : {
-			    "clamp" : 3,
-			    "integrator_disable" : true,
-			    "gain" : 2
+			"value" : {
+			    "adc" : {
+				"resolution" : false,
+				"output_format" : true,
+				"SB_first" : false
+			    },
+			    "pga" : {
+				"lpf_cut_frequnecy" : 0,
+				"integrator_disable" : false,
+				"gain" : true
+			    },
+			    "lna" : {
+				"clamp" : 3,
+				"integrator_disable" : true,
+				"gain" : 2
+			    }
 			}
 		    }
 		]
