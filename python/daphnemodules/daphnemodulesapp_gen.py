@@ -32,11 +32,26 @@ def unpack( j : dict, block : str )  -> dict :
     return ret
 
 def to_adc( j : dict ) -> daphnecontroller.ADCConf :
+    ret = daphnecontroller.ADCConf(
+        resolution    = j['resolution'],
+        output_formal = j['output_format'],
+        SB_first      = j['SB_first '])
+    return ret
+        
 
 def to_pga( j : dict ) -> daphnecontroller.PGAConf :
+    ret = daphnecontroller.PGAConf(
+        lpf_cut_frequency  = j['lpf_cut_frequnecy'],
+        integrator_disable = j['integrator_disable'],
+        gain               = j['gain'] )
+    return ret
 
 def to_lna( j : dict ) -> daphnecontroller.LNAConf :
-    
+    ret = daphnecontroller.LNAConf(
+        clamp              = j['clamp'],
+        integrator_disable = j['integrator_disable'],
+        gain               = j['gain'] )
+    return ret
 
 def get_daphnemodules_app(
                           slots : tuple,
@@ -76,15 +91,18 @@ def get_daphnemodules_app(
             afe_block = ext_conf['afes']
             ext_afe_gains = unpack(afe_block, 'v_gains')
             ext_biases    = unpack(afe_block, 'v_biases')
+            ext_adcs      = unpack(afe_block, 'adcs')
+            ext_pgas      = unpack(afe_block, 'pgas')
+            ext_lnas      = unpack(afe_block, 'lnas')
             
         for afe in range(n_afe) :
             afes.append( daphnecontroller.AFE(
                 id=afe,
-                v_gain=afe_gain if afe not int ext_afe_gains else ext_afe_gains[afe],
-                v_bias = 0      if afe not int ext_biases    else ext_biases[afe],
-                adc = adc,
-                pga = pga,
-                lna = lna
+                v_gain=afe_gain if afe not in ext_afe_gains else ext_afe_gains[afe],
+                v_bias = 0      if afe not in ext_biases    else ext_biases[afe],
+                adc = adc       if afe not in ext_adcs      else to_adc(ext_adcs[afe]),
+                pga = pga       if afe not in ext_pgas      else to_pga(ext_pgas[afe]),
+                lna = lna       if afe not in ext_lnas      else to_lan(ext_lnas[afe])
             ) )
 
         channels=[]

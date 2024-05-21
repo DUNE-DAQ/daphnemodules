@@ -14,30 +14,22 @@
 		"afes" : {
 		    "v_gains" : [ {"id": 3, "value" : 54 } ],
 		    "v_biases" : [ {"id": 2, "value" : 21 } ],
-		},
-		
-		[
-		    {
-			"id" : 2,
-			"value" : {
-			    "adc" : {
-				"resolution" : false,
-				"output_format" : true,
-				"SB_first" : false
-			    },
-			    "pga" : {
-				"lpf_cut_frequnecy" : 0,
-				"integrator_disable" : false,
-				"gain" : true
-			    },
-			    "lna" : {
-				"clamp" : 3,
-				"integrator_disable" : true,
-				"gain" : 2
-			    }
-			}
-		    }
-		]
+		    "adcs" : [ {"id" : 1, "value" : {
+			 "resolution" : false,
+                        "output_format" : true,
+                        "SB_first" : false
+		    } } ],
+		    "pgas" : [ { "id" : 4, "value" : {
+			"lpf_cut_frequnecy" : 0,
+                        "integrator_disable" : false,
+                        "gain" : true
+		    }} ],
+		    "lnas" : [ { "id":0, "value" : {
+			"clamp" : 3,
+                        "integrator_disable" : true,
+                        "gain" : 2
+		    }}]		    
+		}
 	    }
 	}
     ]
