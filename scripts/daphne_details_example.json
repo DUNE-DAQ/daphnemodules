@@ -1,0 +1,36 @@
+{
+    "details" :
+    [
+	{
+	    "id" : 13,
+	    "value" : {
+		"self_trigger_threshold" : 10,
+		"full_stream_channels" : [ 1, 3, 39 ],
+		"channels" : {
+		    "gains" : [ {"id" : 2, "value" : 1}],
+		    "offsets": [ {"id" : 3, "value" : 54}],
+		    "trims" : [ {"id" : 4, "value" : 87}]
+		},
+		"afes" : {
+		    "v_gains" : [ {"id": 3, "value" : 54 } ],
+		    "v_biases" : [ {"id": 2, "value" : 21 } ],
+		    "adcs" : [ {"id" : 1, "value" : {
+			 "resolution" : false,
+                        "output_format" : true,
+                        "SB_first" : false
+		    } } ],
+		    "pgas" : [ { "id" : 4, "value" : {
+			"lpf_cut_frequnecy" : 0,
+                        "integrator_disable" : false,
+                        "gain" : true
+		    }} ],
+		    "lnas" : [ { "id":0, "value" : {
+			"clamp" : 3,
+                        "integrator_disable" : true,
+                        "gain" : 2
+		    }}]		    
+		}
+	    }
+	}
+    ]
+}
