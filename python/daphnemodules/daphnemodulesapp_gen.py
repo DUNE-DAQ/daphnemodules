@@ -34,8 +34,8 @@ def unpack( j : dict, block : str )  -> dict :
 def to_adc( j : dict ) -> daphnecontroller.ADCConf :
     ret = daphnecontroller.ADCConf(
         resolution    = j['resolution'],
-        output_formal = j['output_format'],
-        SB_first      = j['SB_first '])
+        output_format = j['output_format'],
+        SB_first      = j['SB_first'])
     return ret
         
 
@@ -102,7 +102,7 @@ def get_daphnemodules_app(
                 v_bias = 0      if afe not in ext_biases    else ext_biases[afe],
                 adc = adc       if afe not in ext_adcs      else to_adc(ext_adcs[afe]),
                 pga = pga       if afe not in ext_pgas      else to_pga(ext_pgas[afe]),
-                lna = lna       if afe not in ext_lnas      else to_lan(ext_lnas[afe])
+                lna = lna       if afe not in ext_lnas      else to_lna(ext_lnas[afe])
             ) )
 
         channels=[]
