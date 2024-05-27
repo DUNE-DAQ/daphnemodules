@@ -6,6 +6,6 @@
       "ers_impl": "local"
   },
     "daphne":  {
-	"slots": [13,4]
+	"slots": [13]
     }
 }
