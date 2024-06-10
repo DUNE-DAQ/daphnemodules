@@ -27,7 +27,7 @@ local cs = {
     string:   s.string(  "String",   		   doc="A string"),   
     monitoring_dest: s.enum(     "MonitoringDest", ["local", "cern", "pocket"]),
 
-    slotlist : s.sequence( "slotlist", self.uint4, doc="list of slots" ),
+    slotlist : s.sequence( "SlotList", self.uint4, doc="list of slots" ),
 
     daphne_input: s.record("DaphneInput", [
         s.field( "slots", self.slotlist, default=[4,5,7,9,11,12,13],
@@ -46,14 +46,14 @@ local cs = {
 		 doc = "Commond PGA configuration for all the AFEs across the boards" ),
 	s.field( "lna", daphneconf.LNAConf, default = daphneconf.LNAConf,
 		 doc = "Commond LNA configuration for all the AFEs across the boards" ),
-    s.field("dump_buffers_directory", self.string, default = "./" ,
-         doc ="Where the dump_buffer command will write the spy buffer"),
-    s.field("dump_buffers_n_samples", self.uint8, default = 1024,
-         doc="How many samples to dump")
+        s.field( "dump_buffers_directory", self.string, default = "./" ,
+                 doc ="Where the dump_buffer command will write the spy buffer"),
+        s.field( "dump_buffers_n_samples", self.uint8, default = 1024,
+                 doc="How many samples to dump")
     ]),
 
     daphne_gen: s.record("daphne_gen", [
-        s.field("boot", bootgen.boot, default=bootgen.boot, doc="Boot parameters"),
+        s.field("boot",   bootgen.boot,      default=bootgen.boot,      doc="Boot parameters"),
         s.field("daphne", self.daphne_input, default=self.daphne_input, doc="daphnemodules Conf parameters"),
     ]),
 };
