@@ -29,7 +29,7 @@ namespace dunedaq {
                      "Board in slot " << slot
 		     << ": response from board was not parsed correctly for "
 		     << counter << " times. Last Rseponse: " << response,
-                     ((uint8_t)slot)((uint16_t)counter)((std::string)response)
+                     ((uint16_t)slot)((uint16_t)counter)((std::string)response)
                    )
 
   ERS_DECLARE_ISSUE( daphnemodules,
@@ -41,19 +41,19 @@ namespace dunedaq {
   ERS_DECLARE_ISSUE( daphnemodules,
 		     InvalidSlot,
                      "Invalid slot " << slot << " obtained from IP " << ip,
-		     ((uint8_t)slot) ((std::string)ip)
+		     ((uint16_t)slot) ((std::string)ip)
 		   )
 
   ERS_DECLARE_ISSUE( daphnemodules,
 		     PLLNotLocked,
                      "Board in slot " << slot << ": " << mm << " not locked",
-		     ((uint8_t)slot)((std::string)mm)
+		     ((uint16_t)slot)((std::string)mm)
 		   )
 
   ERS_DECLARE_ISSUE( daphnemodules,
 		     TimingEndpointNotReady,
                      "Board in slot " << slot << ": timing endpoint not ready, full status: " << status,
-		     ((uint8_t)slot)((std::string)status)
+		     ((uint16_t)slot)((std::string)status)
 		   )
 
   ERS_DECLARE_ISSUE( daphnemodules,
@@ -116,7 +116,7 @@ namespace dunedaq {
   ERS_DECLARE_ISSUE( daphnemodules,
 		     DDRNotAligned,
                      "board in slot " << slot << ": AFE " << afe << " DDR not aligned, check value: " << check,
-		     ((uint8_t)slot)((uint16_t)afe)((uint64_t)check)
+		     ((uint16_t)slot)((uint16_t)afe)((uint64_t)check)
 		   )
   
 }
