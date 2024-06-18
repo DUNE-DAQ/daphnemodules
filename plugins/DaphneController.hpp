@@ -145,13 +145,14 @@ private:
   
   // Commands DaphneController can receive
   void do_conf(const data_t&);
+  void do_scrap(const data_t&);
   void dump_buffers(const data_t&);
   
   // specific actions
   void create_interface( const std::string & ip ) ;
   void validate_configuration(const daphnecontroller::Conf &);   
   void configure_timing_endpoints();
-  void configure_analog_chain();
+  void configure_analog_chain(bool intial_config);
   void align_DDR();
   void configure_trigger_mode();
 
