@@ -26,8 +26,10 @@
 namespace dunedaq {
   ERS_DECLARE_ISSUE( daphnemodules,
                      WrongMonitoringString,
-                     "Board in slot " << slot << ": response from board was not parsed correctly",
-                     ((uint8_t)slot)((std::string)string)
+                     "Board in slot " << slot
+		     << ": response from board was not parsed correctly for "
+		     << counter << " times. Last Rseponse: " << response,
+                     ((uint8_t)slot)((uint16_t)counter)((std::string)response)
                    )
 
   ERS_DECLARE_ISSUE( daphnemodules,
@@ -185,6 +187,8 @@ private:
   
   static const uint16_t s_frame_alignment_good = 0x3f80;
 
+  uint16_t m_error_counter = 0;
+  // counter use to see how many times we failed the parsing of the monitoing
   
 };
 

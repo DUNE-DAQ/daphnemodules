@@ -53,10 +53,16 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
   std::smatch string_values; 
 						 
   if ( ! std::regex_match( cmd_res.result, string_values, volt_regex ) ) {
-    ers::error( WrongMonitoringString(ERS_HERE, m_slot, cmd_res.result) );
+    ++m_error_counter;
+    if ( m_error_counter >= 50 ) {
+      ers::error( WrongMonitoringString(ERS_HERE, m_slot, m_error_counter, cmd_res.result) );
+    }
     return ;
   }
-    
+
+  //reset the error counter
+  m_error_counter = 0;
+  
   daphnecontrollerinfo::VoltageInfo v_info;
 
   std::vector<double> values(string_values.size());
