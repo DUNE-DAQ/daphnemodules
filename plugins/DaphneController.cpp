@@ -54,8 +54,10 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
 						 
   if ( ! std::regex_match( cmd_res.result, string_values, volt_regex ) ) {
     ++m_error_counter;
+    WrongMonitoringString temp_error(ERS_HERE, m_slot, m_error_counter, cmd_res.result);
+    TLOG() << temp_error;
     if ( m_error_counter >= 50 ) {
-      ers::error( WrongMonitoringString(ERS_HERE, m_slot, m_error_counter, cmd_res.result) );
+      ers::error( temp_error );
     }
     return ;
   }
