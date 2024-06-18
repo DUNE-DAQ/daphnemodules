@@ -164,7 +164,7 @@ DaphneController::do_conf(const data_t& conf_as_json)
 
 
 void
-DaphneController::do_scrap(const data_t& conf_as_json)
+DaphneController::do_scrap(const data_t&)
 {
   auto start_time = std::chrono::high_resolution_clock::now();
   
