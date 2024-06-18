@@ -57,8 +57,13 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
     ++m_error_counter;
     WrongMonitoringString temp_error(ERS_HERE, m_slot, m_error_counter, cmd_res.result);
     TLOG() << temp_error;
-    if ( m_error_counter >= 50 ) {
+    if ( m_error_counter >= 5 ) {
+      ers::warning( temp_error );
+      return;
+    }
+    if ( m_error_counter >= 10 ) {
       ers::error( temp_error );
+      return;
     }
     return ;
   }
