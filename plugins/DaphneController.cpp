@@ -32,6 +32,7 @@ DaphneController::DaphneController(const std::string& name)
   : dunedaq::appfwk::DAQModule(name)
 {
   register_command("conf", &DaphneController::do_conf);
+  register_command("scrap", &DaphneController::do_scrap);
   register_command("dump_buffers", &DaphneController::dump_buffers);
 }
 
@@ -53,10 +54,23 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
   std::smatch string_values; 
 						 
   if ( ! std::regex_match( cmd_res.result, string_values, volt_regex ) ) {
-    ers::error( WrongMonitoringString(ERS_HERE, m_slot, cmd_res.result) );
+    ++m_error_counter;
+    WrongMonitoringString temp_error(ERS_HERE, m_slot, m_error_counter, cmd_res.result);
+    TLOG() << temp_error;
+    if ( m_error_counter >= 10 ) {
+      ers::error( temp_error );
+      return;
+    }
+    if ( m_error_counter >= 5 ) {
+      ers::warning( temp_error );
+      return;
+    }
     return ;
   }
-    
+
+  //reset the error counter
+  m_error_counter = 0;
+  
   daphnecontrollerinfo::VoltageInfo v_info;
 
   std::vector<double> values(string_values.size());
@@ -131,7 +145,7 @@ DaphneController::do_conf(const data_t& conf_as_json)
   
   configure_timing_endpoints();
   
-  configure_analog_chain();
+  configure_analog_chain(true);
   
   align_DDR();
   
@@ -153,6 +167,39 @@ DaphneController::do_conf(const data_t& conf_as_json)
   
 }
 
+
+void
+DaphneController::do_scrap(const data_t&)
+{
+  auto start_time = std::chrono::high_resolution_clock::now();
+  
+  // during configuration no other operations are allowed
+  const std::lock_guard<std::mutex> lock(m_mutex);
+
+  // we want to write 0 in all the bias variables an all the trims
+  m_bias_ctrl = 0;
+  for ( auto & c : m_afe_confs ) {
+    c.v_bias = 0;
+  }
+  for ( auto & c : m_channel_confs ) {
+    c.trim = 0;
+  }
+
+  configure_analog_chain(false);
+
+  // break the interface
+  m_interface.release();
+
+  m_full_stream_channels.clear();
+  
+  auto end_time = std::chrono::high_resolution_clock::now();
+
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+  TLOG() << get_name() << ": board releasd in " << duration.count() << " microseconds";
+  
+}
+
+  
 
 void
 DaphneController::create_interface(const std::string & ip) {
@@ -400,14 +447,16 @@ DaphneController::configure_timing_endpoints() {
 
 }
 
-void DaphneController::configure_analog_chain() {
+void DaphneController::configure_analog_chain(bool initial_config) {
 
   TLOG() << get_name() << ": configuring analog chain";
-  
-  auto result = m_interface->send_command("CFG AFE ALL INITIAL");
-  TLOG() << result.command << " -> " << result.result;
 
-  result = m_interface->send_command("WR VBIASCTRL V " + std::to_string(m_bias_ctrl));
+  if ( initial_config) {
+    auto result = m_interface->send_command("CFG AFE ALL INITIAL");
+    TLOG() << result.command << " -> " << result.result;
+  }
+
+  auto result = m_interface->send_command("WR VBIASCTRL V " + std::to_string(m_bias_ctrl));
   TLOG() << result.command << " -> " << result.result;
   
   for ( size_t ch = 0; ch < m_channel_confs.size() ; ++ch ) {

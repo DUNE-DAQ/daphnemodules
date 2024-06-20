@@ -26,8 +26,10 @@
 namespace dunedaq {
   ERS_DECLARE_ISSUE( daphnemodules,
                      WrongMonitoringString,
-                     "Board in slot " << slot << ": response from board was not parsed correctly",
-                     ((uint8_t)slot)((std::string)string)
+                     "Board in slot " << slot
+		     << ": response from board was not parsed correctly for "
+		     << counter << " times. Last Rseponse: " << response,
+                     ((uint16_t)slot)((uint16_t)counter)((std::string)response)
                    )
 
   ERS_DECLARE_ISSUE( daphnemodules,
@@ -39,19 +41,19 @@ namespace dunedaq {
   ERS_DECLARE_ISSUE( daphnemodules,
 		     InvalidSlot,
                      "Invalid slot " << slot << " obtained from IP " << ip,
-		     ((uint8_t)slot) ((std::string)ip)
+		     ((uint16_t)slot) ((std::string)ip)
 		   )
 
   ERS_DECLARE_ISSUE( daphnemodules,
 		     PLLNotLocked,
                      "Board in slot " << slot << ": " << mm << " not locked",
-		     ((uint8_t)slot)((std::string)mm)
+		     ((uint16_t)slot)((std::string)mm)
 		   )
 
   ERS_DECLARE_ISSUE( daphnemodules,
 		     TimingEndpointNotReady,
                      "Board in slot " << slot << ": timing endpoint not ready, full status: " << status,
-		     ((uint8_t)slot)((std::string)status)
+		     ((uint16_t)slot)((std::string)status)
 		   )
 
   ERS_DECLARE_ISSUE( daphnemodules,
@@ -114,7 +116,7 @@ namespace dunedaq {
   ERS_DECLARE_ISSUE( daphnemodules,
 		     DDRNotAligned,
                      "board in slot " << slot << ": AFE " << afe << " DDR not aligned, check value: " << check,
-		     ((uint8_t)slot)((uint16_t)afe)((uint64_t)check)
+		     ((uint16_t)slot)((uint16_t)afe)((uint64_t)check)
 		   )
   
 }
@@ -143,13 +145,14 @@ private:
   
   // Commands DaphneController can receive
   void do_conf(const data_t&);
+  void do_scrap(const data_t&);
   void dump_buffers(const data_t&);
   
   // specific actions
   void create_interface( const std::string & ip ) ;
   void validate_configuration(const daphnecontroller::Conf &);   
   void configure_timing_endpoints();
-  void configure_analog_chain();
+  void configure_analog_chain(bool intial_config);
   void align_DDR();
   void configure_trigger_mode();
 
@@ -185,6 +188,8 @@ private:
   
   static const uint16_t s_frame_alignment_good = 0x3f80;
 
+  uint16_t m_error_counter = 0;
+  // counter use to see how many times we failed the parsing of the monitoing
   
 };
 
