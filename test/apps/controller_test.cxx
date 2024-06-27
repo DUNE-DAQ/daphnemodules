@@ -9,7 +9,7 @@ main()
 {
   TLOG() << "Creating Module instances...";
   std::shared_ptr<DAQModule> instdaphnecontroller = make_module("DaphneController", "dummy");
-  instdaphnecontroller->init(nlohmann::json{});
+  instdaphnecontroller->init(nullptr);
   dunedaq::daphnemodules::daphnecontroller::Conf c;
 
   c.daphne_address = "10.73.137.113";

@@ -128,7 +128,7 @@ class DaphneController : public dunedaq::appfwk::DAQModule
 public:
   explicit DaphneController(const std::string& name);
 
-  void init(const data_t&) override {;}
+  void init(std::shared_ptr<appfwk::ModuleConfiguration>) override {;}
 
   void get_info(opmonlib::InfoCollector&, int /*level*/) override;
 
