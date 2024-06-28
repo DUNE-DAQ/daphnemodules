@@ -38,6 +38,7 @@ daq_add_plugin(DaphneController duneDAQModule LINK_LIBRARIES daphnemodules)
 # See https://dune-daq-sw.readthedocs.io/en/latest/packages/daq-cmake/#daq_add_unit_test
 
 daq_add_unit_test(DaphneInterface_test LINK_LIBRARIES daphnemodules) 
+#daq_add_unit_test(OKSClasses_test      LINK_LIBRARIES daphnemodules) 
 
 ##############################################################################
 daq_add_application(daphne_controller_test controller_test.cxx TEST LINK_LIBRARIES daphnemodules)
