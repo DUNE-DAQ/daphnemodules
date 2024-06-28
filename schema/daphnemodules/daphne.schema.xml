@@ -80,12 +80,15 @@
 
 <oks-schema>
 
-<info name="" type="" num-of-items="2" oks-format="schema" oks-version="862f2957270" created-by="jcfree" created-on="mu2edaq13.fnal.gov" creation-time="20230123T223700" last-modified-by="maroda" last-modified-on="np04-srv-015.cern.ch" last-modification-time="20240628T143546"/>
+<info name="" type="" num-of-items="2" oks-format="schema" oks-version="862f2957270" created-by="jcfree" created-on="mu2edaq13.fnal.gov" creation-time="20230123T223700" last-modified-by="maroda" last-modified-on="np04-srv-015.cern.ch" last-modification-time="20240628T151108"/>
 
  <class name="ADC">
   <attribute name="resolution" description="true=12bit, false=14bit" type="bool" init-value="false" is-not-null="yes"/>
   <attribute name="output_format" description="true=Offset Binary, false=2s complement" type="bool" init-value="true" is-not-null="yes"/>
   <attribute name="SB_first" description="Which Significant bit comes first, true=MSB, false=LSB" type="bool" init-value="true" is-not-null="yes"/>
+  <method name="get_reg4" description="Extract ADC info to generate the register 4 to pass to the Daphne for configuration">
+   <method-implementation language="c++" prototype="auto get_reg4() const " body="BEGIN_HEADER_PROLOGUE&#xA;#include &lt;bitset&gt;&#xA;END_HEADER_PROLOGUE&#xA;&#xA;std::bitset&lt;5&gt; reg4;&#xA;&#xA;// bits 0 and 2 are reserved&#xA;reg4[1] = get_resolution();&#xA;reg4[3] = get_output_format();&#xA;reg4[4] = get_SB_first();&#xA;&#xA;return (uint8_t) reg4.to_ulong();"/>
+  </method>
  </class>
 
  <class name="Channel">
