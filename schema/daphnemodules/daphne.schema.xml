@@ -80,7 +80,7 @@
 
 <oks-schema>
 
-<info name="" type="" num-of-items="2" oks-format="schema" oks-version="862f2957270" created-by="jcfree" created-on="mu2edaq13.fnal.gov" creation-time="20230123T223700" last-modified-by="maroda" last-modified-on="np04-srv-015.cern.ch" last-modification-time="20240628T151108"/>
+<info name="" type="" num-of-items="3" oks-format="schema" oks-version="862f2957270" created-by="jcfree" created-on="mu2edaq13.fnal.gov" creation-time="20230123T223700" last-modified-by="maroda" last-modified-on="np04-srv-015.cern.ch" last-modification-time="20240628T153333"/>
 
  <class name="ADC">
   <attribute name="resolution" description="true=12bit, false=14bit" type="bool" init-value="false" is-not-null="yes"/>
@@ -97,6 +97,18 @@
   <attribute name="gain" description="Gain of the channel, can only be 1 or 2." type="u8" range="1..2" init-value="1" is-not-null="yes"/>
   <method name="is_valid" description="Checks if the gain and the offset are compatible with each other">
    <method-implementation language="C++" prototype="bool is_valid() const" body="if ( get_gain() == 1 ) {&#xA;  return ( get_offset() &lt;= 2700);&#xA;} else if ( get_gain() == 2 ) {&#xA;  return ( get_offset() &lt;= 1500 );&#xA;}&#xA;return false;"/>
+  </method>
+ </class>
+
+ <class name="PGA">
+  <attribute name="lpf_cut_frequency" description="cut frequency, only 4 values acceptable. 0=15MHz, 2=20MHz, 3=30MHz, 4=10MHz" type="u8" init-value="0" is-not-null="yes"/>
+  <attribute name="integrator_disable" description="true=disabled, false=enabled" type="bool" init-value="true" is-not-null="yes"/>
+  <attribute name="gain" description="doc=&quot;true=30 dB, false=24 dB" type="bool" init-value="false" is-not-null="yes"/>
+  <method name="is_valid" description="Check if the cut frquency is set to the only 4 possible acceptable values">
+   <method-implementation language="c++" prototype="bool is_valid() const" body="auto cut = get_lpf_cut_frequency();&#xA;if (cut != 0 &amp;&amp; cut != 2 &amp;&amp; cut != 4 ) return false;&#xA;return true;&#xA;"/>
+  </method>
+  <method name="get_reg51" description="Generate the register value to send to the daphne for configuration">
+   <method-implementation language="c++" prototype="auto get_reg51() const" body="BEGIN_HEADER_PROLOGUE&#xA;#include &lt;bitset&gt;&#xA;END_HEADER_PROLOGUE&#xA;&#xA;std::bitset&lt;14&gt; reg51(get_lpf_cut_frequency());&#xA;reg51 &lt;&lt;= 1;&#xA;reg51[4] = get_integrator_disable();&#xA;reg51[7] = true;  // clamp is always disabled and we are in low noise mode&#xA;reg51[13] = get_gain();&#xA;&#xA;return (uint16_t) reg51.to_ulong() ;"/>
   </method>
  </class>
 
