@@ -80,7 +80,7 @@
 
 <oks-schema>
 
-<info name="" type="" num-of-items="4" oks-format="schema" oks-version="862f2957270" created-by="jcfree" created-on="mu2edaq13.fnal.gov" creation-time="20230123T223700" last-modified-by="maroda" last-modified-on="np04-srv-015.cern.ch" last-modification-time="20240701T073151"/>
+<info name="" type="" num-of-items="4" oks-format="schema" oks-version="862f2957270" created-by="jcfree" created-on="mu2edaq13.fnal.gov" creation-time="20230123T223700" last-modified-by="maroda" last-modified-on="np04-srv-015.cern.ch" last-modification-time="20240701T090327"/>
 
  <class name="ADC">
   <attribute name="resolution" description="true=12bit, false=14bit" type="bool" init-value="false" is-not-null="yes"/>
@@ -102,10 +102,10 @@
 
  <class name="LNA">
   <attribute name="clamp" description="0=auto setting, 1=1.5 Vpp, 2=1.15 Vpp, 3=0.6 Vpp" type="u8" range="0..3" init-value="0" is-not-null="yes"/>
-  <attribute name="integrator_disapbel" description="true=disabled, false=enabled" type="bool" init-value="true" is-not-null="yes"/>
+  <attribute name="integrator_disable" description="true=disabled, false=enabled" type="bool" init-value="true" is-not-null="yes"/>
   <attribute name="gain" description="0=18 dB, 1=24 dB, 2=12 dB" type="u8" range="0..2" init-value="2" is-not-null="yes"/>
   <method name="get_reg52" description="Extract register 52 value">
-   <method-implementation language="c++" prototype="auto get_reg52() const" body="BEGIN_HEADER_PROLOGUE&#xA;#include &lt;bitset&gt;&#xA;END_HEADER_PROLOGUE&#xA;&#xA;std::bitset&lt;16&gt; reg52;&#xA;decltype(reg52) clamp(get_clamp());&#xA;clamp &lt;&lt;= 6;&#xA;&#xA;reg52[12] = get_integrator_disable();&#xA;&#xA;decltype(reg52) gain(get_gain());&#xA;clamp &lt;&lt;= 13;&#xA;&#xA;reg52 |= clamp;&#xA;reg52 |= gain;&#xA;&#xA;return (uint16_t) reg52.to_ulong() ;&#xA;&#xA;&#xA;&#xA;std::bitset&lt;14&gt; reg51(get_lpf_cut_frequency());&#xA;reg51 &lt;&lt;= 1;&#xA;reg51[4] = get_integrator_disable();&#xA;reg51[7] = true;  // clamp is always disabled and we are in low noise mode&#xA;reg51[13] = get_gain();&#xA;&#xA;return (uint16_t) reg51.to_ulong() ;"/>
+   <method-implementation language="c++" prototype="auto get_reg52() const" body="BEGIN_HEADER_PROLOGUE&#xA;#include &lt;bitset&gt;&#xA;END_HEADER_PROLOGUE&#xA;&#xA;std::bitset&lt;16&gt; reg52;&#xA;decltype(reg52) clamp(get_clamp());&#xA;clamp &lt;&lt;= 6;&#xA;&#xA;reg52[12] = get_integrator_disable();&#xA;&#xA;decltype(reg52) gain(get_gain());&#xA;clamp &lt;&lt;= 13;&#xA;&#xA;reg52 |= clamp;&#xA;reg52 |= gain;&#xA;&#xA;return (uint16_t) reg52.to_ulong() ;&#xA;&#xA;&#xA;&#xA;"/>
   </method>
  </class>
 
