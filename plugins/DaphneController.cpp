@@ -71,7 +71,7 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
   //reset the error counter
   m_error_counter = 0;
   
-  daphnecontrollerinfo::VoltageInfo v_info;
+  daphnecontrollerinfo::GeneralInfo v_info;
 
   std::vector<double> values(string_values.size());
 
