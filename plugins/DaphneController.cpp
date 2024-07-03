@@ -46,26 +46,27 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
   // read the channel counters
   constexpr uint64_t s_start_counter_buffer = 0x40800000;
   constexpr auto  s_packets_counter_address = s_start_counter_buffer + s_max_channels*8;
+  constexpr auto  s_tot_packets_counter_address = s_packets_counter_address + s_max_channels*8;
 
   // this lock is not completely necessary because of the internal locks in the interface
   // but it's a safety measure to make sure that this does not interfere with complex operations
   const std::lock_guard<std::mutex> lock(m_mutex);
 
-  auto trig_buf = m_interface->read_register(s_start_counter_buffer, s_max_channels);
-  auto pack_buf = m_interface->read_register(s_packets_counter_address, s_max_channels+1);  // we also read the total register
+  auto tot_pack_buf = m_interface->read_register(s_tot_packets_counter_address, 1);
 
-  v_info.total_packets = pack_buf[s_max_channels];
+  v_info.total_packets = tot_pack_buf[0];
   v_info.new_packets   = v_info.total_packets - m_last_package_counter.exchange(v_info.total_packets);
-
 
   for ( ChannelId c = 0; c < s_max_channels; ++c ) {
     daphnecontrollerinfo::ChannelInfo c_info;
 
-    auto trig = trig_buf[c];
+    auto trig_buf = m_interface->read_register(s_start_counter_buffer+c*8, 1);  
+    auto trig = trig_buf[0];
     c_info.total_triggers = trig;
     c_info.new_triggers   = trig - m_channel_counters[c].triggers.exchange(trig);
 
-    auto pack = pack_buf[c];
+    auto pack_buf = m_interface->read_register(s_packets_counter_address+c*8, 1);
+    auto pack = pack_buf[0];
     c_info.total_packets = pack;
     c_info.new_packets   = pack - m_channel_counters[c].packets.exchange(pack);
     
