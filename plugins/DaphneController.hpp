@@ -197,11 +197,11 @@ private:
   //monitoring
   using counter_t = decltype(daphnecontrollerinfo::ChannelInfo::total_triggers);
   struct Counters {
-    counter_t triggers = 0;
-    counter_t packages = 0;
+    std::atomic<counter_t> triggers = 0;
+    std::atomic<counter_t> packages = 0;
   };
   std::array<Counters, s_max_channels> m_channel_counters;
-  counter_t m_last_package_counter = 0;
+  std::atomic<counter_t> m_last_package_counter = 0;
   
 };
 
