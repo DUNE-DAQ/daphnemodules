@@ -9,6 +9,7 @@ daq_setup_environment()
 
 find_package(appfwk REQUIRED)
 find_package(opmonlib REQUIRED)
+find_package(fmt REQUIRED)
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
 ##############################################################################
@@ -24,7 +25,7 @@ daq_codegen(daphnecontrollerinfo.jsonnet DEP_PKGS opmonlib TEMPLATES opmonlib/In
 
 # See https://dune-daq-sw.readthedocs.io/en/latest/packages/daq-cmake/#daq_add_library
 
-daq_add_library( *.cpp LINK_LIBRARIES appfwk::appfwk) # Any source files and/or dependent libraries to link in not yet determined
+daq_add_library( *.cpp LINK_LIBRARIES appfwk::appfwk fmt::fmt) # Any source files and/or dependent libraries to link in not yet determined
 ##############################################################################
 
 

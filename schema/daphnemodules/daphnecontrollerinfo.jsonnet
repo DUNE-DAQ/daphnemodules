@@ -23,14 +23,14 @@ local info = {
        s.field("power_ce", self.double8, doc="Power(+CE)"),
        s.field("temperature", self.double8, doc="Temperature in degree celsious"),
        s.field("total_packets", self.uint8,  doc="Cumulative counters of sent packages to the felix"),
-       s.field("new_packets",   self.uint8,  doc="Incremental value of sent packages to the felix"),
+       s.field("new_packets",   self.uint8, 0,  doc="Incremental value of sent packages to the felix"),
     ], doc="monitoring of the Daphne"),
 
     channel_info : s.record("ChannelInfo", [
        s.field("total_triggers", self.uint8,  doc="Cumulative counters of self trigger windows"),
-       s.field("new_triggers",   self.uint8,  doc="Incremental value of the self trigger windows"),
+       s.field("new_triggers",   self.uint8, 0,  doc="Incremental value of the self trigger windows"),
        s.field("total_packets", self.uint8,  doc="Cumulative counters of packets from the FIFO"),
-       s.field("new_packets",   self.uint8,  doc="Incremental value of the packets from the FIFO"),
+       s.field("new_packets",   self.uint8, 0,  doc="Incremental value of the packets from the FIFO"),
     ], doc="monitoring of the Daphne channels")
 };
 

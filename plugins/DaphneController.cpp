@@ -25,6 +25,8 @@
 #include <bitset>
 #include <thread>
 #include <algorithm>
+#include <fmt/format.h>
+
 
 namespace dunedaq::daphnemodules {
 
@@ -53,27 +55,38 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
   const std::lock_guard<std::mutex> lock(m_mutex);
 
   auto tot_pack_buf = m_interface->read_register(s_tot_packets_counter_address, 1);
-
   v_info.total_packets = tot_pack_buf[0];
-  v_info.new_packets   = v_info.total_packets - m_last_package_counter.exchange(v_info.total_packets);
+  if ( m_last_package_counter.load() != 0 ) {
+    v_info.new_packets   = v_info.total_packets - m_last_package_counter.exchange(v_info.total_packets);
+  } else {
+    m_last_package_counter = v_info.total_packets;
+  }
 
   for ( ChannelId c = 0; c < s_max_channels; ++c ) {
     daphnecontrollerinfo::ChannelInfo c_info;
 
     auto trig_buf = m_interface->read_register(s_start_counter_buffer+c*8, 1);  
-    auto trig = trig_buf[0];
+    const auto & trig = trig_buf[0];
     c_info.total_triggers = trig;
-    c_info.new_triggers   = trig - m_channel_counters[c].triggers.exchange(trig);
+    if ( m_channel_counters[c].triggers.load() != 0 ) {
+      c_info.new_triggers   = trig - m_channel_counters[c].triggers.exchange(trig);
+    } else {
+      m_channel_counters[c].triggers = trig;
+    }
 
     auto pack_buf = m_interface->read_register(s_packets_counter_address+c*8, 1);
-    auto pack = pack_buf[0];
+    const auto & pack = pack_buf[0];
     c_info.total_packets = pack;
-    c_info.new_packets   = pack - m_channel_counters[c].packets.exchange(pack);
-    
+    if ( m_channel_counters[c].packets.load() != 0 ) {
+      c_info.new_packets   = pack - m_channel_counters[c].packets.exchange(pack);
+    } else {
+      m_channel_counters[c].packets = pack;
+    }
+	   
     opmonlib::InfoCollector tmp_ci;
     tmp_ci.add(c_info);
     
-    auto name = "ch_" + std::to_string(c);
+    auto name = fmt::format("ch_{:02}", c);
     ci.add(name, tmp_ci);
   }
 
