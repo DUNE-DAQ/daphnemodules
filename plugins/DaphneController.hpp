@@ -164,11 +164,11 @@ private:
   
   std::unique_ptr<DaphneInterface> m_interface;
   std::mutex m_mutex;  // mutex for interface
+  std::atomic<bool> m_scrap_called = false;
 
   uint8_t  m_slot;
   uint16_t m_bias_ctrl;
   uint16_t m_self_threshold;
-
   
   static const ChannelId s_max_channels = 40;
   std::array<daphnecontroller::ChannelConf, s_max_channels> m_channel_confs;

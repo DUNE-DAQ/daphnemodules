@@ -43,6 +43,8 @@ void
 DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
 {
 
+  if ( m_scrap_called.load() ) return;
+  
   daphnecontrollerinfo::GeneralInfo v_info;
   
   // read the channel counters
@@ -207,6 +209,7 @@ DaphneController::do_conf(const data_t& conf_as_json)
   // thing.write_reg(0x2000, {1234});         
   // 
 
+  m_scrap_called = false;
 
   auto end_time = std::chrono::high_resolution_clock::now();
 
@@ -220,6 +223,8 @@ void
 DaphneController::do_scrap(const data_t&)
 {
   auto start_time = std::chrono::high_resolution_clock::now();
+
+  m_scrap_called = true;
   
   // during configuration no other operations are allowed
   const std::lock_guard<std::mutex> lock(m_mutex);
