@@ -25,6 +25,8 @@
 #include <bitset>
 #include <thread>
 #include <algorithm>
+#include <fmt/format.h>
+
 
 namespace dunedaq::daphnemodules {
 
@@ -41,11 +43,58 @@ void
 DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
 {
 
-  static const std::regex volt_regex(".* VBIAS0= ([^ ]+) VBIAS1= ([^ ]+) VBIAS2= ([^ ]+) VBIAS3= ([^ ]+) VBIAS4= ([^ ]+) POWER.-5v.= ([^ ]+) POWER..2.5v.= ([^ ]+) POWER..CE.= ([^ ]+) TEMP.Celsius.= ([^ ]+) .*");
+  if ( m_scrap_called.load() ) return;
+  
+  daphnecontrollerinfo::GeneralInfo v_info;
+  
+  // read the channel counters
+  constexpr uint64_t s_start_counter_buffer = 0x40800000;
+  constexpr auto  s_packets_counter_address = s_start_counter_buffer + s_max_channels*8;
+  constexpr auto  s_tot_packets_counter_address = s_packets_counter_address + s_max_channels*8;
 
   // this lock is not completely necessary because of the internal locks in the interface
   // but it's a safety measure to make sure that this does not interfere with complex operations
   const std::lock_guard<std::mutex> lock(m_mutex);
+
+  auto tot_pack_buf = m_interface->read_register(s_tot_packets_counter_address, 1);
+  v_info.total_packets = tot_pack_buf[0];
+  if ( m_last_package_counter.load() != 0 ) {
+    v_info.new_packets   = v_info.total_packets - m_last_package_counter.exchange(v_info.total_packets);
+  } else {
+    m_last_package_counter = v_info.total_packets;
+  }
+
+  for ( ChannelId c = 0; c < s_max_channels; ++c ) {
+    daphnecontrollerinfo::ChannelInfo c_info;
+
+    auto trig_buf = m_interface->read_register(s_start_counter_buffer+c*8, 1);  
+    const auto & trig = trig_buf[0];
+    c_info.total_triggers = trig;
+    if ( m_channel_counters[c].triggers.load() != 0 ) {
+      c_info.new_triggers   = trig - m_channel_counters[c].triggers.exchange(trig);
+    } else {
+      m_channel_counters[c].triggers = trig;
+    }
+
+    auto pack_buf = m_interface->read_register(s_packets_counter_address+c*8, 1);
+    const auto & pack = pack_buf[0];
+    c_info.total_packets = pack;
+    if ( m_channel_counters[c].packets.load() != 0 ) {
+      c_info.new_packets   = pack - m_channel_counters[c].packets.exchange(pack);
+    } else {
+      m_channel_counters[c].packets = pack;
+    }
+	   
+    opmonlib::InfoCollector tmp_ci;
+    tmp_ci.add(c_info);
+    
+    auto name = fmt::format("ch_{:02}", c);
+    ci.add(name, tmp_ci);
+  }
+
+  // gatehring the rest of the information
+  static const std::regex volt_regex(".* VBIAS0= ([^ ]+) VBIAS1= ([^ ]+) VBIAS2= ([^ ]+) VBIAS3= ([^ ]+) VBIAS4= ([^ ]+) POWER.-5v.= ([^ ]+) POWER..2.5v.= ([^ ]+) POWER..CE.= ([^ ]+) TEMP.Celsius.= ([^ ]+) .*");
+
   
   if ( ! m_interface ) return ;
   
@@ -71,8 +120,6 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
   //reset the error counter
   m_error_counter = 0;
   
-  daphnecontrollerinfo::VoltageInfo v_info;
-
   std::vector<double> values(string_values.size());
 
   for ( size_t i = 1; i < string_values.size(); ++i ) {
@@ -95,9 +142,12 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
   v_info.power_ce = values[8];
   
   v_info.temperature = values[9];
+
   
   ci.add(v_info);
 
+  
+  
   // //current monitor
   // for ( size_t ch = 0; ch < m_channel_confs.size() ; ++ch ) {
   //   if ( m_channel_confs[ch].offset > 0 ) {
@@ -159,6 +209,7 @@ DaphneController::do_conf(const data_t& conf_as_json)
   // thing.write_reg(0x2000, {1234});         
   // 
 
+  m_scrap_called = false;
 
   auto end_time = std::chrono::high_resolution_clock::now();
 
@@ -172,6 +223,8 @@ void
 DaphneController::do_scrap(const data_t&)
 {
   auto start_time = std::chrono::high_resolution_clock::now();
+
+  m_scrap_called = true;
   
   // during configuration no other operations are allowed
   const std::lock_guard<std::mutex> lock(m_mutex);
@@ -524,6 +577,14 @@ void DaphneController::align_DDR() {
   m_interface->write_register(0x2001, {1234});
   // this is correct to be done 3 times
 
+  // wriring in regiester 0x2001 for 3 times resets every counter so we reset the counters on the Module side as well
+  // to aling with the board
+  for ( auto & c : m_channel_counters ) {
+    c.triggers = 0;
+    c.packets = 0;
+  }
+  m_last_package_counter = 0;
+  
   std::this_thread::sleep_for(std::chrono::milliseconds(5));
   // this is necessary to give time to the board to align the AFE DDR
   // Otherwise further checks become pointless

@@ -22,6 +22,8 @@
 #include "DaphneInterface.hpp"
 
 #include "daphnemodules/daphnecontroller/Structs.hpp"
+#include "daphnemodules/daphnecontrollerinfo/InfoStructs.hpp"
+
 
 namespace dunedaq {
   ERS_DECLARE_ISSUE( daphnemodules,
@@ -162,6 +164,7 @@ private:
   
   std::unique_ptr<DaphneInterface> m_interface;
   std::mutex m_mutex;  // mutex for interface
+  std::atomic<bool> m_scrap_called = false;
 
   uint8_t  m_slot;
   uint16_t m_bias_ctrl;
@@ -170,7 +173,7 @@ private:
   static const ChannelId s_max_channels = 40;
   std::array<daphnecontroller::ChannelConf, s_max_channels> m_channel_confs;
   // this array is indexed in the [0-40) range
-
+  
   struct AFEConf {
     uint16_t v_gain = 0;  // 12 bit register
     uint16_t v_bias = 0;  // 12 bit register
@@ -190,6 +193,15 @@ private:
 
   uint16_t m_error_counter = 0;
   // counter use to see how many times we failed the parsing of the monitoing
+
+  //monitoring
+  using counter_t = decltype(daphnecontrollerinfo::ChannelInfo::total_triggers);
+  struct Counters {
+    std::atomic<counter_t> triggers = 0;
+    std::atomic<counter_t> packets  = 0;
+  };
+  std::array<Counters, s_max_channels> m_channel_counters;
+  std::atomic<counter_t> m_last_package_counter = 0;
   
 };
 
