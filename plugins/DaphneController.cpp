@@ -189,9 +189,9 @@ DaphneController::do_conf(const data_t& conf_as_json)
   auto slot = conf_as_cpp.slot;
   if ( slot >= 16 ) {
     // the slot used laster in the code is a 4 bit register, so we need to check we are not overflowing
-    throw InvalidSlot(ERS_HERE, slot, ip);
+    throw InvalidSlot(ERS_HERE, slot, conf_as_cpp.daphne_address);
   } else {
-    m_slot = (decltype<m_slot>) slot;
+    m_slot = (decltype(m_slot)) slot;
   }
   
   // during configuration no other operations are allowed
