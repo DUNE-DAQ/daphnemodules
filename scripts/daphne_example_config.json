@@ -6,6 +6,6 @@
       "ers_impl": "local"
   },
     "daphne":  {
-	"slots": [13]
+	"daphnes": [{"slot": 13, "ip": "10.73.137.113"}]
     }
 }

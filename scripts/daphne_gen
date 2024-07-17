@@ -60,21 +60,36 @@ def cli(config,
     from daphnemodules import daphnemodulesapp_gen
 
     the_system = System()
+    
+    daphnes = {}
+    if daphne_file :
+        file = open(daphne_file)
+        data = json.load(file)
+        daphnes = daphnemodulesapp_gen.unpack(data, 'details')
 
-    the_system.apps["daphneapp"] = daphnemodulesapp_gen.get_daphnemodules_app(
-        host=host,
-        nickname = "controller",
-        slots = daphne_block.slots,
-        biasctrl = daphne_block.biasctrl,
-        afe_gain = daphne_block.afe_gain,
-        channel_gain = daphne_block.channel_gain,
-        channel_offset = daphne_block.channel_offset,
-        adc = daphne_block.adc,
-        pga = daphne_block.pga,
-        lna = daphne_block.lna,
-        map_file = daphne_file
-    )
+    for entry in daphne_block.daphnes :
+        slot = entry["slot"]
+        ip   = entry["ip"]
+        app_name = f"daphne-{slot}"
+        detail_block = None
+        if slot in daphnes : detail_block = daphnes[slot]
+        
+        the_system.apps[app_name] = daphnemodulesapp_gen.get_daphnemodules_app(
+            host=host,
+            nickname = f"controller_{slot}",
+            slot = slot,
+            ip = ip,
+            biasctrl = daphne_block.biasctrl,
+            afe_gain = daphne_block.afe_gain,
+            channel_gain = daphne_block.channel_gain,
+            channel_offset = daphne_block.channel_offset,
+            adc = daphne_block.adc,
+            pga = daphne_block.pga,
+            lna = daphne_block.lna,
+            details = detail_block
+        )
 
+ 
     ####################################################################                                  
     # Application command data generation                                                                 
     ####################################################################                                  
@@ -92,11 +107,11 @@ def cli(config,
 
     write_json_files(app_command_datas, system_command_datas, json_dir, verbose=True)
 
-    from daphnemodules.dump_buffer_command_gen import generate_daphne_rc_cmds
-    directory = daphne_block.dump_buffers_directory
-    n_samples = daphne_block.dump_buffers_n_samples
-    console.log(f"dump_buffer command generated and will dump in the {directory} directory, dumping {n_samples} n_samples")
-    generate_daphne_rc_cmds(directory, n_samples, "daphneapp", json_dir)
+#    from daphnemodules.dump_buffer_command_gen import generate_daphne_rc_cmds
+#    directory = daphne_block.dump_buffers_directory
+#    n_samples = daphne_block.dump_buffers_n_samples
+#    console.log(f"dump_buffer command generated and will dump in the {directory} directory, dumping {n_samples} n_samples")
+#    generate_daphne_rc_cmds(directory, n_samples, "daphneapp", json_dir)
     
     console.log(f"daphnemodules app config generated in {json_dir}")
 

@@ -53,8 +53,10 @@ def to_lna( j : dict ) -> daphnecontroller.LNAConf :
         gain               = j['gain'] )
     return ret
 
+
 def get_daphnemodules_app(
-                          slots : tuple,
+                          slot : int,
+                          ip : str,
                           biasctrl : int,
                           afe_gain : int,
                           channel_gain : int,
@@ -62,7 +64,7 @@ def get_daphnemodules_app(
                           adc : daphnecontroller.ADCConf,
                           pga : daphnecontroller.PGAConf,
                           lna : daphnecontroller.LNAConf,
-                          map_file,  
+                          details,  
                           nickname="daphne",
                           host="localhost"):
     """
@@ -71,78 +73,74 @@ def get_daphnemodules_app(
     The map file, will profvide details to override whatever comes from the inputs
     """
 
-    daphnes = {}
-    if map_file :
-        file = open(map_file)
-        data = json.load(file)
-        daphnes = unpack(data, 'details')
+    ext_conf = details
     
-    modules = []
+    afes = []
+    ext_afe_gains = []
+    ext_biases    = []
+    ext_adcs      = []
+    ext_pgas      = [] 
+    ext_lnas      = [] 
 
-    for s in slots:
-
-        ext_conf = None
-        if s in daphnes : ext_conf = daphnes[s]
+    if ext_conf :
+        afe_block = ext_conf['afes']
+        ext_afe_gains = unpack(afe_block, 'v_gains')
+        ext_biases    = unpack(afe_block, 'v_biases')
+        ext_adcs      = unpack(afe_block, 'adcs')
+        ext_pgas      = unpack(afe_block, 'pgas')
+        ext_lnas      = unpack(afe_block, 'lnas')
+            
+    for afe in range(n_afe) :
+        afes.append( daphnecontroller.AFE(
+            id=afe,
+            v_gain=afe_gain if afe not in ext_afe_gains else ext_afe_gains[afe],
+            v_bias = 0      if afe not in ext_biases    else ext_biases[afe],
+            adc = adc       if afe not in ext_adcs      else to_adc(ext_adcs[afe]),
+            pga = pga       if afe not in ext_pgas      else to_pga(ext_pgas[afe]),
+            lna = lna       if afe not in ext_lnas      else to_lna(ext_lnas[afe])
+        ) )
         
-        ip = ip_base + str(100+s)
-
-        afes = []
-        if ext_conf :
-            afe_block = ext_conf['afes']
-            ext_afe_gains = unpack(afe_block, 'v_gains')
-            ext_biases    = unpack(afe_block, 'v_biases')
-            ext_adcs      = unpack(afe_block, 'adcs')
-            ext_pgas      = unpack(afe_block, 'pgas')
-            ext_lnas      = unpack(afe_block, 'lnas')
-            
-        for afe in range(n_afe) :
-            afes.append( daphnecontroller.AFE(
-                id=afe,
-                v_gain=afe_gain if afe not in ext_afe_gains else ext_afe_gains[afe],
-                v_bias = 0      if afe not in ext_biases    else ext_biases[afe],
-                adc = adc       if afe not in ext_adcs      else to_adc(ext_adcs[afe]),
-                pga = pga       if afe not in ext_pgas      else to_pga(ext_pgas[afe]),
-                lna = lna       if afe not in ext_lnas      else to_lna(ext_lnas[afe])
-            ) )
-
-        channels=[]
-        if ext_conf :
-            channel_block = ext_conf['channels']
-            ext_gains = unpack(channel_block, 'gains')
-            ext_offsets = unpack(channel_block, 'offsets')
-            ext_trims =   unpack(channel_block, 'trims')
+    channels=[]
+    ext_gains = [] 
+    ext_offsets = []
+    ext_trims =   [] 
+    if ext_conf :
+        channel_block = ext_conf['channels']
+        ext_gains = unpack(channel_block, 'gains')
+        ext_offsets = unpack(channel_block, 'offsets')
+        ext_trims =   unpack(channel_block, 'trims')
                         
-        for ch in range(n_channels) :
-            conf = None
+    for ch in range(n_channels) :
+        conf = None
+        
+        gain = channel_gain     if ch not in ext_gains   else ext_gains[ch]
+        offset = channel_offset if ch not in ext_offsets else ext_offsets[ch]
+        if ch in ext_trims :
+            conf = daphnecontroller.ChannelConf(
+                gain = gain,
+                offset = offset, 
+                trim = ext_trims[ch] )
+        else :
+            conf = daphnecontroller.ChannelConf(
+                gain = gain, 
+                offset = offset )
 
-            gain = channel_gain     if ch not in ext_gains   else ext_gains[ch]
-            offset = channel_offset if ch not in ext_offsets else ext_offsets[ch]
-            if ch in ext_trims :
-                conf = daphnecontroller.ChannelConf(
-                    gain = gain,
-                    offset = offset, 
-                    trim = ext_trims[ch] )
-            else :
-                conf = daphnecontroller.ChannelConf(
-                    gain = gain, 
-                    offset = offset )
-
-            channels.append( daphnecontroller.Channel( id = ch, conf = conf ) ) 
+        channels.append( daphnecontroller.Channel( id = ch, conf = conf ) ) 
             
-        conf = daphnecontroller.Conf(
-            daphne_address=ip,
-            biasctrl=biasctrl,
-            afes = afes,
-            channels = channels,
-            self_trigger_threshold = 0 if not ext_conf else ext_conf['self_trigger_threshold'],
-            full_stream_channels = []  if not ext_conf else ext_conf['full_stream_channels'] 
-        )
+    conf = daphnecontroller.Conf(
+        daphne_address=ip,
+        slot=slot,
+        biasctrl=biasctrl,
+        afes = afes,
+        channels = channels,
+        self_trigger_threshold = 0 if not ext_conf else ext_conf['self_trigger_threshold'],
+        full_stream_channels = []  if not ext_conf else ext_conf['full_stream_channels'] 
+    )
 
-        modules += [DAQModule(name = f"controller_{s}", 
-                              plugin = "DaphneController", 
-                              conf = conf
-                              )
-                    ]
+    modules = [DAQModule(name = "controller", 
+                         plugin = "DaphneController", 
+                         conf = conf
+                         )]
 
     mgraph = ModuleGraph(modules)
     daphnemodules_app = App(modulegraph = mgraph, host = host, name = nickname)
