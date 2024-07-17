@@ -77,6 +77,8 @@ local types = {
     conf: s.record("Conf", [
                            s.field("daphne_address", self.ipaddress,
                                    doc="addresses of the daphne connection point"),
+                           s.field("slot", self.uint4,
+                                   doc="Slot of the board, also used to identify the board"),
                            s.field("biasctrl", self.uint4,
                                    doc="V Bias Control"),
                            s.field("channels", self.channels,

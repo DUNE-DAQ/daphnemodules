@@ -186,6 +186,14 @@ DaphneController::do_conf(const data_t& conf_as_json)
   
   auto conf_as_cpp = conf_as_json.get<daphnecontroller::Conf>();
 
+  auto slot = conf_as_cpp.slot;
+  if ( slot >= 16 ) {
+    // the slot used laster in the code is a 4 bit register, so we need to check we are not overflowing
+    throw InvalidSlot(ERS_HERE, slot, ip);
+  } else {
+    m_slot = (decltype<m_slot>) slot;
+  }
+  
   // during configuration no other operations are allowed
   const std::lock_guard<std::mutex> lock(m_mutex);
   
@@ -263,14 +271,6 @@ DaphneController::create_interface(const std::string & ip) {
   
   if ( ! std::regex_match( ip, matches, ip_regex) ) {
     throw InvalidIPAddress(ERS_HERE, ip);
-  }
-
-  auto last = std::stoi(matches[1]);
-  m_slot = last % 100;
-  if ( m_slot >= 16 ) {
-    // Set the slot to the last part of the IP addreess (from 104 to 113)
-    // the slot used laster in the code is a 4 bit register, so we need to check we are not overflowing
-    throw InvalidSlot(ERS_HERE, m_slot, ip);
   }
 
   TLOG() << get_name() << ": using daphne at " << ip << " with slot " << (int)m_slot; 
