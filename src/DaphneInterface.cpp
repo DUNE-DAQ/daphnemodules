@@ -49,13 +49,12 @@ bool DaphneInterface::validate_connection() const {
 }
 
 
-command_result DaphneInterface::send_command( std::string cmd ) const {
+command_result DaphneInterface::send_command( std::string cmd, std::chrono::milliseconds timeout,
+					      std::function<bool()> & can_retry ) const {
 
-  bool sent = false;
   do {
     try {
       auto ret = send_command(cmd, std::chrono::milliseconds(50) );
-      sent = true;
       return ret;
     }
     catch ( const CommandTimeout & e ) {
@@ -64,15 +63,14 @@ command_result DaphneInterface::send_command( std::string cmd ) const {
     catch ( const ers::Issue & e ) {
       throw FailedSocketInteraction(ERS_HERE, cmd, e);
     }
-			   
-  } while (! sent);
+    
+  } while (can_retry());
 
-  
 }
 
 
 
-command_result DaphneInterface::send_command( std::string cmd, std::chrono::milliseconds timeout ) const {
+command_result DaphneInterface::send_command( std::string cmd, std::chrono::milliseconds timeout) const {
 
   TLOG() << "Sending command " << cmd;
   std::vector<uint64_t> bytes;

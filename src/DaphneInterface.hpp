@@ -20,6 +20,8 @@
 #include <unistd.h>
 #include <memory>
 #include <mutex>
+#include <functional>
+
 
 #include <ers/ers.hpp>
 
@@ -92,10 +94,12 @@ namespace dunedaq::daphnemodules {
  
     bool validate_connection() const ;
 
-    command_result send_command( std::string cmd, std::chrono::milliseconds timeout ) const ;
-    command_result send_command( std::string cmd ) const ;
+    command_result send_command( std::string cmd, std::chrono::milliseconds timeout,
+				 std::function<bool()> & can_retry ) const ;
     
   protected:
+
+    command_result send_command( std::string cmd, std::chrono::milliseconds timeout) const;
     void close();
 
     void write( uint8_t command_id, uint64_t addr, std::vector<uint64_t> && data) const;
