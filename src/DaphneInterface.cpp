@@ -123,8 +123,14 @@ command_result DaphneInterface::send_command( std::string cmd, std::chrono::mill
 
     auto delay = std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time);
 
-    if ( delay > timeout )
+    if ( delay > timeout ) {
+      TLOG() << "Details of timeout";
+      for ( size_t i = 0; i < data_block.size(); ++i ) {
+	TLOG() << i << "\t" << std::hex << data_block[i] << std::dec;
+      }
+      TLOG() << res.result;
       throw CommandTimeout(ERS_HERE, cmd, delay.count());
+    }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
     --more;
