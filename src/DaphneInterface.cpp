@@ -48,6 +48,27 @@ bool DaphneInterface::validate_connection() const {
 
 command_result DaphneInterface::send_command( std::string cmd ) const {
 
+  bool sent = false;
+  do {
+    try {
+      return send_command(cmd, std::chrono::milliseconds(50) );
+    }
+    catch ( const CommandTimeout & e ) {
+      ers::warning( e );
+    }
+    catch ( const ers::Issue & e ) {
+      throw FailedSocketInteraction(ERS_HERE, cmd, e);
+    }
+			   
+  } while (! sent);
+
+  
+}
+
+
+
+command_result DaphneInterface::send_command( std::string cmd, std::chrono::milliseconds timeout ) const {
+
   TLOG() << "Sending command " << cmd;
   std::vector<uint64_t> bytes;
   for (char ch : cmd) {
@@ -65,10 +86,13 @@ command_result DaphneInterface::send_command( std::string cmd ) const {
   }
 
   TLOG() << "Command sent, waiting for result";
+
   
   command_result res;
   std::string * writing_pointer = nullptr;
 
+  auto start_time = std::chrono::high_resolution_clock::now();
+  
   int more = 40;
   while (more > 0) {
     auto data_block = read_buffer(0x90000000, 50);
@@ -95,6 +119,13 @@ command_result DaphneInterface::send_command( std::string cmd ) const {
 	}
       }
     }
+    auto now = std::chrono::high_resolution_clock::now();
+
+    auto delay = std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time);
+
+    if ( delay > timeout )
+      throw CommandTimeout(ERS_HERE, cmd, delay.count());
+
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
     --more;
   }

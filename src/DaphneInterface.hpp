@@ -48,7 +48,19 @@ namespace dunedaq {
 		     "Failed to call " << command,
 		     ((std::string)command)
 		   ) 
-  
+
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     CommandTimeout,
+		     "Command " << command << " timed out after " << ms << " ms",
+		     ((std::string)command)((unsigned int)ms)
+		   ) 
+
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     SocketTimeout,
+		     "Socket timed out after " << timeout_ms << " ms",
+		     ((unsigned int)timeout_ms)
+		   ) 
+ 
   } // dunedaq namespace
 
 
@@ -79,6 +91,7 @@ namespace dunedaq::daphnemodules {
  
     bool validate_connection() const ;
 
+    command_result send_command( std::string cmd, std::chrono::milliseconds timeout ) const ;
     command_result send_command( std::string cmd ) const ;
     
   protected:
