@@ -57,8 +57,8 @@ namespace dunedaq {
 
   ERS_DECLARE_ISSUE( daphnemodules,
 		     SocketTimeout,
-		     "Socket timed out after " << timeout_ms << " ms",
-		     ((unsigned int)timeout_ms)
+		     "Socket timed out after " << timeout_us << " microseconds",
+		     ((unsigned int)timeout_us)
 		   ) 
  
   } // dunedaq namespace
@@ -104,6 +104,7 @@ namespace dunedaq::daphnemodules {
   private:
     int m_connection_id = -1;
     sockaddr_in m_target;
+    std::chrono::microseconds m_socket_timeout{1000}; 
     mutable std::mutex m_access_mutex;
     mutable std::mutex m_command_mutex;
   }; 
