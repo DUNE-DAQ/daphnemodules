@@ -51,7 +51,9 @@ command_result DaphneInterface::send_command( std::string cmd ) const {
   bool sent = false;
   do {
     try {
-      return send_command(cmd, std::chrono::milliseconds(50) );
+      auto ret = send_command(cmd, std::chrono::milliseconds(50) );
+      sent = true;
+      return ret;
     }
     catch ( const CommandTimeout & e ) {
       ers::warning( e );
