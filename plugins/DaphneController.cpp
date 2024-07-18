@@ -197,7 +197,7 @@ DaphneController::do_conf(const data_t& conf_as_json)
   // during configuration no other operations are allowed
   const std::lock_guard<std::mutex> lock(m_mutex);
   
-  create_interface(conf_as_cpp.daphne_address);
+  create_interface(conf_as_cpp.daphne_address, conf_as_cpp.socket_timeout_us);
 
   validate_configuration(conf_as_cpp);
   
@@ -263,7 +263,7 @@ DaphneController::do_scrap(const data_t&)
   
 
 void
-DaphneController::create_interface(const std::string & ip) {
+DaphneController::create_interface(const std::string & ip, timeout_t us) {
 
   static std::regex ip_regex("[0-9]+.[0-9]+.[0-9]+.([0-9]+)");
   
@@ -275,7 +275,7 @@ DaphneController::create_interface(const std::string & ip) {
 
   TLOG() << get_name() << ": using daphne at " << ip << " with slot " << (int)m_slot; 
 
-  m_interface.reset( new  DaphneInterface( ip.c_str(), 2001) );
+  m_interface.reset( new  DaphneInterface( ip.c_str(), 2001, std::chrono::microseconds(us)) );
   
 }
 

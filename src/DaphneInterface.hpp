@@ -75,7 +75,8 @@ namespace dunedaq::daphnemodules {
   class DaphneInterface {
 
   public:
-    DaphneInterface( const char* ipaddr, int port );
+    DaphneInterface( const char* ipaddr, int port,
+		     std::chrono::microseconds timeout = std::chrono::microseconds(100) );
     ~DaphneInterface() { if(m_connection_id>0) close();}
 
     DaphneInterface(const DaphneInterface &) = delete;

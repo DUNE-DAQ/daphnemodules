@@ -12,10 +12,11 @@
 
 using namespace dunedaq::daphnemodules;
 
-DaphneInterface::DaphneInterface( const char* ipaddr, int port ) {
+DaphneInterface::DaphneInterface( const char* ipaddr, int port, std::chrono::microseconds timeout )
+  : m_socket_timeout(timeout) {
 
   m_connection_id = socket(AF_INET, SOCK_DGRAM, 0);
-
+  
   if ( m_connection_id < 0 )
     throw SocketCreationError(ERS_HERE);
   
@@ -132,7 +133,7 @@ command_result DaphneInterface::send_command( std::string cmd, std::chrono::mill
       for ( size_t i = 0; i < data_block.size(); ++i ) {
 	TLOG() << i << "\t" << std::hex << data_block[i] << std::dec;
       }
-      TLOG() << res.result;
+      TLOG() << "Received so far: " << res.result;
       throw CommandTimeout(ERS_HERE, cmd, delay.count());
     }
 
@@ -167,6 +168,8 @@ std::vector<uint64_t>  DaphneInterface::read(uint8_t command_id,
   FD_SET(m_connection_id, &masterfds);
   
   memcpy(&readfds, &masterfds, sizeof(fd_set));
+
+  auto start_time = std::chrono::high_resolution_clock::now();
   
   if (select(m_connection_id+1, &readfds, NULL, NULL, &timeout) < 0) {
     throw FailedSocketInteraction(ERS_HERE, "select") ;
@@ -199,7 +202,10 @@ std::vector<uint64_t>  DaphneInterface::read(uint8_t command_id,
   }
   else {
     // the socket timedout
-    throw SocketTimeout(ERS_HERE, m_socket_timeout.count() );
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+
+    throw SocketTimeout(ERS_HERE, duration.count() );
   }
   
   return ret_value;
@@ -214,7 +220,7 @@ void  DaphneInterface::write(uint8_t command_id, uint64_t addr, std::vector<uint
   cmd[0] = command_id;
   cmd[1] = data.size();
   memcpy(cmd + 2, &addr, sizeof(uint64_t));
-  for (int i = 0; i < data.size(); i++) {
+  for (size_t i = 0; i < data.size(); i++) {
     memcpy(cmd + 10 + (8 * i), &(data[i]), sizeof(uint64_t));
   }
 
