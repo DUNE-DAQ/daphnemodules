@@ -12,8 +12,11 @@
 
 using namespace dunedaq::daphnemodules;
 
-DaphneInterface::DaphneInterface( const char* ipaddr, int port, std::chrono::microseconds timeout )
-  : m_socket_timeout(timeout) {
+DaphneInterface::DaphneInterface( const char* ipaddr, int port,
+				  std::chrono::milliseconds cmd_timeout,
+				  std::chrono::microseconds sock_timeout )
+  : m_cmd_timeout(cmd_timeout)
+  , m_socket_timeout(sock_timeout) {
 
   m_connection_id = socket(AF_INET, SOCK_DGRAM, 0);
   
@@ -49,12 +52,35 @@ bool DaphneInterface::validate_connection() const {
 }
 
 
-command_result DaphneInterface::send_command( std::string cmd, std::chrono::milliseconds timeout,
-					      std::function<bool()> & can_retry ) const {
+command_result DaphneInterface::send_command_retry( std::string cmd,
+						    size_t retry ) const {
 
   do {
     try {
-      auto ret = send_command(cmd, std::chrono::milliseconds(50) );
+      auto ret = send_command(cmd);
+      return ret;
+    }
+    catch ( const CommandTimeout & e ) {
+      ers::warning( e );
+      --retry;
+    }
+    catch ( const ers::Issue & e ) {
+      throw FailedSocketInteraction(ERS_HERE, cmd, e);
+    }
+    
+  } while (retry>0);
+
+  throw FailedSocketInteraction(ERS_HERE, cmd);
+
+}
+
+
+command_result DaphneInterface::send_command_interruptible( std::string cmd,
+							    std::function<bool()> can_retry ) const {
+
+  do {
+    try {
+      auto ret = send_command(cmd);
       return ret;
     }
     catch ( const CommandTimeout & e ) {
@@ -70,7 +96,7 @@ command_result DaphneInterface::send_command( std::string cmd, std::chrono::mill
 
 
 
-command_result DaphneInterface::send_command( std::string cmd, std::chrono::milliseconds timeout) const {
+command_result DaphneInterface::send_command( std::string cmd) const {
 
   TLOG() << "Sending command " << cmd;
   std::vector<uint64_t> bytes;
@@ -126,7 +152,7 @@ command_result DaphneInterface::send_command( std::string cmd, std::chrono::mill
 
     auto delay = std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time);
 
-    if ( delay > timeout ) {
+    if ( delay > m_cmd_timeout ) {
       TLOG() << "Details of timeout";
       for ( size_t i = 0; i < data_block.size(); ++i ) {
 	TLOG() << i << "\t" << std::hex << data_block[i] << std::dec;
