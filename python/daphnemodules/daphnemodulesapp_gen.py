@@ -132,6 +132,8 @@ def get_daphnemodules_app(
     conf = daphnecontroller.Conf(
         daphne_address=ip,
         slot=slot,
+        socket_timeout_us=socket_timeout_us,
+        command_timeout_ms=command_timeout_ms,
         biasctrl=biasctrl,
         afes = afes,
         channels = channels,
