@@ -37,6 +37,10 @@ local cs = {
     daphne_input: s.record("DaphneInput", [
         s.field( "daphnes", self.daphne_list, default=[],
 		 doc="List of the daphne to use, identified by slot"),
+	s.field( "socket_timeout_us", self.uint4, default = 200,
+		 doc = "timeout for socket interactions in microseconds"),
+	s.field( "command_timeout_ms", self.uint4, default = 150,
+		 doc = "timeout for command response reception in milliseconds"),
 	s.field( "biasctrl", self.uint4, default = 4095,
 		 doc = "Biasctr to be used for all boards"),
 	s.field( "afe_gain", self.uint4, default = 2667,
