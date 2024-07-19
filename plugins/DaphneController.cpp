@@ -96,52 +96,52 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
   static const std::regex volt_regex(".* VBIAS0= ([^ ]+) VBIAS1= ([^ ]+) VBIAS2= ([^ ]+) VBIAS3= ([^ ]+) VBIAS4= ([^ ]+) POWER.-5v.= ([^ ]+) POWER..2.5v.= ([^ ]+) POWER..CE.= ([^ ]+) TEMP.Celsius.= ([^ ]+) .*");
 
   
-  if ( ! m_interface ) return ;
+  // if ( ! m_interface ) return ;
   
-  auto cmd_res = m_interface->send_command("RD VM ALL");
+  // auto cmd_res = m_interface->send_command("RD VM ALL");
   
-  std::smatch string_values; 
+  // std::smatch string_values; 
 						 
-  if ( ! std::regex_match( cmd_res.result, string_values, volt_regex ) ) {
-    ++m_error_counter;
-    WrongMonitoringString temp_error(ERS_HERE, m_slot, m_error_counter, cmd_res.result);
-    TLOG() << temp_error;
-    if ( m_error_counter >= 10 ) {
-      ers::error( temp_error );
-      return;
-    }
-    if ( m_error_counter >= 5 ) {
-      ers::warning( temp_error );
-      return;
-    }
-    return ;
-  }
+  // if ( ! std::regex_match( cmd_res.result, string_values, volt_regex ) ) {
+  //   ++m_error_counter;
+  //   WrongMonitoringString temp_error(ERS_HERE, m_slot, m_error_counter, cmd_res.result);
+  //   TLOG() << temp_error;
+  //   if ( m_error_counter >= 10 ) {
+  //     ers::error( temp_error );
+  //     return;
+  //   }
+  //   if ( m_error_counter >= 5 ) {
+  //     ers::warning( temp_error );
+  //     return;
+  //   }
+  //   return ;
+  // }
 
-  //reset the error counter
-  m_error_counter = 0;
+  // //reset the error counter
+  // m_error_counter = 0;
   
-  std::vector<double> values(string_values.size());
+  // std::vector<double> values(string_values.size());
 
-  for ( size_t i = 1; i < string_values.size(); ++i ) {
-    try {
-      values[i] = std::stod( string_values[i] );
-    }  catch ( const std::logic_error & e) {
-      ers::error( FailedStringConversion(ERS_HERE, string_values[i], e) );
-      return;
-    }
-  }
+  // for ( size_t i = 1; i < string_values.size(); ++i ) {
+  //   try {
+  //     values[i] = std::stod( string_values[i] );
+  //   }  catch ( const std::logic_error & e) {
+  //     ers::error( FailedStringConversion(ERS_HERE, string_values[i], e) );
+  //     return;
+  //   }
+  // }
     
-  v_info.v_bias_0 = values[1];
-  v_info.v_bias_1 = values[2];
-  v_info.v_bias_2 = values[3];
-  v_info.v_bias_3 = values[4];
-  v_info.v_bias_4 = values[5];
+  // v_info.v_bias_0 = values[1];
+  // v_info.v_bias_1 = values[2];
+  // v_info.v_bias_2 = values[3];
+  // v_info.v_bias_3 = values[4];
+  // v_info.v_bias_4 = values[5];
   
-  v_info.power_minus5v = values[6];
-  v_info.power_plus2p5v = values[7];
-  v_info.power_ce = values[8];
+  // v_info.power_minus5v = values[6];
+  // v_info.power_plus2p5v = values[7];
+  // v_info.power_ce = values[8];
   
-  v_info.temperature = values[9];
+  // v_info.temperature = values[9];
 
   
   ci.add(v_info);
