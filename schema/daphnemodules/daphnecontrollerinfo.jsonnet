@@ -29,7 +29,7 @@ local info = {
        s.field("new_packets",   self.uint8, 0,  doc="Incremental value of sent packages to the felix"),
        s.field("total_dropped_packets", self.uint8,  doc="Cumulative counters of  packages NOT sent to the felix"),
        s.field("new_dropped_packets",   self.uint8, 0,  doc="Incremental value of  packages NOT sent to the felix"),
-    ], doc="monitoring of the Daphne channels")
+    ], doc="monitoring of the Daphne channels"),
 
 
     channel_info : s.record("ChannelInfo", [
