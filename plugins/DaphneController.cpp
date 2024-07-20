@@ -44,10 +44,7 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
 {
 
   if ( m_scrap_called.load() ) return;
-  
 
-  daphnecontrollerinfo::StreamInfo stream_info;
-  
   // read the channel counters
   constexpr uint64_t s_dropped_counter_address = 0x40700000;
   constexpr uint64_t s_start_counter_buffer = 0x40800000;
@@ -57,109 +54,130 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
   // this lock is not completely necessary because of the internal locks in the interface
   // but it's a safety measure to make sure that this does not interfere with complex operations
   const std::lock_guard<std::mutex> lock(m_mutex);
-
-  // read total packages sent to felix
-  auto tot_pack_buf = m_interface->read_register(s_tot_packets_counter_address, 1);
-  stream_info.total_packets = tot_pack_buf[0];
-  if ( m_last_package_counter.load() != 0 ) {
-    stream_info.new_packets = stream_info.total_packets - m_last_package_counter.exchange(stream_info.total_packets);
-  } else {
-    m_last_package_counter = stream_info.total_packets;
-  }
+    
+  try {
+  
+    daphnecontrollerinfo::StreamInfo stream_info;    
+    
+    // read total packages sent to felix
+    auto tot_pack_buf = m_interface->read_register(s_tot_packets_counter_address, 1);
+    stream_info.total_packets = tot_pack_buf[0];
+    if ( m_last_package_counter.load() != 0 ) {
+      stream_info.new_packets = stream_info.total_packets - m_last_package_counter.exchange(stream_info.total_packets);
+    } else {
+      m_last_package_counter = stream_info.total_packets;
+    }
 
   // read total packages not sent to felix
-  auto tot_dropped_buf = m_interface->read_register(s_dropped_counter_address, 1);
-  stream_info.total_dropped_packets = tot_dropped_buf[0];
-  if ( m_last_unsent_counter.load() != 0 ) {
-    stream_info.new_dropped_packets = stream_info.total_dropped_packets - m_last_unsent_counter.exchange(stream_info.total_dropped_packets);
-  } else {
-    m_last_unsent_counter = stream_info.total_dropped_packets;
+    auto tot_dropped_buf = m_interface->read_register(s_dropped_counter_address, 1);
+    stream_info.total_dropped_packets = tot_dropped_buf[0];
+    if ( m_last_unsent_counter.load() != 0 ) {
+      stream_info.new_dropped_packets = stream_info.total_dropped_packets - m_last_unsent_counter.exchange(stream_info.total_dropped_packets);
+    } else {
+      m_last_unsent_counter = stream_info.total_dropped_packets;
+    }
+    
+    ci.add(stream_info);
+  } catch ( const ers::Issue & e ) {
+    ers::warning( MonitoringFailed(ERS_HERE, "data stream", e));
   }
-  
-  ci.add(stream_info);
+
   
   for ( ChannelId c = 0; c < s_max_channels; ++c ) {
-    daphnecontrollerinfo::ChannelInfo c_info;
-
-    auto trig_buf = m_interface->read_register(s_start_counter_buffer+c*8, 1);  
-    const auto & trig = trig_buf[0];
-    c_info.total_triggers = trig;
-    if ( m_channel_counters[c].triggers.load() != 0 ) {
-      c_info.new_triggers   = trig - m_channel_counters[c].triggers.exchange(trig);
-    } else {
-      m_channel_counters[c].triggers = trig;
-    }
-
-    auto pack_buf = m_interface->read_register(s_packets_counter_address+c*8, 1);
-    const auto & pack = pack_buf[0];
-    c_info.total_packets = pack;
-    if ( m_channel_counters[c].packets.load() != 0 ) {
-      c_info.new_packets   = pack - m_channel_counters[c].packets.exchange(pack);
-    } else {
-      m_channel_counters[c].packets = pack;
-    }
-	   
-    opmonlib::InfoCollector tmp_ci;
-    tmp_ci.add(c_info);
     
     auto name = fmt::format("ch_{:02}", c);
-    ci.add(name, tmp_ci);
-  }
+    
+    try { 
+      daphnecontrollerinfo::ChannelInfo c_info;
+      
+      auto trig_buf = m_interface->read_register(s_start_counter_buffer+c*8, 1);  
+      const auto & trig = trig_buf[0];
+      c_info.total_triggers = trig;
+      if ( m_channel_counters[c].triggers.load() != 0 ) {
+	c_info.new_triggers   = trig - m_channel_counters[c].triggers.exchange(trig);
+      } else {
+	m_channel_counters[c].triggers = trig;
+      }
+      
+      auto pack_buf = m_interface->read_register(s_packets_counter_address+c*8, 1);
+      const auto & pack = pack_buf[0];
+      c_info.total_packets = pack;
+      if ( m_channel_counters[c].packets.load() != 0 ) {
+	c_info.new_packets   = pack - m_channel_counters[c].packets.exchange(pack);
+      } else {
+	m_channel_counters[c].packets = pack;
+      }
+      
+      opmonlib::InfoCollector tmp_ci;
+      tmp_ci.add(c_info);
+      
+      ci.add(name, tmp_ci);
 
+    } catch ( const ers::Issue & e) {
+      ers::warning( MonitoringFailed(ERS_HERE, name, e));
+    }
+    
+  } 
+    
   // gatehring the rest of the information
   static const std::regex volt_regex(".* VBIAS0= ([^ ]+) VBIAS1= ([^ ]+) VBIAS2= ([^ ]+) VBIAS3= ([^ ]+) VBIAS4= ([^ ]+) POWER.-5v.= ([^ ]+) POWER..2.5v.= ([^ ]+) POWER..CE.= ([^ ]+) TEMP.Celsius.= ([^ ]+) .*");
 
-  
-  // if ( ! m_interface ) return ;
+  if ( ! m_interface ) return ;
 
-  daphnecontrollerinfo::GeneralInfo v_info;
-  
-  auto cmd_res = m_interface->send_command("RD VM ALL");
-  
-  std::smatch string_values; 
-						 
-  if ( ! std::regex_match( cmd_res.result, string_values, volt_regex ) ) {
-    ++m_error_counter;
-    WrongMonitoringString temp_error(ERS_HERE, m_slot, m_error_counter, cmd_res.result);
-    TLOG() << temp_error;
-    if ( m_error_counter >= 10 ) {
-      ers::error( temp_error );
-      return;
-    }
-    if ( m_error_counter >= 5 ) {
-      ers::warning( temp_error );
-      return;
-    }
-    return ;
-  }
+  try {
 
-  //reset the error counter
-  m_error_counter = 0;
-  
-  std::vector<double> values(string_values.size());
-
-  for ( size_t i = 1; i < string_values.size(); ++i ) {
-    try {
-      values[i] = std::stod( string_values[i] );
-    }  catch ( const std::logic_error & e) {
-      ers::error( FailedStringConversion(ERS_HERE, string_values[i], e) );
-      return;
-    }
-  }
+    daphnecontrollerinfo::GeneralInfo v_info;
     
-  v_info.v_bias_0 = values[1];
-  v_info.v_bias_1 = values[2];
-  v_info.v_bias_2 = values[3];
-  v_info.v_bias_3 = values[4];
-  v_info.v_bias_4 = values[5];
-  
-  v_info.power_minus5v = values[6];
-  v_info.power_plus2p5v = values[7];
-  v_info.power_ce = values[8];
-  
-  v_info.temperature = values[9];
-  
-  ci.add(v_info);
+    auto cmd_res = m_interface->send_command("RD VM ALL");
+    
+    std::smatch string_values; 
+						 
+    if ( ! std::regex_match( cmd_res.result, string_values, volt_regex ) ) {
+      ++m_error_counter;
+      WrongMonitoringString temp_error(ERS_HERE, m_slot, m_error_counter, cmd_res.result);
+      TLOG() << temp_error;
+      if ( m_error_counter >= 10 ) {
+	ers::error( temp_error );
+	return;
+      }
+      if ( m_error_counter >= 5 ) {
+	ers::warning( temp_error );
+	return;
+      }
+      return ;
+    }
+    
+    //reset the error counter
+    m_error_counter = 0;
+    
+    std::vector<double> values(string_values.size());
+    
+    for ( size_t i = 1; i < string_values.size(); ++i ) {
+      try {
+	values[i] = std::stod( string_values[i] );
+      }  catch ( const std::logic_error & e) {
+	ers::error( FailedStringConversion(ERS_HERE, string_values[i], e) );
+	return;
+      }
+    }
+    
+    v_info.v_bias_0 = values[1];
+    v_info.v_bias_1 = values[2];
+    v_info.v_bias_2 = values[3];
+    v_info.v_bias_3 = values[4];
+    v_info.v_bias_4 = values[5];
+    
+    v_info.power_minus5v = values[6];
+    v_info.power_plus2p5v = values[7];
+    v_info.power_ce = values[8];
+    
+    v_info.temperature = values[9];
+    
+    ci.add(v_info);
+
+  } catch (const ers::Issue & e ){
+    ers::warning(MonitoringFailed(ERS_HERE, "general info", e));
+  }
 
   
   
