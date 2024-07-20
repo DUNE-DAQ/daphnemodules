@@ -76,6 +76,7 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
     m_last_unsent_counter = stream_info.total_dropped_packets;
   }
   
+  ci.add(stream_info);
   
   for ( ChannelId c = 0; c < s_max_channels; ++c ) {
     daphnecontrollerinfo::ChannelInfo c_info;
