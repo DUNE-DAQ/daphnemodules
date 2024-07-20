@@ -12,7 +12,7 @@ local info = {
     boolean:  s.boolean( "Boolean",                doc="A boolean"),
     string:   s.string(  "String",                 doc="A string"),   
 
-    voltage_info: s.record("GeneralInfo", [
+    general_info: s.record("GeneralInfo", [
        s.field("v_bias_0", self.double8, doc="Volt bias for AFE0"),
        s.field("v_bias_1", self.double8, doc="Volt bias for AFE1"),
        s.field("v_bias_2", self.double8, doc="Volt bias for AFE2"),
@@ -22,9 +22,15 @@ local info = {
        s.field("power_plus2p5v", self.double8, doc="Power(2.5V)"),
        s.field("power_ce", self.double8, doc="Power(+CE)"),
        s.field("temperature", self.double8, doc="Temperature in degree celsious"),
+    ], doc="monitoring of the Daphne"),
+
+    stream_info : s.record("StreamInfo", [
        s.field("total_packets", self.uint8,  doc="Cumulative counters of sent packages to the felix"),
        s.field("new_packets",   self.uint8, 0,  doc="Incremental value of sent packages to the felix"),
-    ], doc="monitoring of the Daphne"),
+       s.field("total_dropped_packets", self.uint8,  doc="Cumulative counters of  packages NOT sent to the felix"),
+       s.field("new_dropped_packets",   self.uint8, 0,  doc="Incremental value of  packages NOT sent to the felix"),
+    ], doc="monitoring of the Daphne channels")
+
 
     channel_info : s.record("ChannelInfo", [
        s.field("total_triggers", self.uint8,  doc="Cumulative counters of self trigger windows"),
