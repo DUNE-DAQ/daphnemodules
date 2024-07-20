@@ -45,9 +45,11 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
 
   if ( m_scrap_called.load() ) return;
   
-  daphnecontrollerinfo::GeneralInfo v_info;
+
+  daphnecontrollerinfo::StreamInfo stream_info;
   
   // read the channel counters
+  constexpr uint64_t s_dropped_counter_address = 0x40700000;
   constexpr uint64_t s_start_counter_buffer = 0x40800000;
   constexpr auto  s_packets_counter_address = s_start_counter_buffer + s_max_channels*8;
   constexpr auto  s_tot_packets_counter_address = s_packets_counter_address + s_max_channels*8;
@@ -56,14 +58,25 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
   // but it's a safety measure to make sure that this does not interfere with complex operations
   const std::lock_guard<std::mutex> lock(m_mutex);
 
+  // read total packages sent to felix
   auto tot_pack_buf = m_interface->read_register(s_tot_packets_counter_address, 1);
-  v_info.total_packets = tot_pack_buf[0];
+  stream_info.total_packets = tot_pack_buf[0];
   if ( m_last_package_counter.load() != 0 ) {
-    v_info.new_packets   = v_info.total_packets - m_last_package_counter.exchange(v_info.total_packets);
+    stream_info.new_packets = stream_info.total_packets - m_last_package_counter.exchange(stream_info.total_packets);
   } else {
-    m_last_package_counter = v_info.total_packets;
+    m_last_package_counter = stream_info.total_packets;
   }
 
+  // read total packages not sent to felix
+  auto tot_dropped_buf = m_interface->read_register(s_dropped_counter_address, 1);
+  stream_info.total_dropped_packets = tot_dropped_buf[0];
+  if ( m_last_unsent_counter.load() != 0 ) {
+    stream_info.new_dropped_packets = stream_info.total_dropped_packets - m_last_unsent_counter.exchange(stream_info.total_dropped_packets);
+  } else {
+    m_last_unsent_counter = stream_info.total_dropped_packets;
+  }
+  
+  
   for ( ChannelId c = 0; c < s_max_channels; ++c ) {
     daphnecontrollerinfo::ChannelInfo c_info;
 
@@ -97,6 +110,8 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
 
   
   // if ( ! m_interface ) return ;
+
+  daphnecontrollerinfo::GeneralInfo v_info;
   
   // auto cmd_res = m_interface->send_command("RD VM ALL");
   

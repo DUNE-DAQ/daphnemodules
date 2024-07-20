@@ -203,6 +203,7 @@ private:
   };
   std::array<Counters, s_max_channels> m_channel_counters;
   std::atomic<counter_t> m_last_package_counter = 0;
+  std::atomic<counter_t> m_last_unsent_counter = 0;
   
 };
 
