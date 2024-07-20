@@ -13,10 +13,8 @@
 using namespace dunedaq::daphnemodules;
 
 DaphneInterface::DaphneInterface( const char* ipaddr, int port,
-				  std::chrono::milliseconds cmd_timeout,
-				  std::chrono::microseconds sock_timeout )
-  : m_cmd_timeout(cmd_timeout)
-  , m_socket_timeout(sock_timeout) {
+				  std::chrono::milliseconds timeout)
+  : m_timeout(timeout) {
 
   m_connection_id = socket(AF_INET, SOCK_DGRAM, 0);
   
@@ -149,16 +147,17 @@ command_result DaphneInterface::send_command( std::string cmd) const {
       }
     }
     auto now = std::chrono::high_resolution_clock::now();
-
-    auto delay = std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time);
-
-    if ( delay > m_cmd_timeout ) {
+    
+    auto delay = now - start_time;
+    
+    if ( delay > m_timeout ) {
       TLOG() << "Details of timeout";
       for ( size_t i = 0; i < data_block.size(); ++i ) {
 	TLOG() << i << "\t" << std::hex << data_block[i] << std::dec;
       }
       TLOG() << "Received so far: " << res.result;
-      throw CommandTimeout(ERS_HERE, cmd, delay.count());
+      auto delay_us = std::chrono::duration_cast<std::chrono::microseconds>(delay);
+      throw CommandTimeout(ERS_HERE, cmd, delay_us.count());
     }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -184,8 +183,8 @@ std::vector<uint64_t>  DaphneInterface::read(uint8_t command_id,
 
 
   struct timeval timeout;
-  timeout.tv_sec = 0;
-  timeout.tv_usec = m_socket_timeout.count();
+  timeout.tv_sec = m_timeout.count() / 1000 ;
+  timeout.tv_usec = (m_timeout.count() % 1000) * 1000 ;
   fd_set readfds, masterfds;
 
   FD_ZERO(&masterfds);

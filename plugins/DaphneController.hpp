@@ -158,8 +158,7 @@ private:
   void dump_buffers(const data_t&);
   
   // specific actions
-  using timeout_t = decltype(daphnecontroller::Conf::socket_timeout_us);
-  void create_interface( const std::string & ip, timeout_t cmd, timeout_t sock )  ;
+  void create_interface( const std::string & ip, std::chrono::milliseconds timeout )  ;
   void validate_configuration(const daphnecontroller::Conf &);   
   void configure_timing_endpoints();
   void configure_analog_chain(bool intial_config);

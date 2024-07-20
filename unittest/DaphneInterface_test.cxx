@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_CASE(Construction)
 
   using namespace std::chrono;
   
-  BOOST_CHECK_THROW( dunedaq::daphnemodules::DaphneInterface i("non.exising.ip", 1000, milliseconds(50), microseconds(200)),
+  BOOST_CHECK_THROW( dunedaq::daphnemodules::DaphneInterface i("non.exising.ip", 1000, milliseconds(5)),
 		     dunedaq::daphnemodules::InvalidIPAddress );
 
 }

@@ -57,8 +57,7 @@ def to_lna( j : dict ) -> daphnecontroller.LNAConf :
 def get_daphnemodules_app(
                           slot : int,
                           ip : str,
-                          socket_timeout_us : int,
-                          command_timeout_ms : int,
+                          timeout_ms : int,
                           biasctrl : int,
                           afe_gain : int,
                           channel_gain : int,
@@ -132,8 +131,7 @@ def get_daphnemodules_app(
     conf = daphnecontroller.Conf(
         daphne_address=ip,
         slot=slot,
-        socket_timeout_us=socket_timeout_us,
-        command_timeout_ms=command_timeout_ms,
+        timeout_ms=timeout_ms,
         biasctrl=biasctrl,
         afes = afes,
         channels = channels,

@@ -53,8 +53,8 @@ namespace dunedaq {
 
   ERS_DECLARE_ISSUE( daphnemodules,
 		     CommandTimeout,
-		     "Command " << command << " timed out after " << ms << " ms",
-		     ((std::string)command)((unsigned int)ms)
+		     "Command " << command << " timed out after " << timeout_us << " microseconds",
+		     ((std::string)command)((unsigned int)timeout_us)
 		   ) 
 
   ERS_DECLARE_ISSUE( daphnemodules,
@@ -78,8 +78,8 @@ namespace dunedaq::daphnemodules {
 
   public:
     DaphneInterface( const char* ipaddr, int port,
-		     std::chrono::milliseconds cmd_timeout,
-		     std::chrono::microseconds sock_timeout = std::chrono::microseconds(100) );
+		     std::chrono::milliseconds timeout = std::chrono::milliseconds(500));
+
     ~DaphneInterface() { if(m_connection_id>0) close();}
 
     DaphneInterface(const DaphneInterface &) = delete;
@@ -115,8 +115,7 @@ namespace dunedaq::daphnemodules {
   private:
     int m_connection_id = -1;
     sockaddr_in m_target;
-    std::chrono::milliseconds m_cmd_timeout{5}; 
-    std::chrono::microseconds m_socket_timeout{1000};
+    std::chrono::milliseconds m_timeout{5}; 
     mutable std::mutex m_access_mutex;
     mutable std::mutex m_command_mutex;
   }; 
