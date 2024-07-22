@@ -20,6 +20,8 @@
 #include <unistd.h>
 #include <memory>
 #include <mutex>
+#include <functional>
+
 
 #include <ers/ers.hpp>
 
@@ -48,7 +50,19 @@ namespace dunedaq {
 		     "Failed to call " << command,
 		     ((std::string)command)
 		   ) 
-  
+
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     CommandTimeout,
+		     "Command " << command << " timed out after " << timeout_us << " microseconds",
+		     ((std::string)command)((unsigned int)timeout_us)
+		   ) 
+
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     SocketTimeout,
+		     "Socket timed out after " << timeout_us << " microseconds",
+		     ((unsigned int)timeout_us)
+		   ) 
+ 
   } // dunedaq namespace
 
 
@@ -63,7 +77,9 @@ namespace dunedaq::daphnemodules {
   class DaphneInterface {
 
   public:
-    DaphneInterface( const char* ipaddr, int port );
+    DaphneInterface( const char* ipaddr, int port,
+		     std::chrono::milliseconds timeout = std::chrono::milliseconds(500));
+
     ~DaphneInterface() { if(m_connection_id>0) close();}
 
     DaphneInterface(const DaphneInterface &) = delete;
@@ -79,9 +95,17 @@ namespace dunedaq::daphnemodules {
  
     bool validate_connection() const ;
 
-    command_result send_command( std::string cmd ) const ;
+    command_result send_command(std::string cmd) const;
+    
+    // this will throw if it fails
+    command_result send_command_retry( std::string cmd, size_t retry = std::numeric_limits<size_t>::max() ) const ;
+    
+    // this will try until success but it won't thrwo if can retry become false
+    command_result send_command_interruptible( std::string cmd, std::function<bool()> can_retry) const ;
+
     
   protected:
+    
     void close();
 
     void write( uint8_t command_id, uint64_t addr, std::vector<uint64_t> && data) const;
@@ -91,6 +115,7 @@ namespace dunedaq::daphnemodules {
   private:
     int m_connection_id = -1;
     sockaddr_in m_target;
+    std::chrono::milliseconds m_timeout{5}; 
     mutable std::mutex m_access_mutex;
     mutable std::mutex m_command_mutex;
   }; 

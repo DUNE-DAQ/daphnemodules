@@ -27,11 +27,18 @@ local cs = {
     string:   s.string(  "String",   		   doc="A string"),   
     monitoring_dest: s.enum(     "MonitoringDest", ["local", "cern", "pocket"]),
 
-    slotlist : s.sequence( "SlotList", self.uint4, doc="list of slots" ),
+    daphne_id : s.record( "DaphneId", [
+      s.field("slot", self.uint4,  doc="Slot of the board"),
+      s.field("ip",   self.string, doc="IP of the board")
+    ], doc="Entry for a map to slot map"),
+    
+    daphne_list : s.sequence( "DaphneList", self.daphne_id, doc="Map of slots and IPs" ),
 
     daphne_input: s.record("DaphneInput", [
-        s.field( "slots", self.slotlist, default=[4,5,7,9,11,12,13],
+        s.field( "daphnes", self.daphne_list, default=[],
 		 doc="List of the daphne to use, identified by slot"),
+	s.field( "timeout_ms", self.uint4, default = 500,
+		 doc = "timeout for any interaction with the board; in milliseconds"),
 	s.field( "biasctrl", self.uint4, default = 4095,
 		 doc = "Biasctr to be used for all boards"),
 	s.field( "afe_gain", self.uint4, default = 2667,
