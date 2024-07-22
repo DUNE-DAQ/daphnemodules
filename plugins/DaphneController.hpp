@@ -26,6 +26,13 @@
 
 
 namespace dunedaq {
+
+  ERS_DECLARE_ISSUE( daphnemodules,
+                     MonitoringFailed,
+                     "Monitoring of " << item << " failed",
+                     ((std::string)item)
+                   )
+
   ERS_DECLARE_ISSUE( daphnemodules,
                      WrongMonitoringString,
                      "Board in slot " << slot
@@ -151,7 +158,7 @@ private:
   void dump_buffers(const data_t&);
   
   // specific actions
-  void create_interface( const std::string & ip ) ;
+  void create_interface( const std::string & ip, std::chrono::milliseconds timeout )  ;
   void validate_configuration(const daphnecontroller::Conf &);   
   void configure_timing_endpoints();
   void configure_analog_chain(bool intial_config);
@@ -202,6 +209,7 @@ private:
   };
   std::array<Counters, s_max_channels> m_channel_counters;
   std::atomic<counter_t> m_last_package_counter = 0;
+  std::atomic<counter_t> m_last_unsent_counter = 0;
   
 };
 

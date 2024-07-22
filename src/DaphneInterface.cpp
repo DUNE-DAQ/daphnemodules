@@ -8,13 +8,16 @@
 
 #include "DaphneInterface.hpp"
 #include "logging/Logging.hpp"
+#include <sys/time.h>
 
 using namespace dunedaq::daphnemodules;
 
-DaphneInterface::DaphneInterface( const char* ipaddr, int port ) {
-  
-  m_connection_id = socket(AF_INET, SOCK_DGRAM, 0);
+DaphneInterface::DaphneInterface( const char* ipaddr, int port,
+				  std::chrono::milliseconds timeout)
+  : m_timeout(timeout) {
 
+  m_connection_id = socket(AF_INET, SOCK_DGRAM, 0);
+  
   if ( m_connection_id < 0 )
     throw SocketCreationError(ERS_HERE);
   
@@ -23,6 +26,7 @@ DaphneInterface::DaphneInterface( const char* ipaddr, int port ) {
   auto ret = inet_pton(AF_INET, ipaddr, &(m_target.sin_addr));
   if ( ret <= 0 ) 
     throw InvalidIPAddress(ERS_HERE, ipaddr);
+
  
   if ( ! validate_connection() )
     throw FailedPing(ERS_HERE, ipaddr, port );
@@ -46,7 +50,51 @@ bool DaphneInterface::validate_connection() const {
 }
 
 
-command_result DaphneInterface::send_command( std::string cmd ) const {
+command_result DaphneInterface::send_command_retry( std::string cmd,
+						    size_t retry ) const {
+
+  do {
+    try {
+      auto ret = send_command(cmd);
+      return ret;
+    }
+    catch ( const CommandTimeout & e ) {
+      ers::warning( e );
+      --retry;
+    }
+    catch ( const ers::Issue & e ) {
+      throw FailedSocketInteraction(ERS_HERE, cmd, e);
+    }
+    
+  } while (retry>0);
+
+  throw FailedSocketInteraction(ERS_HERE, cmd);
+
+}
+
+
+command_result DaphneInterface::send_command_interruptible( std::string cmd,
+							    std::function<bool()> can_retry ) const {
+
+  do {
+    try {
+      auto ret = send_command(cmd);
+      return ret;
+    }
+    catch ( const CommandTimeout & e ) {
+      ers::warning( e );
+    }
+    catch ( const ers::Issue & e ) {
+      throw FailedSocketInteraction(ERS_HERE, cmd, e);
+    }
+    
+  } while (can_retry());
+
+}
+
+
+
+command_result DaphneInterface::send_command( std::string cmd) const {
 
   TLOG() << "Sending command " << cmd;
   std::vector<uint64_t> bytes;
@@ -65,10 +113,13 @@ command_result DaphneInterface::send_command( std::string cmd ) const {
   }
 
   TLOG() << "Command sent, waiting for result";
+
   
   command_result res;
   std::string * writing_pointer = nullptr;
 
+  auto start_time = std::chrono::high_resolution_clock::now();
+  
   int more = 40;
   while (more > 0) {
     auto data_block = read_buffer(0x90000000, 50);
@@ -95,6 +146,20 @@ command_result DaphneInterface::send_command( std::string cmd ) const {
 	}
       }
     }
+    auto now = std::chrono::high_resolution_clock::now();
+    
+    auto delay = now - start_time;
+    
+    if ( delay > m_timeout ) {
+      TLOG() << "Details of timeout";
+      for ( size_t i = 0; i < data_block.size(); ++i ) {
+	TLOG() << i << "\t" << std::hex << data_block[i] << std::dec;
+      }
+      TLOG() << "Received so far: " << res.result;
+      auto delay_us = std::chrono::duration_cast<std::chrono::microseconds>(delay);
+      throw CommandTimeout(ERS_HERE, cmd, delay_us.count());
+    }
+
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
     --more;
   }
@@ -115,29 +180,57 @@ std::vector<uint64_t>  DaphneInterface::read(uint8_t command_id,
   auto result = sendto(m_connection_id, cmd, sizeof(cmd), 0, (struct sockaddr*)&m_target, sizeof(m_target));
 
   if ( result < 0 ) throw FailedSocketInteraction(ERS_HERE, "sendto") ;
-  
-  uint8_t buffer[2 + (8 * size)];
-  socklen_t addrlen = sizeof(m_target);
-  result = recvfrom(m_connection_id, buffer, sizeof(buffer), 0, (struct sockaddr*)&m_target, &addrlen);
 
-  if ( result <= 0 ) throw FailedSocketInteraction(ERS_HERE, "recvfrom") ;
+
+  struct timeval timeout;
+  timeout.tv_sec = m_timeout.count() / 1000 ;
+  timeout.tv_usec = (m_timeout.count() % 1000) * 1000 ;
+  fd_set readfds, masterfds;
+
+  FD_ZERO(&masterfds);
+  FD_SET(m_connection_id, &masterfds);
   
-  uint8_t fmt[4 + size];
-  fmt[0] = '<';
-  fmt[1] = 'B';
-  fmt[2] = 'B';
-  fmt[3] = size;
-  for (int i = 0; i < size; i++) {
-    fmt[4 + i] = 'Q';
+  memcpy(&readfds, &masterfds, sizeof(fd_set));
+
+  auto start_time = std::chrono::high_resolution_clock::now();
+  
+  if (select(m_connection_id+1, &readfds, NULL, NULL, &timeout) < 0) {
+    throw FailedSocketInteraction(ERS_HERE, "select") ;
   }
 
   std::vector<uint64_t> ret_value;
-  for (int i = 0; i < size; i++) {
-    uint64_t value;
-    memcpy(&value, buffer + 2 + (8 * i), sizeof(uint64_t));
-    ret_value.push_back(value);
-  }
+  
+  if (FD_ISSET(m_connection_id, &readfds)) {
+    uint8_t buffer[2 + (8 * size)];
+    socklen_t addrlen = sizeof(m_target);
+    result = recvfrom(m_connection_id, buffer, sizeof(buffer), 0, (struct sockaddr*)&m_target, &addrlen);
+    
+    if ( result <= 0 ) throw FailedSocketInteraction(ERS_HERE, "recvfrom") ;
+    
+    uint8_t fmt[4 + size];
+    fmt[0] = '<';
+    fmt[1] = 'B';
+    fmt[2] = 'B';
+    fmt[3] = size;
+    for (int i = 0; i < size; i++) {
+      fmt[4 + i] = 'Q';
+    }
 
+    for (int i = 0; i < size; i++) {
+      uint64_t value;
+      memcpy(&value, buffer + 2 + (8 * i), sizeof(uint64_t));
+      ret_value.push_back(value);
+    }
+
+  }
+  else {
+    // the socket timedout
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+
+    throw SocketTimeout(ERS_HERE, duration.count() );
+  }
+  
   return ret_value;
 }
 
@@ -150,7 +243,7 @@ void  DaphneInterface::write(uint8_t command_id, uint64_t addr, std::vector<uint
   cmd[0] = command_id;
   cmd[1] = data.size();
   memcpy(cmd + 2, &addr, sizeof(uint64_t));
-  for (int i = 0; i < data.size(); i++) {
+  for (size_t i = 0; i < data.size(); i++) {
     memcpy(cmd + 10 + (8 * i), &(data[i]), sizeof(uint64_t));
   }
 
