@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package dunedaq.daphnemodules.opmon;
+
+message GeneralInfo {
+
+  double v_bias_0 = 1;
+  double v_bias_1 = 2;
+  double v_bias_2 = 3;
+  double v_bias_3 = 4;
+  double v_bias_4 = 5;
+
+  double power_minus5v  = 10;
+  double power_plus2p5v = 11;
+  double power_ce       = 12;
+
+  double temperature = 15;
+}
+
+message StreamInfo {
+
+  uint64 total_packets = 1;
+  uint64 new_packets   = 2;
+  uint64 total_dropped_packets = 3;
+  uint64 new_dropped_packets   = 4;
+  
+}
+
+message ChannelInfo {
+
+  uint64 total_triggers = 1;
+  uint64 new_triggers   = 2;
+  uint64 total_packets  = 5;
+  uint64 new_packets    = 6;
+}
