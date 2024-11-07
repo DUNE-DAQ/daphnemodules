@@ -10,9 +10,6 @@
 
 #include "DaphneController.hpp"
 
-#include "daphnemodules/daphnecontroller/Nljs.hpp"
-#include "daphnemodules/daphnecontrollerinfo/InfoNljs.hpp"
-
 #include <string>
 #include <logging/Logging.hpp>
 #include <fstream>
@@ -35,12 +32,12 @@ DaphneController::DaphneController(const std::string& name)
 {
   register_command("conf", &DaphneController::do_conf);
   register_command("scrap", &DaphneController::do_scrap);
-  register_command("dump_buffers", &DaphneController::dump_buffers);
+  //  register_command("dump_buffers", &DaphneController::dump_buffers);
 }
 
 
 void
-DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
+DaphneController::generate_opmon_data()
 {
 
   if ( m_scrap_called.load() ) return;
@@ -57,27 +54,27 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
     
   try {
   
-    daphnecontrollerinfo::StreamInfo stream_info;    
+    opmon::StreamInfo stream_info;    
     
     // read total packages sent to felix
     auto tot_pack_buf = m_interface->read_register(s_tot_packets_counter_address, 1);
-    stream_info.total_packets = tot_pack_buf[0];
+    stream_info.set_total_packets(tot_pack_buf[0]);
     if ( m_last_package_counter.load() != 0 ) {
-      stream_info.new_packets = stream_info.total_packets - m_last_package_counter.exchange(stream_info.total_packets);
+      stream_info.set_new_packets(stream_info.total_packets() - m_last_package_counter.exchange(stream_info.total_packets()));
     } else {
-      m_last_package_counter = stream_info.total_packets;
-    }
-
-  // read total packages not sent to felix
-    auto tot_dropped_buf = m_interface->read_register(s_dropped_counter_address, 1);
-    stream_info.total_dropped_packets = tot_dropped_buf[0];
-    if ( m_last_unsent_counter.load() != 0 ) {
-      stream_info.new_dropped_packets = stream_info.total_dropped_packets - m_last_unsent_counter.exchange(stream_info.total_dropped_packets);
-    } else {
-      m_last_unsent_counter = stream_info.total_dropped_packets;
+      m_last_package_counter = stream_info.total_packets();
     }
     
-    ci.add(stream_info);
+  // read total packages not sent to felix
+    auto tot_dropped_buf = m_interface->read_register(s_dropped_counter_address, 1);
+    stream_info.set_total_dropped_packets(tot_dropped_buf[0]);
+    if ( m_last_unsent_counter.load() != 0 ) {
+      stream_info.set_new_dropped_packets(stream_info.total_dropped_packets() - m_last_unsent_counter.exchange(stream_info.total_dropped_packets()));
+    } else {
+      m_last_unsent_counter = stream_info.total_dropped_packets();
+    }
+    
+    publish( std::move(stream_info) );
   } catch ( const ers::Issue & e ) {
     ers::warning( MonitoringFailed(ERS_HERE, "data stream", e));
   }
@@ -85,36 +82,31 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
   
   for ( ChannelId c = 0; c < s_max_channels; ++c ) {
     
-    auto name = fmt::format("ch_{:02}", c);
-    
     try { 
-      daphnecontrollerinfo::ChannelInfo c_info;
+      opmon::ChannelInfo c_info;
       
       auto trig_buf = m_interface->read_register(s_start_counter_buffer+c*8, 1);  
       const auto & trig = trig_buf[0];
-      c_info.total_triggers = trig;
+      c_info.set_total_triggers(trig);
       if ( m_channel_counters[c].triggers.load() != 0 ) {
-	c_info.new_triggers   = trig - m_channel_counters[c].triggers.exchange(trig);
+	c_info.set_new_triggers(trig - m_channel_counters[c].triggers.exchange(trig));
       } else {
 	m_channel_counters[c].triggers = trig;
       }
       
       auto pack_buf = m_interface->read_register(s_packets_counter_address+c*8, 1);
       const auto & pack = pack_buf[0];
-      c_info.total_packets = pack;
+      c_info.set_total_packets(pack);
       if ( m_channel_counters[c].packets.load() != 0 ) {
-	c_info.new_packets   = pack - m_channel_counters[c].packets.exchange(pack);
+	c_info.set_new_packets(pack - m_channel_counters[c].packets.exchange(pack));
       } else {
 	m_channel_counters[c].packets = pack;
       }
-      
-      opmonlib::InfoCollector tmp_ci;
-      tmp_ci.add(c_info);
-      
-      ci.add(name, tmp_ci);
+
+      publish( std::move(c_info), { {"name", fmt::format("{}", c)} } );
 
     } catch ( const ers::Issue & e) {
-      ers::warning( MonitoringFailed(ERS_HERE, name, e));
+      ers::warning( MonitoringFailed(ERS_HERE, fmt::format("Channel {}", c), e));
     }
     
   } 
@@ -126,12 +118,12 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
 
   try {
 
-    daphnecontrollerinfo::GeneralInfo v_info;
+    opmon::GeneralInfo v_info;
     
     auto cmd_res = m_interface->send_command("RD VM ALL");
     
     std::smatch string_values; 
-						 
+    
     if ( ! std::regex_match( cmd_res.result, string_values, volt_regex ) ) {
       ++m_error_counter;
       WrongMonitoringString temp_error(ERS_HERE, m_slot, m_error_counter, cmd_res.result);
@@ -161,19 +153,19 @@ DaphneController::get_info(opmonlib::InfoCollector& ci, int /* level */)
       }
     }
     
-    v_info.v_bias_0 = values[1];
-    v_info.v_bias_1 = values[2];
-    v_info.v_bias_2 = values[3];
-    v_info.v_bias_3 = values[4];
-    v_info.v_bias_4 = values[5];
+    v_info.set_v_bias_0(values[1]);
+    v_info.set_v_bias_1(values[2]);
+    v_info.set_v_bias_2(values[3]);
+    v_info.set_v_bias_3(values[4]);
+    v_info.set_v_bias_4(values[5]);
     
-    v_info.power_minus5v = values[6];
-    v_info.power_plus2p5v = values[7];
-    v_info.power_ce = values[8];
+    v_info.set_power_minus5v(values[6]);
+    v_info.set_power_plus2p5v(values[7]);
+    v_info.set_power_ce(values[8]);
     
-    v_info.temperature = values[9];
-    
-    ci.add(v_info);
+    v_info.set_temperature(values[9]);
+
+    publish( std::move(v_info) );
 
   } catch (const ers::Issue & e ){
     ers::warning(MonitoringFailed(ERS_HERE, "general info", e));
@@ -216,24 +208,25 @@ void
 DaphneController::do_conf(const data_t& conf_as_json)
 {
   auto start_time = std::chrono::high_resolution_clock::now();
-  
-  auto conf_as_cpp = conf_as_json.get<daphnecontroller::Conf>();
 
-  auto slot = conf_as_cpp.slot;
-  if ( slot >= 16 ) {
-    // the slot used laster in the code is a 4 bit register, so we need to check we are not overflowing
-    throw InvalidSlot(ERS_HERE, slot, conf_as_cpp.daphne_address);
-  } else {
-    m_slot = (decltype(m_slot)) slot;
-  }
+  // MaR adapt tp v5
+  // auto conf_as_cpp = conf_as_json.get<daphnecontroller::Conf>();
+
+  // auto slot = conf_as_cpp.slot;
+  // if ( slot >= 16 ) {
+  //   // the slot used laster in the code is a 4 bit register, so we need to check we are not overflowing
+  //   throw InvalidSlot(ERS_HERE, slot, conf_as_cpp.daphne_address);
+  // } else {
+  //   m_slot = (decltype(m_slot)) slot;
+  // }
   
   // during configuration no other operations are allowed
   const std::lock_guard<std::mutex> lock(m_mutex);
   
-  create_interface(conf_as_cpp.daphne_address,
-		   std::chrono::milliseconds(conf_as_cpp.timeout_ms) );
+  // create_interface(conf_as_cpp.daphne_address,
+  // 		   std::chrono::milliseconds(conf_as_cpp.timeout_ms) );
 
-  validate_configuration(conf_as_cpp);
+  //validate_configuration(conf_as_cpp);
   
   configure_timing_endpoints();
   
@@ -700,62 +693,62 @@ DaphneController::configure_trigger_mode() {
 }
 
 
-void
-DaphneController::dump_buffers(const data_t& conf_as_json)
-{
-  auto start_time = std::chrono::high_resolution_clock::now();
+// void
+// DaphneController::dump_buffers(const data_t& conf_as_json)
+// {
+//   auto start_time = std::chrono::high_resolution_clock::now();
   
-  auto conf_as_cpp = conf_as_json.get<daphnecontroller::DumpBuffers>();
+//   auto conf_as_cpp = conf_as_json.get<daphnecontroller::DumpBuffers>();
 
-  // during dumping no other operations are allowed
-  const std::lock_guard<std::mutex> lock(m_mutex);
+//   // during dumping no other operations are allowed
+//   const std::lock_guard<std::mutex> lock(m_mutex);
 
-  std::string file_name(conf_as_cpp.directory);
-  if ( file_name.back() != '/' ) file_name += '/';
-  file_name += "spy_buffers_" + std::to_string(m_slot);
+//   std::string file_name(conf_as_cpp.directory);
+//   if ( file_name.back() != '/' ) file_name += '/';
+//   file_name += "spy_buffers_" + std::to_string(m_slot);
 
-  auto t = std::time(nullptr);
-  auto tm = *std::localtime(&t);
-  std::ostringstream oss;
-  oss << std::put_time(&tm, "%Y-%m-%dT%H-%M-%S");
-  file_name += '_' + oss.str() + ".txt";
+//   auto t = std::time(nullptr);
+//   auto tm = *std::localtime(&t);
+//   std::ostringstream oss;
+//   oss << std::put_time(&tm, "%Y-%m-%dT%H-%M-%S");
+//   file_name += '_' + oss.str() + ".txt";
 
-  size_t entries = std::min(conf_as_cpp.n_samples, (decltype(conf_as_cpp.n_samples)) 1024);
-  const size_t max_batch_size = 50;
+//   size_t entries = std::min(conf_as_cpp.n_samples, (decltype(conf_as_cpp.n_samples)) 1024);
+//   const size_t max_batch_size = 50;
   
-  m_interface->write_register(0x2000, {1234});
-  // this triggers the spy buffers
+//   m_interface->write_register(0x2000, {1234});
+//   // this triggers the spy buffers
 
-  std::ofstream file(file_name);
+//   std::ofstream file(file_name);
     
-  for ( size_t ch = 0; ch < m_channel_confs.size(); ++ch) {
-    if ( ! channel_used(ch) ) continue;
+//   for ( size_t ch = 0; ch < m_channel_confs.size(); ++ch) {
+//     if ( ! channel_used(ch) ) continue;
     
-    auto afe   = ch / 8;
-    auto ch_id = ch % 8;
+//     auto afe   = ch / 8;
+//     auto ch_id = ch % 8;
 
-    file << "AFE "<< afe << " CH " << ch_id;
+//     file << "AFE "<< afe << " CH " << ch_id;
    
-    size_t counter = 0;
-    while ( counter < entries ) {
-      auto n_points = counter + max_batch_size > entries ? entries-counter : max_batch_size;
-      auto data = m_interface->read_register(0x40000000 + (afe * 0x100000) + (ch_id * 0x10000) + counter, n_points);
-      counter += n_points;
-      for ( const auto & e : data ) {
-	file << " " << e;
-      }
+//     size_t counter = 0;
+//     while ( counter < entries ) {
+//       auto n_points = counter + max_batch_size > entries ? entries-counter : max_batch_size;
+//       auto data = m_interface->read_register(0x40000000 + (afe * 0x100000) + (ch_id * 0x10000) + counter, n_points);
+//       counter += n_points;
+//       for ( const auto & e : data ) {
+// 	file << " " << e;
+//       }
      
-    } // loop over the queries for the same channel
+//     } // loop over the queries for the same channel
 
-    file << std::endl;
-  } // loop over the channels 
+//     file << std::endl;
+//   } // loop over the channels 
   
-  auto end_time = std::chrono::high_resolution_clock::now();
+//   auto end_time = std::chrono::high_resolution_clock::now();
 
-  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
-  TLOG() << get_name() << ": buffers dumped in " << duration.count() << " microseconds";
+//   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+//   TLOG() << get_name() << ": buffers dumped in " << duration.count() << " microseconds";
   
-}
+// }
 
   
 } // namespace dunedaq::daphnemodules

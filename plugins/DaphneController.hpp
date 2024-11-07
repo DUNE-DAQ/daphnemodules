@@ -22,7 +22,7 @@
 #include "DaphneInterface.hpp"
 
 #include "daphnemodules/daphnecontroller/Structs.hpp"
-#include "daphnemodules/daphnecontrollerinfo/InfoStructs.hpp"
+#include "daphnemodules/opmon/DaphneController.pb.h"
 
 
 namespace dunedaq {
@@ -137,9 +137,9 @@ class DaphneController : public dunedaq::appfwk::DAQModule
 public:
   explicit DaphneController(const std::string& name);
 
-  void init(const data_t&) override {;}
+  void init(std::shared_ptr<appfwk::ModuleConfiguration> mcfg) override {;}
 
-  void get_info(opmonlib::InfoCollector&, int /*level*/) override;
+  void generate_opmon_data() override;
 
   DaphneController(const DaphneController&) = delete;
   DaphneController& operator=(const DaphneController&) = delete;
@@ -155,7 +155,7 @@ private:
   // Commands DaphneController can receive
   void do_conf(const data_t&);
   void do_scrap(const data_t&);
-  void dump_buffers(const data_t&);
+  //  void dump_buffers(const data_t&);
   
   // specific actions
   void create_interface( const std::string & ip, std::chrono::milliseconds timeout )  ;
@@ -202,7 +202,9 @@ private:
   // counter use to see how many times we failed the parsing of the monitoing
 
   //monitoring
-  using counter_t = decltype(daphnecontrollerinfo::ChannelInfo::total_triggers);
+  using const_metric_counter_t = std::invoke_result<decltype(&dunedaq::daphnemodules::opmon::ChannelInfo::total_triggers),
+						    dunedaq::daphnemodules::opmon::ChannelInfo>::type;
+  using counter_t = std::remove_const<const_metric_counter_t>::type;
   struct Counters {
     std::atomic<counter_t> triggers = 0;
     std::atomic<counter_t> packets  = 0;
