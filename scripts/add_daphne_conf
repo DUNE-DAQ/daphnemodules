@@ -2,7 +2,7 @@
 
 import click
 from pathlib import Path
-import daphnemodules.add_daphne_conf
+import daphnemodules.add_daphne_conf as add_daphne_conf
 
 @click.command()
 @click.option('--timeout', '-t', type=int, default=1500,
