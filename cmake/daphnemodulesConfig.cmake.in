@@ -7,6 +7,7 @@ include(CMakeFindDependencyMacro)
 # the place of this comment. Make sure they match up with the
 # find_package calls in your package's CMakeLists.txt file
 
+find_package(appmodel)
 find_package(appfwk)
 find_package(opmonlib)
 find_package(fmt)
