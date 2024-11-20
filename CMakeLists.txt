@@ -7,6 +7,7 @@ find_package(daq-cmake REQUIRED)
 daq_setup_environment()
 
 find_package(appmodel REQUIRED)
+find_package(conffwk REQUIRED)
 find_package(appfwk REQUIRED)
 find_package(opmonlib REQUIRED)
 find_package(fmt REQUIRED)

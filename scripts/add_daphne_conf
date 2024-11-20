@@ -2,7 +2,7 @@
 
 import click
 from pathlib import Path
-import daphnemodules.add_daphne_conf as add_daphne_conf
+import daphnemodules.add_daphne_conf as daphne
 
 @click.command()
 @click.option('--timeout', '-t', type=int, default=1500,
@@ -14,8 +14,8 @@ import daphnemodules.add_daphne_conf as add_daphne_conf
 def cli(oksfile, jsonfile, name, timeout):
   """Script to import a json calibration file into the database"""
   if not name:
-     name = Path("jsonfile").stem
-  add_daphne_conf(oksfile, name, jsonfile, timeout)
+     name = Path(jsonfile).stem
+     daphne.add_daphne_conf(oksfile, name, jsonfile, timeout)
 
 if __name__ == '__main__':
   cli()
