@@ -9,7 +9,7 @@
  */
 
 #include "DaphneV2ControllerModule.hpp"
-#include "appmodel/DaphneBoardConf.hpp"
+#include "appmodel/DaphneV2BoardConf.hpp"
 #include "appmodel/DaphneConf.hpp"
 
 #include <string>

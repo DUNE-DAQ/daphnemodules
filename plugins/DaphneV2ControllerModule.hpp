@@ -12,7 +12,7 @@
 #define DAPHNEMODULES_PLUGINS_DaphneV2ControllerModule_HPP_
 
 #include "appfwk/DAQModule.hpp"
-#include "appmodel/DaphneV2ControllerModuleModule.hpp"
+#include "appmodel/DaphneV2ControllerModule.hpp"
 
 #include <atomic>
 #include <limits>
@@ -22,7 +22,7 @@
 
 #include "DaphneInterface.hpp"
 
-#include "daphnemodules/opmon/DaphneV2ControllerModule.pb.h"
+#include "daphnemodules/opmon/DaphneControllerModule.pb.h"
 
 
 namespace dunedaq {
@@ -182,7 +182,7 @@ private:
 
   static const ChannelId s_max_channels = 40;
   static const ChannelId s_max_afes = 5;
-  using conf_t = appmodel::DaphneV2ControllerModuleModule;
+  using conf_t = appmodel::DaphneV2ControllerModule;
   const conf_t* m_module_config = nullptr;
   
   // uint8_t  m_slot;
