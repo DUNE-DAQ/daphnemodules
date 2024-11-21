@@ -53,6 +53,8 @@ void
 DaphneController::generate_opmon_data()
 {
 
+  if ( ! m_interface ) return ;
+  
   if ( m_scrap_called.load() ) return;
 
   // read the channel counters
@@ -127,7 +129,6 @@ DaphneController::generate_opmon_data()
   // gatehring the rest of the information
   static const std::regex volt_regex(".* VBIAS0= ([^ ]+) VBIAS1= ([^ ]+) VBIAS2= ([^ ]+) VBIAS3= ([^ ]+) VBIAS4= ([^ ]+) POWER.-5v.= ([^ ]+) POWER..2.5v.= ([^ ]+) POWER..CE.= ([^ ]+) TEMP.Celsius.= ([^ ]+) .*");
 
-  if ( ! m_interface ) return ;
 
   try {
 
@@ -219,26 +220,20 @@ DaphneController::generate_opmon_data()
 }
 
 void
-DaphneController::do_conf(const data_t& conf_as_json)
+DaphneController::do_conf(const data_t&)
 {
   auto start_time = std::chrono::high_resolution_clock::now();
 
-  // MaR adapt tp v5
-  // auto conf_as_cpp = conf_as_json.get<daphnecontroller::Conf>();
-
-  // auto slot = conf_as_cpp.slot;
-  // if ( slot >= 16 ) {
-  //   // the slot used laster in the code is a 4 bit register, so we need to check we are not overflowing
-  //   throw InvalidSlot(ERS_HERE, slot, conf_as_cpp.daphne_address);
-  // } else {
-  //   m_slot = (decltype(m_slot)) slot;
-  // }
+  auto slot = m_module_config->get_slot();
+  if ( slot >= 16 ) 
+    //   // the slot used laster in the code is a 4 bit register, so we need to check we are not overflowing
+    throw InvalidSlot(ERS_HERE, slot, m_module_config->get_address());
   
   // during configuration no other operations are allowed
   const std::lock_guard<std::mutex> lock(m_mutex);
   
-  // create_interface(conf_as_cpp.daphne_address,
-  // 		   std::chrono::milliseconds(conf_as_cpp.timeout_ms) );
+  create_interface(m_module_config->get_address(),
+		   m_module_config->get_daphne_conf()->get_timeout());
 
   //validate_configuration(conf_as_cpp);
   
