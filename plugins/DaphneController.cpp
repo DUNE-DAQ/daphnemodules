@@ -38,6 +38,18 @@ DaphneController::DaphneController(const std::string& name)
 
 
 void
+DaphneController::init(std::shared_ptr<appfwk::ModuleConfiguration> mcfg) {
+
+  auto mdal = mcfg->module<conf_t>(get_name());
+  if (!mdal) {
+    throw ConfigurationFailed(ERS_HERE, get_name());
+  }
+  m_module_config = mdal;
+}
+  
+
+  
+void
 DaphneController::generate_opmon_data()
 {
 

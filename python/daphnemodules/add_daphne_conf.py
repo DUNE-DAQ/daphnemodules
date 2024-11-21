@@ -13,7 +13,7 @@ def add_daphne_conf(oksfile:str, object_name:str, json_file:str, timeout_ms:int 
     db = conffwk.Configuration("oksconflibs:" + oksfile)
 
     with open(json_file, 'r') as file:
-        data = json.load(file)
+        data = file.read()
 
     schemafile='schema/appmodel/PDS.schema.xml'
     dal = conffwk.dal.module('dal', schemafile)

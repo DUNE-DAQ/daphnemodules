@@ -26,7 +26,14 @@
 
 
 namespace dunedaq {
+  
+  ERS_DECLARE_ISSUE( daphnemodules,
+                     ConfigurationFailed,
+                     name << " failed to retrieve its conf object",
+                     ((std::string)name)
+                   )
 
+  
   ERS_DECLARE_ISSUE( daphnemodules,
                      MonitoringFailed,
                      "Monitoring of " << item << " failed",
@@ -137,7 +144,7 @@ class DaphneController : public dunedaq::appfwk::DAQModule
 public:
   explicit DaphneController(const std::string& name);
 
-  void init(std::shared_ptr<appfwk::ModuleConfiguration> mcfg) override {;}
+  void init(std::shared_ptr<appfwk::ModuleConfiguration> mcfg) override;
 
   void generate_opmon_data() override;
 
@@ -174,8 +181,9 @@ private:
   std::atomic<bool> m_scrap_called = false;
 
   static const ChannelId s_max_channels = 40;
-  static const ChannelId s_max_afes = 5; 
-  appmodel::DaphneControllerModule * m_module_config = nullptr;
+  static const ChannelId s_max_afes = 5;
+  using conf_t = appmodel::DaphneControllerModule;
+  const conf_t* m_module_config = nullptr;
   
   // uint8_t  m_slot;
   // uint16_t m_bias_ctrl;
