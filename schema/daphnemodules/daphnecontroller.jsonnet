@@ -1,5 +1,5 @@
 local moo = import "moo.jsonnet";
-local ns = "dunedaq.daphnemodules.daphnecontroller";
+local ns = "dunedaq.daphnemodules.DaphneV2ControllerModule";
 local s = moo.oschema.schema(ns);
 
 local types = {

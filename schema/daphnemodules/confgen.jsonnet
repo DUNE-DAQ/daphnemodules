@@ -9,8 +9,8 @@ local types = moo.oschema.hier(stypes).dunedaq.daqconf.types;
 local sboot = import "daqconf/bootgen.jsonnet";
 local bootgen = moo.oschema.hier(sboot).dunedaq.daqconf.bootgen;
 
-local sdaphne = import "daphnemodules/daphnecontroller.jsonnet";
-local daphneconf = moo.oschema.hier(sdaphne).dunedaq.daphnemodules.daphnecontroller;
+local sdaphne = import "daphnemodules/DaphneV2ControllerModule.jsonnet";
+local daphneconf = moo.oschema.hier(sdaphne).dunedaq.daphnemodules.DaphneV2ControllerModule;
 
 local ns = "dunedaq.daphnemodules.confgen";
 local s = moo.oschema.schema(ns);

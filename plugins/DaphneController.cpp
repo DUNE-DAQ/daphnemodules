@@ -1,14 +1,14 @@
 /**
- * @file DaphneController.cpp
+ * @file DaphneV2ControllerModule.cpp
  *
- * Implementations of DaphneController's functions
+ * Implementations of DaphneV2ControllerModule's functions
  *
  * This is part of the DUNE DAQ Software Suite, copyright 2020.
  * Licensing/copyright details are in the COPYING file that you should have
  * received with this code.
  */
 
-#include "DaphneController.hpp"
+#include "DaphneV2ControllerModule.hpp"
 #include "appmodel/DaphneBoardConf.hpp"
 #include "appmodel/DaphneConf.hpp"
 
@@ -29,17 +29,17 @@
 
 namespace dunedaq::daphnemodules {
 
-DaphneController::DaphneController(const std::string& name)
+DaphneV2ControllerModule::DaphneV2ControllerModule(const std::string& name)
   : dunedaq::appfwk::DAQModule(name)
 {
-  register_command("conf", &DaphneController::do_conf);
-  register_command("scrap", &DaphneController::do_scrap);
-  //  register_command("dump_buffers", &DaphneController::dump_buffers);
+  register_command("conf", &DaphneV2ControllerModule::do_conf);
+  register_command("scrap", &DaphneV2ControllerModule::do_scrap);
+  //  register_command("dump_buffers", &DaphneV2ControllerModule::dump_buffers);
 }
 
 
 void
-DaphneController::init(std::shared_ptr<appfwk::ModuleConfiguration> mcfg) {
+DaphneV2ControllerModule::init(std::shared_ptr<appfwk::ModuleConfiguration> mcfg) {
 
   auto mdal = mcfg->module<conf_t>(get_name());
   if (!mdal) {
@@ -51,7 +51,7 @@ DaphneController::init(std::shared_ptr<appfwk::ModuleConfiguration> mcfg) {
 
   
 void
-DaphneController::generate_opmon_data()
+DaphneV2ControllerModule::generate_opmon_data()
 {
 
   if ( ! m_interface ) return ;
@@ -221,7 +221,7 @@ DaphneController::generate_opmon_data()
 }
 
 void
-DaphneController::do_conf(const data_t&)
+DaphneV2ControllerModule::do_conf(const data_t&)
 {
   auto start_time = std::chrono::high_resolution_clock::now();
 
@@ -265,7 +265,7 @@ DaphneController::do_conf(const data_t&)
 
 
 void
-DaphneController::do_scrap(const data_t&)
+DaphneV2ControllerModule::do_scrap(const data_t&)
 {
   auto start_time = std::chrono::high_resolution_clock::now();
 
@@ -301,7 +301,7 @@ DaphneController::do_scrap(const data_t&)
   
 
 void
-DaphneController::create_interface(const std::string & ip, std::chrono::milliseconds timeout) {
+DaphneV2ControllerModule::create_interface(const std::string & ip, std::chrono::milliseconds timeout) {
 
   static std::regex ip_regex("[0-9]+.[0-9]+.[0-9]+.([0-9]+)");
   
@@ -318,7 +318,7 @@ DaphneController::create_interface(const std::string & ip, std::chrono::millisec
 }
 
 // void
-// DaphneController::validate_configuration(const appmodel::DaphneControllerModule & c) {
+// DaphneV2ControllerModule::validate_configuration(const appmodel::DaphneV2ControllerModuleModule & c) {
 
 //   // channel configuration
 //   // there is another variable we use to configure each channel the TRIM control:
@@ -337,8 +337,8 @@ DaphneController::create_interface(const std::string & ip, std::chrono::millisec
 
 //   for ( const auto & ch : channel_conf ) {
 
-//     if ( ch.id >= DaphneController::s_max_channels ) {
-//       throw InvalidChannelId(ERS_HERE, ch.id, DaphneController::s_max_channels);
+//     if ( ch.id >= DaphneV2ControllerModule::s_max_channels ) {
+//       throw InvalidChannelId(ERS_HERE, ch.id, DaphneV2ControllerModule::s_max_channels);
 //     }
     
 //     //CH TRIM maximum is 4095
@@ -374,8 +374,8 @@ DaphneController::create_interface(const std::string & ip, std::chrono::millisec
 //     // max value it should take in configuration is 1500DAC ~ 55V
 
 
-//     if ( afe.id >= DaphneController::s_max_afes ) 
-//       throw InvalidChannelId( ERS_HERE, afe.id, DaphneController::s_max_afes);
+//     if ( afe.id >= DaphneV2ControllerModule::s_max_afes ) 
+//       throw InvalidChannelId( ERS_HERE, afe.id, DaphneV2ControllerModule::s_max_afes);
 
 //     bool used = false;
 //     for ( auto ch = afe.id * 8 ; ch < (afe.id+1)*8 ; ++ch ) {
@@ -459,8 +459,8 @@ DaphneController::create_interface(const std::string & ip, std::chrono::millisec
 //   if ( m_self_threshold == 0 ) {
 //     // we need to set the list of channels to broadcast
 //     for ( const auto & ch : c.full_stream_channels ) {
-//       if ( ch >= DaphneController::s_max_channels ) 
-// 	throw InvalidChannelId(ERS_HERE, ch, DaphneController::s_max_channels);
+//       if ( ch >= DaphneV2ControllerModule::s_max_channels ) 
+// 	throw InvalidChannelId(ERS_HERE, ch, DaphneV2ControllerModule::s_max_channels);
 
 //       m_full_stream_channels.push_back(ch);
 
@@ -476,7 +476,7 @@ DaphneController::create_interface(const std::string & ip, std::chrono::millisec
  
 
 void
-DaphneController::configure_timing_endpoints() {
+DaphneV2ControllerModule::configure_timing_endpoints() {
 
   TLOG() << get_name() << ": configuring timing endpoint";
   m_interface->write_register(0x4001, {0x1});
@@ -540,7 +540,7 @@ DaphneController::configure_timing_endpoints() {
 
 }
 
-void DaphneController::configure_analog_chain(bool initial_config) {
+void DaphneV2ControllerModule::configure_analog_chain(bool initial_config) {
 
   TLOG() << get_name() << ": configuring analog chain";
 
@@ -608,7 +608,7 @@ void DaphneController::configure_analog_chain(bool initial_config) {
 }
 
 
-void DaphneController::align_DDR() {
+void DaphneV2ControllerModule::align_DDR() {
 
   TLOG() << get_name() << ": aligning DDR";
   
@@ -641,7 +641,7 @@ void DaphneController::align_DDR() {
     //   auto data = m_interface->read_register(0x40000000 + (afe * 0x100000) + (8 * 0x10000), 15);  // ch = 8
 
     //   // things are ok when the data is 0x3f80
-    //   if ( data[0] != DaphneController::s_frame_alignment_good ) 
+    //   if ( data[0] != DaphneV2ControllerModule::s_frame_alignment_good ) 
     // 	throw DDRNotAligned(ERS_HERE, m_module_config->get_slot(), afe, data[0] );
     // }
   }
@@ -651,7 +651,7 @@ void DaphneController::align_DDR() {
 
 
 void
-DaphneController::configure_trigger_mode() {
+DaphneV2ControllerModule::configure_trigger_mode() {
 
   TLOG() << get_name() << ": Setting trigger mode";
 
@@ -664,7 +664,7 @@ DaphneController::configure_trigger_mode() {
     m_interface->write_register(0x3001, {0x3});  // only link0 is enabled
     m_interface->write_register(0x6000, {threshold});
 
-    std::bitset<DaphneController::s_max_channels> mask;
+    std::bitset<DaphneV2ControllerModule::s_max_channels> mask;
     // we unmask all the channels that are enabled
     for ( ChannelId ch = 0; ch < s_max_channels; ++ch ) {
       if ( m_module_config->channel_used(ch) )
@@ -707,11 +707,11 @@ DaphneController::configure_trigger_mode() {
 
 
 // void
-// DaphneController::dump_buffers(const data_t& conf_as_json)
+// DaphneV2ControllerModule::dump_buffers(const data_t& conf_as_json)
 // {
 //   auto start_time = std::chrono::high_resolution_clock::now();
   
-//   auto conf_as_cpp = conf_as_json.get<daphnecontroller::DumpBuffers>();
+//   auto conf_as_cpp = conf_as_json.get<DaphneV2ControllerModule::DumpBuffers>();
 
 //   // during dumping no other operations are allowed
 //   const std::lock_guard<std::mutex> lock(m_mutex);
@@ -766,4 +766,4 @@ DaphneController::configure_trigger_mode() {
   
 } // namespace dunedaq::daphnemodules
 
-DEFINE_DUNE_DAQ_MODULE(dunedaq::daphnemodules::DaphneController)
+DEFINE_DUNE_DAQ_MODULE(dunedaq::daphnemodules::DaphneV2ControllerModule)

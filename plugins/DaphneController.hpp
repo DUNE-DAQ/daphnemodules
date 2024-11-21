@@ -1,5 +1,5 @@
 /**
- * @file DaphneController.hpp
+ * @file DaphneV2ControllerModule.hpp
  *
  * Developer(s) of this DAQModule have yet to replace this line with a brief description of the DAQModule.
  *
@@ -8,11 +8,11 @@
  * received with this code.
  */
 
-#ifndef DAPHNEMODULES_PLUGINS_DAPHNECONTROLLER_HPP_
-#define DAPHNEMODULES_PLUGINS_DAPHNECONTROLLER_HPP_
+#ifndef DAPHNEMODULES_PLUGINS_DaphneV2ControllerModule_HPP_
+#define DAPHNEMODULES_PLUGINS_DaphneV2ControllerModule_HPP_
 
 #include "appfwk/DAQModule.hpp"
-#include "appmodel/DaphneControllerModule.hpp"
+#include "appmodel/DaphneV2ControllerModuleModule.hpp"
 
 #include <atomic>
 #include <limits>
@@ -22,7 +22,7 @@
 
 #include "DaphneInterface.hpp"
 
-#include "daphnemodules/opmon/DaphneController.pb.h"
+#include "daphnemodules/opmon/DaphneV2ControllerModule.pb.h"
 
 
 namespace dunedaq {
@@ -139,34 +139,34 @@ namespace dunedaq {
 
 namespace dunedaq::daphnemodules {
 
-class DaphneController : public dunedaq::appfwk::DAQModule
+class DaphneV2ControllerModule : public dunedaq::appfwk::DAQModule
 {
 public:
-  explicit DaphneController(const std::string& name);
+  explicit DaphneV2ControllerModule(const std::string& name);
 
   void init(std::shared_ptr<appfwk::ModuleConfiguration> mcfg) override;
 
   void generate_opmon_data() override;
 
-  DaphneController(const DaphneController&) = delete;
-  DaphneController& operator=(const DaphneController&) = delete;
-  DaphneController(DaphneController&&) = delete;
-  DaphneController& operator=(DaphneController&&) = delete;
+  DaphneV2ControllerModule(const DaphneV2ControllerModule&) = delete;
+  DaphneV2ControllerModule& operator=(const DaphneV2ControllerModule&) = delete;
+  DaphneV2ControllerModule(DaphneV2ControllerModule&&) = delete;
+  DaphneV2ControllerModule& operator=(DaphneV2ControllerModule&&) = delete;
 
-  ~DaphneController() = default;
+  ~DaphneV2ControllerModule() = default;
 
 private:
 
   using ChannelId = uint8_t;
   
-  // Commands DaphneController can receive
+  // Commands DaphneV2ControllerModule can receive
   void do_conf(const data_t&);
   void do_scrap(const data_t&);
   //  void dump_buffers(const data_t&);
   
   // specific actions
   void create_interface( const std::string & ip, std::chrono::milliseconds timeout )  ;
-  //  void validate_configuration(const daphnecontroller::Conf &);   
+  //  void validate_configuration(const DaphneV2ControllerModule::Conf &);   
   void configure_timing_endpoints();
   void configure_analog_chain(bool intial_config);
   void align_DDR();
@@ -182,7 +182,7 @@ private:
 
   static const ChannelId s_max_channels = 40;
   static const ChannelId s_max_afes = 5;
-  using conf_t = appmodel::DaphneControllerModule;
+  using conf_t = appmodel::DaphneV2ControllerModuleModule;
   const conf_t* m_module_config = nullptr;
   
   // uint8_t  m_slot;
@@ -190,7 +190,7 @@ private:
   // uint16_t m_self_threshold;
 
   
-  // std::array<daphnecontroller::ChannelConf, s_max_channels> m_channel_confs;
+  // std::array<DaphneV2ControllerModule::ChannelConf, s_max_channels> m_channel_confs;
   // // this array is indexed in the [0-40) range
   
   // struct AFEConf {
@@ -228,4 +228,4 @@ private:
 
 } // namespace dunedaq::daphnemodules
 
-#endif // DAPHNEMODULES_PLUGINS_DAPHNECONTROLLER_HPP_
+#endif // DAPHNEMODULES_PLUGINS_DaphneV2ControllerModule_HPP_
