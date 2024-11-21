@@ -10,6 +10,7 @@
 
 #include "DaphneController.hpp"
 #include "appmodel/DaphneBoardConf.hpp"
+#include "appmodel/DaphneConf.hpp"
 
 #include <string>
 #include <logging/Logging.hpp>
