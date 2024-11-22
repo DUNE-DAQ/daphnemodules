@@ -549,8 +549,10 @@ void DaphneV2ControllerModule::configure_analog_chain(bool initial_config) {
     TLOG() << result.command << " -> " << result.result;
   }
 
-  // auto result = m_interface->send_command("WR VBIASCTRL V " + std::to_string(m_bias_ctrl));
-  // TLOG() << result.command << " -> " << result.result;
+  auto board_conf = m_module_config->get_board_conf();
+  
+  auto result = m_interface->send_command(fmt::format("WR VBIASCTRL V {}", board_conf->get_bias_ctrl()));
+  TLOG() << result.command << " -> " << result.result;
   
   for ( size_t ch = 0; ch < s_max_channels; ++ch ) {
 
