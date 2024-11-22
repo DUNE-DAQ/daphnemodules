@@ -12,6 +12,7 @@
 #include "appmodel/DaphneV2BoardConf.hpp"
 #include "appmodel/DaphneV2Channel.hpp"
 #include "appmodel/DaphneV2AFE.hpp"
+#include "appmodel/DaphneV2ADC.hpp"
 #include "appmodel/DaphneConf.hpp"
 
 #include <string>
@@ -581,9 +582,10 @@ void DaphneV2ControllerModule::configure_analog_chain(bool initial_config) {
     // 	"WR AFE " + std::to_string(afe) + " REG 52 V " + std::to_string(m_afe_confs[afe].reg52) );
     // TLOG() << result.command << " -> " << result.result;
 
-    // result = m_interface -> send_command(
-    // 	"WR AFE " + std::to_string(afe) + " REG 4 V " + std::to_string(m_afe_confs[afe].reg4) );
-    // TLOG() << result.command << " -> " << result.result;
+    result = m_interface -> send_command( fmt::format("WR AFE {} REG 4 V {}",
+						      afe_conf.get_afe_id(),
+						      afe_conf.get_adc()->get_reg4() ) );
+    TLOG() << result.command << " -> " << result.result;
 
     // result = m_interface -> send_command(
     // 	"WR AFE " + std::to_string(afe) + " REG 51 V " + std::to_string(m_afe_confs[afe].reg51) );
