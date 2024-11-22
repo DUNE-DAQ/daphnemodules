@@ -11,6 +11,7 @@
 #include "DaphneV2ControllerModule.hpp"
 #include "appmodel/DaphneV2BoardConf.hpp"
 #include "appmodel/DaphneV2Channel.hpp"
+#include "appmodel/DaphneV2AFE.hpp"
 #include "appmodel/DaphneConf.hpp"
 
 #include <string>
@@ -538,14 +539,15 @@ void DaphneV2ControllerModule::configure_analog_chain(bool initial_config) {
     TLOG() << result.command << " -> " << result.result;
   }
 
-  auto board_conf = m_module_config->get_board_conf();
-  
+  auto board_conf = initial_config ? m_module_config->get_board_conf() :
+    m_module_config->get_daphne_conf()->get_default_v2_settings();
+    
   auto result = m_interface->send_command(fmt::format("WR VBIASCTRL V {}", board_conf->get_bias_ctrl()));
   TLOG() << result.command << " -> " << result.result;
   
   for ( size_t ch = 0; ch < s_max_channels; ++ch ) {
 
-    const auto & channel_conf = board_conf->get_channel(ch, initial_config);
+    const auto & channel_conf = board_conf->get_channel(ch);
     // get_channel returns the running value if the bool argument is true,
     // and the default values when the bool argument is false
     // hence, this loop does both the job of enabling and disebling
@@ -564,7 +566,6 @@ void DaphneV2ControllerModule::configure_analog_chain(bool initial_config) {
 						     channel_conf.get_channel_id(),
 						     channel_conf.get_gain() ) );
     TLOG() << result.command << " -> " << result.result;
-
     
   } // channel loop
 
@@ -573,6 +574,9 @@ void DaphneV2ControllerModule::configure_analog_chain(bool initial_config) {
   //   // But Manuel said that this is not necessary to be done all the time
 
   for ( size_t afe = 0; afe < s_max_afes ; ++afe) {
+
+    const auto & afe_conf = board_conf->get_afe(afe);
+
     // result = m_interface -> send_command(
     // 	"WR AFE " + std::to_string(afe) + " REG 52 V " + std::to_string(m_afe_confs[afe].reg52) );
     // TLOG() << result.command << " -> " << result.result;
@@ -585,13 +589,15 @@ void DaphneV2ControllerModule::configure_analog_chain(bool initial_config) {
     // 	"WR AFE " + std::to_string(afe) + " REG 51 V " + std::to_string(m_afe_confs[afe].reg51) );
     // TLOG() << result.command << " -> " << result.result;
 
-    // result = m_interface -> send_command(
-    // 	"WR AFE " + std::to_string(afe) + " VGAIN V " + std::to_string(m_afe_confs[afe].v_gain) );
-    // TLOG() << result.command << " -> " << result.result;
+    result = m_interface -> send_command( fmt::format("WR AFE {} VGAIN V {}",
+						      afe_conf.get_afe_id(),
+						      afe_conf.get_attenuator() ) );
+    TLOG() << result.command << " -> " << result.result;
 
-    // result = m_interface -> send_command(
-    // 	"WR BIASSET AFE " + std::to_string(afe) + " V " + std::to_string(m_afe_confs[afe].v_bias) );
-    // TLOG() << result.command << " -> " << result.result;
+    result = m_interface -> send_command( fmt::format("WR BIASSET AFE {} V {}",
+						      afe_conf.get_afe_id(),
+						      afe_conf.get_v_bias() ) );
+    TLOG() << result.command << " -> " << result.result;
 
   } // afe loop
   
