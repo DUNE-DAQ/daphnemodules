@@ -10,6 +10,7 @@
 
 #include "DaphneV2ControllerModule.hpp"
 #include "appmodel/DaphneV2BoardConf.hpp"
+#include "appmodel/DaphneV2Channel.hpp"
 #include "appmodel/DaphneConf.hpp"
 
 #include <string>
@@ -544,7 +545,7 @@ void DaphneV2ControllerModule::configure_analog_chain(bool initial_config) {
 
   TLOG() << get_name() << ": configuring analog chain";
 
-  if ( initial_config) {
+  if (initial_config) {
     auto result = m_interface->send_command("CFG AFE ALL INITIAL");
     TLOG() << result.command << " -> " << result.result;
   }
@@ -556,20 +557,26 @@ void DaphneV2ControllerModule::configure_analog_chain(bool initial_config) {
   
   for ( size_t ch = 0; ch < s_max_channels; ++ch ) {
 
-    // result = m_interface->send_command(
-    //   "WR TRIM CH " + std::to_string(ch) + " V " + std::to_string(m_channel_confs[ch].trim) );
-    // TLOG() << result.command << " -> " << result.result;
-    
-    // result = m_interface->send_command(
-    //   "WR OFFSET CH " + std::to_string(ch) + " V " + std::to_string(m_channel_confs[ch].offset) );
-    // TLOG() << result.command << " -> " << result.result;
-
-    // result = m_interface -> send_command(
-    //   "CFG OFFSET CH " + std::to_string(ch) + " GAIN " + std::to_string(m_channel_confs[ch].gain) );
-    // TLOG() << result.command << " -> " << result.result;
-
-    // the defaul values of offset and gain are set so that they correspond to the setting to disable the channel
+    const auto & channel_conf = board_conf->get_channel(ch, initial_config);
+    // get_channel returns the running value if the bool argument is true,
+    // and the default values when the bool argument is false
     // hence, this loop does both the job of enabling and disebling
+    
+    result = m_interface->send_command(fmt::format( "WR TRIM CH {} V {}",
+						    channel_conf.get_channel_id(),
+						    channel_conf.get_trim() ) );
+    TLOG() << result.command << " -> " << result.result;
+    
+    result = m_interface->send_command(fmt::format("WR OFFSET CH {} V {}",
+						   channel_conf.get_channel_id(),
+						   channel_conf.get_offset() ) );
+    TLOG() << result.command << " -> " << result.result;
+
+    result = m_interface -> send_command(fmt::format("CFG OFFSET CH {} GAIN {}",
+						     channel_conf.get_channel_id(),
+						     channel_conf.get_gain() ) );
+    TLOG() << result.command << " -> " << result.result;
+
     
   } // channel loop
 
