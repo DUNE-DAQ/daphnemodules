@@ -275,23 +275,11 @@ DaphneV2ControllerModule::do_scrap(const data_t&)
   // during configuration no other operations are allowed
   const std::lock_guard<std::mutex> lock(m_mutex);
 
-  // the scrap transition should be rewritten using the default value from configuration
-  // // we want to write 0 in all the bias variables an all the trims
-  // m_bias_ctrl = 0;
-  // for ( auto & c : m_afe_confs ) {
-  //   c.v_bias = 0;
-  // }
-  // for ( auto & c : m_channel_confs ) {
-  //   c.trim = 0;
-  // }
-
   configure_analog_chain(false);
 
   // break the interface
   m_interface.release();
 
-  // m_full_stream_channels.clear();
-  
   auto end_time = std::chrono::high_resolution_clock::now();
 
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
