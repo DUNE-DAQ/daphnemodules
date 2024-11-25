@@ -645,14 +645,15 @@ void DaphneV2ControllerModule::align_DDR() {
   // this trigger the spy buffers
     
   // read register ch 8 of each afe,   by looping on all the afe we use
+  auto board_conf = m_module_config->get_board_conf();
   for ( size_t afe = 0; afe < s_max_afes ; ++afe ) {
-    // if ( m_afe_confs[afe].v_gain > 0 ) {
-    //   auto data = m_interface->read_register(0x40000000 + (afe * 0x100000) + (8 * 0x10000), 15);  // ch = 8
+    if ( board_conf -> is_afe_used(afe) ) {
+      auto data = m_interface->read_register(0x40000000 + (afe * 0x100000) + (8 * 0x10000), 15);  // ch = 8
 
-    //   // things are ok when the data is 0x3f80
-    //   if ( data[0] != DaphneV2ControllerModule::s_frame_alignment_good ) 
-    // 	throw DDRNotAligned(ERS_HERE, m_module_config->get_slot(), afe, data[0] );
-    // }
+      // things are ok when the data is 0x3f80
+      if ( data[0] != DaphneV2ControllerModule::s_frame_alignment_good ) 
+	throw DDRNotAligned(ERS_HERE, m_module_config->get_slot(), afe, data[0] );
+    } //afe used
   }
 
   TLOG() << get_name() << ": done aligning DDR";
@@ -691,24 +692,25 @@ DaphneV2ControllerModule::configure_trigger_mode() {
     m_interface->write_register(0x6000, {0});  // for safety we mask everything
 
     size_t stream_id = 0;
-    // for ( const auto & ch : m_full_stream_channels ) {
+    auto full_stream_channels = c->get_full_stream_channels();
+    for ( const auto & ch : full_stream_channels ) {
 
-    //   // The channles are not identified with an id from 0-39, they have a different identifier to represent the
-    //   // cables in the fron of the board. They are grouped in 8 
-    //   // Conf ch -> DAQ ch
-    //   // 0-7     -> 0-7
-    //   // 8-15    -> 10-17
-    //   // 16-23   -> 20-27
-    //   // 24-31   -> 30-37
-    //   // 32-39   -> 40-47
+      // The channles are not identified with an id from 0-39, they have a different identifier to represent the
+      // cables in the fron of the board. They are grouped in 8 
+      // Conf ch -> DAQ ch
+      // 0-7     -> 0-7
+      // 8-15    -> 10-17
+      // 16-23   -> 20-27
+      // 24-31   -> 30-37
+      // 32-39   -> 40-47
 
-    //   auto reg = 0x5000 + stream_id; // stream is first come first served basis
-    //   auto value = (ch/8)*10 + ch%8;
+      auto reg = 0x5000 + stream_id; // stream is first come first served basis
+      auto value = (ch/8)*10 + ch%8;
 
-    //   m_interface->write_register(reg, {(uint64_t)value});
+      m_interface->write_register(reg, {(uint64_t)value});
 
-    //   ++stream_id;
-    // }
+      ++stream_id;
+    } // loop over full_stream channels
   }
 
   TLOG() << get_name() << ": trigger mode configured";
