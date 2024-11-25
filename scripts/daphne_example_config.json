@@ -7,16 +7,25 @@
             0,
             2,
             5,
-            7
+            7,
+            32,
+            33,
+            34
         ],
         "channel_analog_conf": {
             "ids": [
                 0,
                 2,
                 5,
-                7
+                7,
+                32,
+                33,
+                34
             ],
             "gains": [
+                1,
+                1,
+                1,
                 1,
                 1,
                 1,
@@ -26,186 +35,76 @@
                 2200,
                 2200,
                 2200,
+                2200,
+                2200,
+                2200,
                 2200
             ],
             "trims": [
                 256,
                 246,
                 228,
-                166
+                166,
+                858,
+                191,
+                788
             ]
         },
         "afes": {
-            "v_gains": [
-                {
-                    "id": 0,
-                    "value": 1
-                },
-                {
-                    "id": 1,
-                    "value": 1
-                },
-                {
-                    "id": 2,
-                    "value": 1
-                },
-                {
-                    "id": 3,
-                    "value": 1
-                },
-                {
-                    "id": 4,
-                    "value": 1
-                }
+            "ids": [
+                0,
+                4
+            ],
+            "atenuators": [
+                1,
+                1
             ],
             "v_biases": [
-                {
-                    "id": 0,
-                    "value": 783
-                },
-                {
-                    "id": 1,
-                    "value": 809
-                },
-                {
-                    "id": 2,
-                    "value": 819
-                },
-                {
-                    "id": 3,
-                    "value": 1122
-                },
-                {
-                    "id": 4,
-                    "value": 1154
-                }
+                783,
+                1154
             ],
-            "adcs": [
-                {
-                    "id": 0,
-                    "value": {
-                        "resolution": 0,
-                        "output_format": 1,
-                        "SB_first": 1
-                    }
-                },
-                {
-                    "id": 1,
-                    "value": {
-                        "resolution": 0,
-                        "output_format": 1,
-                        "SB_first": 1
-                    }
-                },
-                {
-                    "id": 2,
-                    "value": {
-                        "resolution": 0,
-                        "output_format": 1,
-                        "SB_first": 1
-                    }
-                },
-                {
-                    "id": 3,
-                    "value": {
-                        "resolution": 0,
-                        "output_format": 1,
-                        "SB_first": 1
-                    }
-                },
-                {
-                    "id": 4,
-                    "value": {
-                        "resolution": 0,
-                        "output_format": 1,
-                        "SB_first": 1
-                    }
-                }
-            ],
-            "pgas": [
-                {
-                    "id": 0,
-                    "value": {
-                        "lpf_cut_frequency": 4,
-                        "integrator_disable": 1,
-                        "gain": 0
-                    }
-                },
-                {
-                    "id": 1,
-                    "value": {
-                        "lpf_cut_frequency": 4,
-                        "integrator_disable": 1,
-                        "gain": 0
-                    }
-                },
-                {
-                    "id": 2,
-                    "value": {
-                        "lpf_cut_frequency": 4,
-                        "integrator_disable": 1,
-                        "gain": 0
-                    }
-                },
-                {
-                    "id": 3,
-                    "value": {
-                        "lpf_cut_frequency": 4,
-                        "integrator_disable": 1,
-                        "gain": 0
-                    }
-                },
-                {
-                    "id": 4,
-                    "value": {
-                        "lpf_cut_frequency": 4,
-                        "integrator_disable": 1,
-                        "gain": 0
-                    }
-                }
-            ],
-            "lnas": [
-                {
-                    "id": 0,
-                    "value": {
-                        "clamp": 0,
-                        "integrator_disable": 1,
-                        "gain": 2
-                    }
-                },
-                {
-                    "id": 1,
-                    "value": {
-                        "clamp": 0,
-                        "integrator_disable": 1,
-                        "gain": 2
-                    }
-                },
-                {
-                    "id": 2,
-                    "value": {
-                        "clamp": 0,
-                        "integrator_disable": 1,
-                        "gain": 2
-                    }
-                },
-                {
-                    "id": 3,
-                    "value": {
-                        "clamp": 0,
-                        "integrator_disable": 1,
-                        "gain": 2
-                    }
-                },
-                {
-                    "id": 4,
-                    "value": {
-                        "clamp": 0,
-                        "integrator_disable": 1,
-                        "gain": 2
-                    }
-                }
-            ]
+            "adcs": {
+                "resolution": [
+                    0,
+                    0
+                ],
+                "output_format": [
+                    1,
+                    1
+                ],
+                "SB_first": [
+                    1,
+                    1
+                ]
+            },
+            "pgas": {
+                "lpf_cut_frequency": [
+                    4,
+                    4
+                ],
+                "integrator_disable": [
+                    1,
+                    1
+                ],
+                "gain": [
+                    0,
+                    0
+                ]
+            },
+            "lnas": {
+                "clamp": [
+                    0,
+                    0
+                ],
+                "integrator_disable": [
+                    1,
+                    1
+                ],
+                "gain": [
+                    2,
+                    2
+                ]
+            }
         }
     },
     "10.73.137.109": {
@@ -384,176 +283,96 @@
             ]
         },
         "afes": {
-            "v_gains": [
-                {
-                    "id": 0,
-                    "value": 1
-                },
-                {
-                    "id": 1,
-                    "value": 1
-                },
-                {
-                    "id": 2,
-                    "value": 1
-                },
-                {
-                    "id": 3,
-                    "value": 1
-                },
-                {
-                    "id": 4,
-                    "value": 1
-                }
+            "ids": [
+                0,
+                1,
+                2,
+                3,
+                4
+            ],
+            "atenuators": [
+                1,
+                1,
+                1,
+                1,
+                1
             ],
             "v_biases": [
-                {
-                    "id": 0,
-                    "value": 804
-                },
-                {
-                    "id": 1,
-                    "value": 817
-                },
-                {
-                    "id": 2,
-                    "value": 1145
-                },
-                {
-                    "id": 3,
-                    "value": 1151
-                },
-                {
-                    "id": 4,
-                    "value": 1113
-                }
+                804,
+                817,
+                1145,
+                1151,
+                1113
             ],
-            "adcs": [
-                {
-                    "id": 0,
-                    "value": {
-                        "resolution": 0,
-                        "output_format": 1,
-                        "SB_first": 1
-                    }
-                },
-                {
-                    "id": 1,
-                    "value": {
-                        "resolution": 0,
-                        "output_format": 1,
-                        "SB_first": 1
-                    }
-                },
-                {
-                    "id": 2,
-                    "value": {
-                        "resolution": 0,
-                        "output_format": 1,
-                        "SB_first": 1
-                    }
-                },
-                {
-                    "id": 3,
-                    "value": {
-                        "resolution": 0,
-                        "output_format": 1,
-                        "SB_first": 1
-                    }
-                },
-                {
-                    "id": 4,
-                    "value": {
-                        "resolution": 0,
-                        "output_format": 1,
-                        "SB_first": 1
-                    }
-                }
-            ],
-            "pgas": [
-                {
-                    "id": 0,
-                    "value": {
-                        "lpf_cut_frequency": 4,
-                        "integrator_disable": 1,
-                        "gain": 0
-                    }
-                },
-                {
-                    "id": 1,
-                    "value": {
-                        "lpf_cut_frequency": 4,
-                        "integrator_disable": 1,
-                        "gain": 0
-                    }
-                },
-                {
-                    "id": 2,
-                    "value": {
-                        "lpf_cut_frequency": 4,
-                        "integrator_disable": 1,
-                        "gain": 0
-                    }
-                },
-                {
-                    "id": 3,
-                    "value": {
-                        "lpf_cut_frequency": 4,
-                        "integrator_disable": 1,
-                        "gain": 0
-                    }
-                },
-                {
-                    "id": 4,
-                    "value": {
-                        "lpf_cut_frequency": 4,
-                        "integrator_disable": 1,
-                        "gain": 0
-                    }
-                }
-            ],
-            "lnas": [
-                {
-                    "id": 0,
-                    "value": {
-                        "clamp": 0,
-                        "integrator_disable": 1,
-                        "gain": 2
-                    }
-                },
-                {
-                    "id": 1,
-                    "value": {
-                        "clamp": 0,
-                        "integrator_disable": 1,
-                        "gain": 2
-                    }
-                },
-                {
-                    "id": 2,
-                    "value": {
-                        "clamp": 0,
-                        "integrator_disable": 1,
-                        "gain": 2
-                    }
-                },
-                {
-                    "id": 3,
-                    "value": {
-                        "clamp": 0,
-                        "integrator_disable": 1,
-                        "gain": 2
-                    }
-                },
-                {
-                    "id": 4,
-                    "value": {
-                        "clamp": 0,
-                        "integrator_disable": 1,
-                        "gain": 2
-                    }
-                }
-            ]
+            "adcs": {
+                "resolution": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "output_format": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                ],
+                "SB_first": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                ]
+            },
+            "pgas": {
+                "lpf_cut_frequency": [
+                    4,
+                    4,
+                    4,
+                    4,
+                    4
+                ],
+                "integrator_disable": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                ],
+                "gain": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ]
+            },
+            "lnas": {
+                "clamp": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "integrator_disable": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                ],
+                "gain": [
+                    2,
+                    2,
+                    2,
+                    2,
+                    2
+                ]
+            }
         }
     },
     "10.73.137.111": {
@@ -732,176 +551,96 @@
             ]
         },
         "afes": {
-            "v_gains": [
-                {
-                    "id": 0,
-                    "value": 1
-                },
-                {
-                    "id": 1,
-                    "value": 1
-                },
-                {
-                    "id": 2,
-                    "value": 1
-                },
-                {
-                    "id": 3,
-                    "value": 1
-                },
-                {
-                    "id": 4,
-                    "value": 1
-                }
+            "ids": [
+                0,
+                1,
+                2,
+                3,
+                4
+            ],
+            "atenuators": [
+                1,
+                1,
+                1,
+                1,
+                1
             ],
             "v_biases": [
-                {
-                    "id": 0,
-                    "value": 810
-                },
-                {
-                    "id": 1,
-                    "value": 814
-                },
-                {
-                    "id": 2,
-                    "value": 799
-                },
-                {
-                    "id": 3,
-                    "value": 1158
-                },
-                {
-                    "id": 4,
-                    "value": 1155
-                }
+                810,
+                814,
+                799,
+                1158,
+                1155
             ],
-            "adcs": [
-                {
-                    "id": 0,
-                    "value": {
-                        "resolution": 0,
-                        "output_format": 1,
-                        "SB_first": 1
-                    }
-                },
-                {
-                    "id": 1,
-                    "value": {
-                        "resolution": 0,
-                        "output_format": 1,
-                        "SB_first": 1
-                    }
-                },
-                {
-                    "id": 2,
-                    "value": {
-                        "resolution": 0,
-                        "output_format": 1,
-                        "SB_first": 1
-                    }
-                },
-                {
-                    "id": 3,
-                    "value": {
-                        "resolution": 0,
-                        "output_format": 1,
-                        "SB_first": 1
-                    }
-                },
-                {
-                    "id": 4,
-                    "value": {
-                        "resolution": 0,
-                        "output_format": 1,
-                        "SB_first": 1
-                    }
-                }
-            ],
-            "pgas": [
-                {
-                    "id": 0,
-                    "value": {
-                        "lpf_cut_frequency": 4,
-                        "integrator_disable": 1,
-                        "gain": 0
-                    }
-                },
-                {
-                    "id": 1,
-                    "value": {
-                        "lpf_cut_frequency": 4,
-                        "integrator_disable": 1,
-                        "gain": 0
-                    }
-                },
-                {
-                    "id": 2,
-                    "value": {
-                        "lpf_cut_frequency": 4,
-                        "integrator_disable": 1,
-                        "gain": 0
-                    }
-                },
-                {
-                    "id": 3,
-                    "value": {
-                        "lpf_cut_frequency": 4,
-                        "integrator_disable": 1,
-                        "gain": 0
-                    }
-                },
-                {
-                    "id": 4,
-                    "value": {
-                        "lpf_cut_frequency": 4,
-                        "integrator_disable": 1,
-                        "gain": 0
-                    }
-                }
-            ],
-            "lnas": [
-                {
-                    "id": 0,
-                    "value": {
-                        "clamp": 0,
-                        "integrator_disable": 1,
-                        "gain": 2
-                    }
-                },
-                {
-                    "id": 1,
-                    "value": {
-                        "clamp": 0,
-                        "integrator_disable": 1,
-                        "gain": 2
-                    }
-                },
-                {
-                    "id": 2,
-                    "value": {
-                        "clamp": 0,
-                        "integrator_disable": 1,
-                        "gain": 2
-                    }
-                },
-                {
-                    "id": 3,
-                    "value": {
-                        "clamp": 0,
-                        "integrator_disable": 1,
-                        "gain": 2
-                    }
-                },
-                {
-                    "id": 4,
-                    "value": {
-                        "clamp": 0,
-                        "integrator_disable": 1,
-                        "gain": 2
-                    }
-                }
-            ]
+            "adcs": {
+                "resolution": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "output_format": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                ],
+                "SB_first": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                ]
+            },
+            "pgas": {
+                "lpf_cut_frequency": [
+                    4,
+                    4,
+                    4,
+                    4,
+                    4
+                ],
+                "integrator_disable": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                ],
+                "gain": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ]
+            },
+            "lnas": {
+                "clamp": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "integrator_disable": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                ],
+                "gain": [
+                    2,
+                    2,
+                    2,
+                    2,
+                    2
+                ]
+            }
         }
     },
     "10.73.137.112": {
@@ -1101,176 +840,96 @@
             ]
         },
         "afes": {
-            "v_gains": [
-                {
-                    "id": 0,
-                    "value": 1
-                },
-                {
-                    "id": 1,
-                    "value": 1
-                },
-                {
-                    "id": 2,
-                    "value": 1
-                },
-                {
-                    "id": 3,
-                    "value": 1
-                },
-                {
-                    "id": 4,
-                    "value": 1
-                }
+            "ids": [
+                0,
+                1,
+                2,
+                3,
+                4
+            ],
+            "atenuators": [
+                1,
+                1,
+                1,
+                1,
+                1
             ],
             "v_biases": [
-                {
-                    "id": 0,
-                    "value": 1129
-                },
-                {
-                    "id": 1,
-                    "value": 1141
-                },
-                {
-                    "id": 2,
-                    "value": 1121
-                },
-                {
-                    "id": 3,
-                    "value": 1160
-                },
-                {
-                    "id": 4,
-                    "value": 1152
-                }
+                1129,
+                1141,
+                1121,
+                1160,
+                1152
             ],
-            "adcs": [
-                {
-                    "id": 0,
-                    "value": {
-                        "resolution": 0,
-                        "output_format": 1,
-                        "SB_first": 1
-                    }
-                },
-                {
-                    "id": 1,
-                    "value": {
-                        "resolution": 0,
-                        "output_format": 1,
-                        "SB_first": 1
-                    }
-                },
-                {
-                    "id": 2,
-                    "value": {
-                        "resolution": 0,
-                        "output_format": 1,
-                        "SB_first": 1
-                    }
-                },
-                {
-                    "id": 3,
-                    "value": {
-                        "resolution": 0,
-                        "output_format": 1,
-                        "SB_first": 1
-                    }
-                },
-                {
-                    "id": 4,
-                    "value": {
-                        "resolution": 0,
-                        "output_format": 1,
-                        "SB_first": 1
-                    }
-                }
-            ],
-            "pgas": [
-                {
-                    "id": 0,
-                    "value": {
-                        "lpf_cut_frequency": 4,
-                        "integrator_disable": 1,
-                        "gain": 0
-                    }
-                },
-                {
-                    "id": 1,
-                    "value": {
-                        "lpf_cut_frequency": 4,
-                        "integrator_disable": 1,
-                        "gain": 0
-                    }
-                },
-                {
-                    "id": 2,
-                    "value": {
-                        "lpf_cut_frequency": 4,
-                        "integrator_disable": 1,
-                        "gain": 0
-                    }
-                },
-                {
-                    "id": 3,
-                    "value": {
-                        "lpf_cut_frequency": 4,
-                        "integrator_disable": 1,
-                        "gain": 0
-                    }
-                },
-                {
-                    "id": 4,
-                    "value": {
-                        "lpf_cut_frequency": 4,
-                        "integrator_disable": 1,
-                        "gain": 0
-                    }
-                }
-            ],
-            "lnas": [
-                {
-                    "id": 0,
-                    "value": {
-                        "clamp": 0,
-                        "integrator_disable": 1,
-                        "gain": 2
-                    }
-                },
-                {
-                    "id": 1,
-                    "value": {
-                        "clamp": 0,
-                        "integrator_disable": 1,
-                        "gain": 2
-                    }
-                },
-                {
-                    "id": 2,
-                    "value": {
-                        "clamp": 0,
-                        "integrator_disable": 1,
-                        "gain": 2
-                    }
-                },
-                {
-                    "id": 3,
-                    "value": {
-                        "clamp": 0,
-                        "integrator_disable": 1,
-                        "gain": 2
-                    }
-                },
-                {
-                    "id": 4,
-                    "value": {
-                        "clamp": 0,
-                        "integrator_disable": 1,
-                        "gain": 2
-                    }
-                }
-            ]
+            "adcs": {
+                "resolution": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "output_format": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                ],
+                "SB_first": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                ]
+            },
+            "pgas": {
+                "lpf_cut_frequency": [
+                    4,
+                    4,
+                    4,
+                    4,
+                    4
+                ],
+                "integrator_disable": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                ],
+                "gain": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ]
+            },
+            "lnas": {
+                "clamp": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "integrator_disable": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                ],
+                "gain": [
+                    2,
+                    2,
+                    2,
+                    2,
+                    2
+                ]
+            }
         }
     },
     "10.73.137.113": {
@@ -1310,176 +969,48 @@
             ]
         },
         "afes": {
-            "v_gains": [
-                {
-                    "id": 0,
-                    "value": 1
-                },
-                {
-                    "id": 1,
-                    "value": 1
-                },
-                {
-                    "id": 2,
-                    "value": 1
-                },
-                {
-                    "id": 3,
-                    "value": 1
-                },
-                {
-                    "id": 4,
-                    "value": 1
-                }
+            "ids": [
+                0
+            ],
+            "atenuators": [
+                1
             ],
             "v_biases": [
-                {
-                    "id": 0,
-                    "value": 807
-                },
-                {
-                    "id": 1,
-                    "value": 0
-                },
-                {
-                    "id": 2,
-                    "value": 0
-                },
-                {
-                    "id": 3,
-                    "value": 0
-                },
-                {
-                    "id": 4,
-                    "value": 0
-                }
+                807
             ],
-            "adcs": [
-                {
-                    "id": 0,
-                    "value": {
-                        "resolution": 0,
-                        "output_format": 1,
-                        "SB_first": 1
-                    }
-                },
-                {
-                    "id": 1,
-                    "value": {
-                        "resolution": 0,
-                        "output_format": 1,
-                        "SB_first": 1
-                    }
-                },
-                {
-                    "id": 2,
-                    "value": {
-                        "resolution": 0,
-                        "output_format": 1,
-                        "SB_first": 1
-                    }
-                },
-                {
-                    "id": 3,
-                    "value": {
-                        "resolution": 0,
-                        "output_format": 1,
-                        "SB_first": 1
-                    }
-                },
-                {
-                    "id": 4,
-                    "value": {
-                        "resolution": 0,
-                        "output_format": 1,
-                        "SB_first": 1
-                    }
-                }
-            ],
-            "pgas": [
-                {
-                    "id": 0,
-                    "value": {
-                        "lpf_cut_frequency": 4,
-                        "integrator_disable": 1,
-                        "gain": 0
-                    }
-                },
-                {
-                    "id": 1,
-                    "value": {
-                        "lpf_cut_frequency": 4,
-                        "integrator_disable": 1,
-                        "gain": 0
-                    }
-                },
-                {
-                    "id": 2,
-                    "value": {
-                        "lpf_cut_frequency": 4,
-                        "integrator_disable": 1,
-                        "gain": 0
-                    }
-                },
-                {
-                    "id": 3,
-                    "value": {
-                        "lpf_cut_frequency": 4,
-                        "integrator_disable": 1,
-                        "gain": 0
-                    }
-                },
-                {
-                    "id": 4,
-                    "value": {
-                        "lpf_cut_frequency": 4,
-                        "integrator_disable": 1,
-                        "gain": 0
-                    }
-                }
-            ],
-            "lnas": [
-                {
-                    "id": 0,
-                    "value": {
-                        "clamp": 0,
-                        "integrator_disable": 1,
-                        "gain": 2
-                    }
-                },
-                {
-                    "id": 1,
-                    "value": {
-                        "clamp": 0,
-                        "integrator_disable": 1,
-                        "gain": 2
-                    }
-                },
-                {
-                    "id": 2,
-                    "value": {
-                        "clamp": 0,
-                        "integrator_disable": 1,
-                        "gain": 2
-                    }
-                },
-                {
-                    "id": 3,
-                    "value": {
-                        "clamp": 0,
-                        "integrator_disable": 1,
-                        "gain": 2
-                    }
-                },
-                {
-                    "id": 4,
-                    "value": {
-                        "clamp": 0,
-                        "integrator_disable": 1,
-                        "gain": 2
-                    }
-                }
-            ]
+            "adcs": {
+                "resolution": [
+                    0
+                ],
+                "output_format": [
+                    1
+                ],
+                "SB_first": [
+                    1
+                ]
+            },
+            "pgas": {
+                "lpf_cut_frequency": [
+                    4
+                ],
+                "integrator_disable": [
+                    1
+                ],
+                "gain": [
+                    0
+                ]
+            },
+            "lnas": {
+                "clamp": [
+                    0
+                ],
+                "integrator_disable": [
+                    1
+                ],
+                "gain": [
+                    2
+                ]
+            }
         }
     }
 }
