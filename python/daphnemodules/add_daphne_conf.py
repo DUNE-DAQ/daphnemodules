@@ -61,7 +61,7 @@ def add_daphne_conf(oksfile:str, object_name:str, json_file:str, timeout_ms:int 
     
     new_conf = dal.DaphneConf(object_name,
                               timeout_ms=timeout_ms,
-                              configuration_file=data,
+                              json_file=data,
                               default_v2_settings=def_board )
     db.update_dal(new_conf)
     
