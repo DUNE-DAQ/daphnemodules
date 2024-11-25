@@ -1,0 +1,3252 @@
+{
+    "details": [
+        {
+            "id": 4,
+            "value": {
+                "self_trigger_threshold": 0,
+                "full_stream_channels": [
+                    0,
+                    2,
+                    5,
+                    7,
+                    1,
+                    3,
+                    4,
+                    6,
+                    8,
+                    10,
+                    13,
+                    15,
+                    9,
+                    11,
+                    12,
+                    14
+                ],
+                "channels": {
+                    "gains": [
+                        {
+                            "id": 0,
+                            "value": 1
+                        },
+                        {
+                            "id": 1,
+                            "value": 1
+                        },
+                        {
+                            "id": 2,
+                            "value": 1
+                        },
+                        {
+                            "id": 3,
+                            "value": 1
+                        },
+                        {
+                            "id": 4,
+                            "value": 1
+                        },
+                        {
+                            "id": 5,
+                            "value": 1
+                        },
+                        {
+                            "id": 6,
+                            "value": 1
+                        },
+                        {
+                            "id": 7,
+                            "value": 1
+                        },
+                        {
+                            "id": 8,
+                            "value": 1
+                        },
+                        {
+                            "id": 9,
+                            "value": 1
+                        },
+                        {
+                            "id": 10,
+                            "value": 1
+                        },
+                        {
+                            "id": 11,
+                            "value": 1
+                        },
+                        {
+                            "id": 12,
+                            "value": 1
+                        },
+                        {
+                            "id": 13,
+                            "value": 1
+                        },
+                        {
+                            "id": 14,
+                            "value": 1
+                        },
+                        {
+                            "id": 15,
+                            "value": 1
+                        }
+                    ],
+                    "offsets": [
+                        {
+                            "id": 0,
+                            "value": 2200
+                        },
+                        {
+                            "id": 1,
+                            "value": 2200
+                        },
+                        {
+                            "id": 2,
+                            "value": 2200
+                        },
+                        {
+                            "id": 3,
+                            "value": 2200
+                        },
+                        {
+                            "id": 4,
+                            "value": 2200
+                        },
+                        {
+                            "id": 5,
+                            "value": 2200
+                        },
+                        {
+                            "id": 6,
+                            "value": 2200
+                        },
+                        {
+                            "id": 7,
+                            "value": 2200
+                        },
+                        {
+                            "id": 8,
+                            "value": 2200
+                        },
+                        {
+                            "id": 9,
+                            "value": 2200
+                        },
+                        {
+                            "id": 10,
+                            "value": 2200
+                        },
+                        {
+                            "id": 11,
+                            "value": 2200
+                        },
+                        {
+                            "id": 12,
+                            "value": 2200
+                        },
+                        {
+                            "id": 13,
+                            "value": 2200
+                        },
+                        {
+                            "id": 14,
+                            "value": 2200
+                        },
+                        {
+                            "id": 15,
+                            "value": 2200
+                        }
+                    ],
+                    "trims": [
+                        {
+                            "id": 0,
+                            "value": 250
+                        },
+                        {
+                            "id": 1,
+                            "value": 53
+                        },
+                        {
+                            "id": 2,
+                            "value": 242
+                        },
+                        {
+                            "id": 3,
+                            "value": 86
+                        },
+                        {
+                            "id": 4,
+                            "value": 297
+                        },
+                        {
+                            "id": 5,
+                            "value": 220
+                        },
+                        {
+                            "id": 6,
+                            "value": 249
+                        },
+                        {
+                            "id": 7,
+                            "value": 168
+                        },
+                        {
+                            "id": 8,
+                            "value": 116
+                        },
+                        {
+                            "id": 9,
+                            "value": 140
+                        },
+                        {
+                            "id": 10,
+                            "value": 112
+                        },
+                        {
+                            "id": 11,
+                            "value": 190
+                        },
+                        {
+                            "id": 12,
+                            "value": 113
+                        },
+                        {
+                            "id": 13,
+                            "value": 103
+                        },
+                        {
+                            "id": 14,
+                            "value": 58
+                        },
+                        {
+                            "id": 15,
+                            "value": 132
+                        }
+                    ]
+                },
+                "afes": {
+                    "v_gains": [
+                        {
+                            "id": 0,
+                            "value": 2318
+                        },
+                        {
+                            "id": 1,
+                            "value": 2318
+                        },
+                        {
+                            "id": 2,
+                            "value": 2318
+                        },
+                        {
+                            "id": 3,
+                            "value": 2318
+                        },
+                        {
+                            "id": 4,
+                            "value": 2318
+                        }
+                    ],
+                    "v_biases": [
+                        {
+                            "id": 0,
+                            "value": 783
+                        },
+                        {
+                            "id": 1,
+                            "value": 1122
+                        },
+                        {
+                            "id": 2,
+                            "value": 0
+                        },
+                        {
+                            "id": 3,
+                            "value": 0
+                        },
+                        {
+                            "id": 4,
+                            "value": 0
+                        }
+                    ],
+                    "adcs": [
+                        {
+                            "id": 0,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 1,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        }
+                    ],
+                    "pgas": [
+                        {
+                            "id": 0,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 1,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        }
+                    ],
+                    "lnas": [
+                        {
+                            "id": 0,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 1,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "id": 5,
+            "value": {
+                "self_trigger_threshold": 0,
+                "full_stream_channels": [
+                    0,
+                    2,
+                    5,
+                    7,
+                    1,
+                    3,
+                    4,
+                    6,
+                    8,
+                    10,
+                    13,
+                    15,
+                    17,
+                    19,
+                    20,
+                    22
+                ],
+                "channels": {
+                    "gains": [
+                        {
+                            "id": 0,
+                            "value": 1
+                        },
+                        {
+                            "id": 1,
+                            "value": 1
+                        },
+                        {
+                            "id": 2,
+                            "value": 1
+                        },
+                        {
+                            "id": 3,
+                            "value": 1
+                        },
+                        {
+                            "id": 4,
+                            "value": 1
+                        },
+                        {
+                            "id": 5,
+                            "value": 1
+                        },
+                        {
+                            "id": 6,
+                            "value": 1
+                        },
+                        {
+                            "id": 7,
+                            "value": 1
+                        },
+                        {
+                            "id": 8,
+                            "value": 1
+                        },
+                        {
+                            "id": 10,
+                            "value": 1
+                        },
+                        {
+                            "id": 13,
+                            "value": 1
+                        },
+                        {
+                            "id": 15,
+                            "value": 1
+                        },
+                        {
+                            "id": 17,
+                            "value": 1
+                        },
+                        {
+                            "id": 19,
+                            "value": 1
+                        },
+                        {
+                            "id": 20,
+                            "value": 1
+                        },
+                        {
+                            "id": 22,
+                            "value": 1
+                        }
+                    ],
+                    "offsets": [
+                        {
+                            "id": 0,
+                            "value": 2200
+                        },
+                        {
+                            "id": 1,
+                            "value": 2200
+                        },
+                        {
+                            "id": 2,
+                            "value": 2200
+                        },
+                        {
+                            "id": 3,
+                            "value": 2200
+                        },
+                        {
+                            "id": 4,
+                            "value": 2200
+                        },
+                        {
+                            "id": 5,
+                            "value": 2200
+                        },
+                        {
+                            "id": 6,
+                            "value": 2200
+                        },
+                        {
+                            "id": 7,
+                            "value": 2200
+                        },
+                        {
+                            "id": 8,
+                            "value": 2200
+                        },
+                        {
+                            "id": 10,
+                            "value": 2200
+                        },
+                        {
+                            "id": 13,
+                            "value": 2200
+                        },
+                        {
+                            "id": 15,
+                            "value": 2200
+                        },
+                        {
+                            "id": 17,
+                            "value": 2200
+                        },
+                        {
+                            "id": 19,
+                            "value": 2200
+                        },
+                        {
+                            "id": 20,
+                            "value": 2200
+                        },
+                        {
+                            "id": 22,
+                            "value": 2200
+                        }
+                    ],
+                    "trims": [
+                        {
+                            "id": 0,
+                            "value": 63
+                        },
+                        {
+                            "id": 1,
+                            "value": 56
+                        },
+                        {
+                            "id": 2,
+                            "value": 71
+                        },
+                        {
+                            "id": 3,
+                            "value": 69
+                        },
+                        {
+                            "id": 4,
+                            "value": 107
+                        },
+                        {
+                            "id": 5,
+                            "value": 43
+                        },
+                        {
+                            "id": 6,
+                            "value": 48
+                        },
+                        {
+                            "id": 7,
+                            "value": 41
+                        },
+                        {
+                            "id": 8,
+                            "value": 100
+                        },
+                        {
+                            "id": 10,
+                            "value": 60
+                        },
+                        {
+                            "id": 13,
+                            "value": 134
+                        },
+                        {
+                            "id": 15,
+                            "value": 166
+                        },
+                        {
+                            "id": 17,
+                            "value": 143
+                        },
+                        {
+                            "id": 19,
+                            "value": 69
+                        },
+                        {
+                            "id": 20,
+                            "value": 110
+                        },
+                        {
+                            "id": 22,
+                            "value": 115
+                        }
+                    ]
+                },
+                "afes": {
+                    "v_gains": [
+                        {
+                            "id": 0,
+                            "value": 2318
+                        },
+                        {
+                            "id": 1,
+                            "value": 2318
+                        },
+                        {
+                            "id": 2,
+                            "value": 2318
+                        },
+                        {
+                            "id": 3,
+                            "value": 2318
+                        },
+                        {
+                            "id": 4,
+                            "value": 2318
+                        }
+                    ],
+                    "v_biases": [
+                        {
+                            "id": 0,
+                            "value": 809
+                        },
+                        {
+                            "id": 1,
+                            "value": 806
+                        },
+                        {
+                            "id": 2,
+                            "value": 1144
+                        },
+                        {
+                            "id": 3,
+                            "value": 0
+                        },
+                        {
+                            "id": 4,
+                            "value": 0
+                        }
+                    ],
+                    "adcs": [
+                        {
+                            "id": 0,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 1,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        }
+                    ],
+                    "pgas": [
+                        {
+                            "id": 0,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 1,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        }
+                    ],
+                    "lnas": [
+                        {
+                            "id": 0,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 1,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "id": 7,
+            "value": {
+                "self_trigger_threshold": 0,
+                "full_stream_channels": [
+                    0,
+                    2,
+                    5,
+                    7,
+                    8,
+                    10,
+                    13,
+                    15
+                ],
+                "channels": {
+                    "gains": [
+                        {
+                            "id": 0,
+                            "value": 1
+                        },
+                        {
+                            "id": 2,
+                            "value": 1
+                        },
+                        {
+                            "id": 5,
+                            "value": 1
+                        },
+                        {
+                            "id": 7,
+                            "value": 1
+                        },
+                        {
+                            "id": 8,
+                            "value": 1
+                        },
+                        {
+                            "id": 10,
+                            "value": 1
+                        },
+                        {
+                            "id": 13,
+                            "value": 1
+                        },
+                        {
+                            "id": 15,
+                            "value": 1
+                        }
+                    ],
+                    "offsets": [
+                        {
+                            "id": 0,
+                            "value": 2200
+                        },
+                        {
+                            "id": 2,
+                            "value": 2200
+                        },
+                        {
+                            "id": 5,
+                            "value": 2200
+                        },
+                        {
+                            "id": 7,
+                            "value": 2200
+                        },
+                        {
+                            "id": 8,
+                            "value": 2200
+                        },
+                        {
+                            "id": 10,
+                            "value": 2200
+                        },
+                        {
+                            "id": 13,
+                            "value": 2200
+                        },
+                        {
+                            "id": 15,
+                            "value": 2200
+                        }
+                    ],
+                    "trims": [
+                        {
+                            "id": 0,
+                            "value": 38
+                        },
+                        {
+                            "id": 2,
+                            "value": 61
+                        },
+                        {
+                            "id": 5,
+                            "value": 48
+                        },
+                        {
+                            "id": 7,
+                            "value": 52
+                        },
+                        {
+                            "id": 8,
+                            "value": 2041
+                        },
+                        {
+                            "id": 10,
+                            "value": 66
+                        },
+                        {
+                            "id": 13,
+                            "value": 329
+                        },
+                        {
+                            "id": 15,
+                            "value": 298
+                        }
+                    ]
+                },
+                "afes": {
+                    "v_gains": [
+                        {
+                            "id": 0,
+                            "value": 2318
+                        },
+                        {
+                            "id": 1,
+                            "value": 2318
+                        },
+                        {
+                            "id": 2,
+                            "value": 2318
+                        },
+                        {
+                            "id": 3,
+                            "value": 2318
+                        },
+                        {
+                            "id": 4,
+                            "value": 2318
+                        }
+                    ],
+                    "v_biases": [
+                        {
+                            "id": 0,
+                            "value": 821
+                        },
+                        {
+                            "id": 1,
+                            "value": 1144
+                        },
+                        {
+                            "id": 2,
+                            "value": 0
+                        },
+                        {
+                            "id": 3,
+                            "value": 0
+                        },
+                        {
+                            "id": 4,
+                            "value": 0
+                        }
+                    ],
+                    "adcs": [
+                        {
+                            "id": 0,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 1,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        }
+                    ],
+                    "pgas": [
+                        {
+                            "id": 0,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 1,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        }
+                    ],
+                    "lnas": [
+                        {
+                            "id": 0,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 1,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "id": 9,
+            "value": {
+                "self_trigger_threshold": 8000,
+                "full_stream_channels": [],
+                "channels": {
+                    "gains": [
+                        {
+                            "id": 0,
+                            "value": 1
+                        },
+                        {
+                            "id": 1,
+                            "value": 1
+                        },
+                        {
+                            "id": 2,
+                            "value": 1
+                        },
+                        {
+                            "id": 3,
+                            "value": 1
+                        },
+                        {
+                            "id": 4,
+                            "value": 1
+                        },
+                        {
+                            "id": 5,
+                            "value": 1
+                        },
+                        {
+                            "id": 6,
+                            "value": 1
+                        },
+                        {
+                            "id": 7,
+                            "value": 1
+                        },
+                        {
+                            "id": 8,
+                            "value": 1
+                        },
+                        {
+                            "id": 9,
+                            "value": 1
+                        },
+                        {
+                            "id": 10,
+                            "value": 1
+                        },
+                        {
+                            "id": 11,
+                            "value": 1
+                        },
+                        {
+                            "id": 12,
+                            "value": 1
+                        },
+                        {
+                            "id": 13,
+                            "value": 1
+                        },
+                        {
+                            "id": 14,
+                            "value": 1
+                        },
+                        {
+                            "id": 15,
+                            "value": 1
+                        },
+                        {
+                            "id": 16,
+                            "value": 1
+                        },
+                        {
+                            "id": 17,
+                            "value": 1
+                        },
+                        {
+                            "id": 18,
+                            "value": 1
+                        },
+                        {
+                            "id": 19,
+                            "value": 1
+                        },
+                        {
+                            "id": 20,
+                            "value": 1
+                        },
+                        {
+                            "id": 21,
+                            "value": 1
+                        },
+                        {
+                            "id": 22,
+                            "value": 1
+                        },
+                        {
+                            "id": 23,
+                            "value": 1
+                        },
+                        {
+                            "id": 24,
+                            "value": 1
+                        },
+                        {
+                            "id": 25,
+                            "value": 1
+                        },
+                        {
+                            "id": 26,
+                            "value": 1
+                        },
+                        {
+                            "id": 27,
+                            "value": 1
+                        },
+                        {
+                            "id": 28,
+                            "value": 1
+                        },
+                        {
+                            "id": 29,
+                            "value": 1
+                        },
+                        {
+                            "id": 30,
+                            "value": 1
+                        },
+                        {
+                            "id": 31,
+                            "value": 1
+                        },
+                        {
+                            "id": 32,
+                            "value": 1
+                        },
+                        {
+                            "id": 33,
+                            "value": 1
+                        },
+                        {
+                            "id": 34,
+                            "value": 1
+                        },
+                        {
+                            "id": 35,
+                            "value": 1
+                        },
+                        {
+                            "id": 36,
+                            "value": 1
+                        },
+                        {
+                            "id": 37,
+                            "value": 1
+                        },
+                        {
+                            "id": 38,
+                            "value": 1
+                        },
+                        {
+                            "id": 39,
+                            "value": 1
+                        }
+                    ],
+                    "offsets": [
+                        {
+                            "id": 0,
+                            "value": 2200
+                        },
+                        {
+                            "id": 1,
+                            "value": 2200
+                        },
+                        {
+                            "id": 2,
+                            "value": 2200
+                        },
+                        {
+                            "id": 3,
+                            "value": 2200
+                        },
+                        {
+                            "id": 4,
+                            "value": 2200
+                        },
+                        {
+                            "id": 5,
+                            "value": 2200
+                        },
+                        {
+                            "id": 6,
+                            "value": 2200
+                        },
+                        {
+                            "id": 7,
+                            "value": 2200
+                        },
+                        {
+                            "id": 8,
+                            "value": 2200
+                        },
+                        {
+                            "id": 9,
+                            "value": 2200
+                        },
+                        {
+                            "id": 10,
+                            "value": 2200
+                        },
+                        {
+                            "id": 11,
+                            "value": 2200
+                        },
+                        {
+                            "id": 12,
+                            "value": 2200
+                        },
+                        {
+                            "id": 13,
+                            "value": 2200
+                        },
+                        {
+                            "id": 14,
+                            "value": 2200
+                        },
+                        {
+                            "id": 15,
+                            "value": 2200
+                        },
+                        {
+                            "id": 16,
+                            "value": 2200
+                        },
+                        {
+                            "id": 17,
+                            "value": 2200
+                        },
+                        {
+                            "id": 18,
+                            "value": 2200
+                        },
+                        {
+                            "id": 19,
+                            "value": 2200
+                        },
+                        {
+                            "id": 20,
+                            "value": 2200
+                        },
+                        {
+                            "id": 21,
+                            "value": 2200
+                        },
+                        {
+                            "id": 22,
+                            "value": 2200
+                        },
+                        {
+                            "id": 23,
+                            "value": 2200
+                        },
+                        {
+                            "id": 24,
+                            "value": 2200
+                        },
+                        {
+                            "id": 25,
+                            "value": 2200
+                        },
+                        {
+                            "id": 26,
+                            "value": 2200
+                        },
+                        {
+                            "id": 27,
+                            "value": 2200
+                        },
+                        {
+                            "id": 28,
+                            "value": 2200
+                        },
+                        {
+                            "id": 29,
+                            "value": 2200
+                        },
+                        {
+                            "id": 30,
+                            "value": 2200
+                        },
+                        {
+                            "id": 31,
+                            "value": 2200
+                        },
+                        {
+                            "id": 32,
+                            "value": 2200
+                        },
+                        {
+                            "id": 33,
+                            "value": 2200
+                        },
+                        {
+                            "id": 34,
+                            "value": 2200
+                        },
+                        {
+                            "id": 35,
+                            "value": 2200
+                        },
+                        {
+                            "id": 36,
+                            "value": 2200
+                        },
+                        {
+                            "id": 37,
+                            "value": 2200
+                        },
+                        {
+                            "id": 38,
+                            "value": 2200
+                        },
+                        {
+                            "id": 39,
+                            "value": 2200
+                        }
+                    ],
+                    "trims": [
+                        {
+                            "id": 0,
+                            "value": 207
+                        },
+                        {
+                            "id": 1,
+                            "value": 275
+                        },
+                        {
+                            "id": 2,
+                            "value": 53
+                        },
+                        {
+                            "id": 3,
+                            "value": 268
+                        },
+                        {
+                            "id": 4,
+                            "value": 105
+                        },
+                        {
+                            "id": 5,
+                            "value": 274
+                        },
+                        {
+                            "id": 6,
+                            "value": 58
+                        },
+                        {
+                            "id": 7,
+                            "value": 301
+                        },
+                        {
+                            "id": 10,
+                            "value": 43
+                        },
+                        {
+                            "id": 13,
+                            "value": 113
+                        },
+                        {
+                            "id": 16,
+                            "value": 574
+                        },
+                        {
+                            "id": 17,
+                            "value": 504
+                        },
+                        {
+                            "id": 18,
+                            "value": 450
+                        },
+                        {
+                            "id": 19,
+                            "value": 93
+                        },
+                        {
+                            "id": 20,
+                            "value": 78
+                        },
+                        {
+                            "id": 21,
+                            "value": 385
+                        },
+                        {
+                            "id": 22,
+                            "value": 55
+                        },
+                        {
+                            "id": 23,
+                            "value": 250
+                        },
+                        {
+                            "id": 24,
+                            "value": 776
+                        },
+                        {
+                            "id": 25,
+                            "value": 51
+                        },
+                        {
+                            "id": 26,
+                            "value": 816
+                        },
+                        {
+                            "id": 27,
+                            "value": 785
+                        },
+                        {
+                            "id": 28,
+                            "value": 263
+                        },
+                        {
+                            "id": 29,
+                            "value": 802
+                        },
+                        {
+                            "id": 30,
+                            "value": 143
+                        },
+                        {
+                            "id": 31,
+                            "value": 843
+                        },
+                        {
+                            "id": 32,
+                            "value": 516
+                        },
+                        {
+                            "id": 33,
+                            "value": 664
+                        },
+                        {
+                            "id": 34,
+                            "value": 39
+                        },
+                        {
+                            "id": 35,
+                            "value": 270
+                        },
+                        {
+                            "id": 36,
+                            "value": 165
+                        },
+                        {
+                            "id": 37,
+                            "value": 627
+                        },
+                        {
+                            "id": 38,
+                            "value": 262
+                        },
+                        {
+                            "id": 39,
+                            "value": 590
+                        }
+                    ]
+                },
+                "afes": {
+                    "v_gains": [
+                        {
+                            "id": 0,
+                            "value": 2318
+                        },
+                        {
+                            "id": 1,
+                            "value": 2318
+                        },
+                        {
+                            "id": 2,
+                            "value": 2318
+                        },
+                        {
+                            "id": 3,
+                            "value": 2318
+                        },
+                        {
+                            "id": 4,
+                            "value": 2318
+                        }
+                    ],
+                    "v_biases": [
+                        {
+                            "id": 0,
+                            "value": 804
+                        },
+                        {
+                            "id": 1,
+                            "value": 817
+                        },
+                        {
+                            "id": 2,
+                            "value": 1145
+                        },
+                        {
+                            "id": 3,
+                            "value": 1151
+                        },
+                        {
+                            "id": 4,
+                            "value": 1113
+                        }
+                    ],
+                    "adcs": [
+                        {
+                            "id": 0,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 1,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        }
+                    ],
+                    "pgas": [
+                        {
+                            "id": 0,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 1,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        }
+                    ],
+                    "lnas": [
+                        {
+                            "id": 0,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 1,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "id": 11,
+            "value": {
+                "self_trigger_threshold": 8000,
+                "full_stream_channels": [],
+                "channels": {
+                    "gains": [
+                        {
+                            "id": 0,
+                            "value": 1
+                        },
+                        {
+                            "id": 1,
+                            "value": 1
+                        },
+                        {
+                            "id": 2,
+                            "value": 1
+                        },
+                        {
+                            "id": 3,
+                            "value": 1
+                        },
+                        {
+                            "id": 4,
+                            "value": 1
+                        },
+                        {
+                            "id": 5,
+                            "value": 1
+                        },
+                        {
+                            "id": 6,
+                            "value": 1
+                        },
+                        {
+                            "id": 7,
+                            "value": 1
+                        },
+                        {
+                            "id": 8,
+                            "value": 1
+                        },
+                        {
+                            "id": 9,
+                            "value": 1
+                        },
+                        {
+                            "id": 10,
+                            "value": 1
+                        },
+                        {
+                            "id": 11,
+                            "value": 1
+                        },
+                        {
+                            "id": 12,
+                            "value": 1
+                        },
+                        {
+                            "id": 13,
+                            "value": 1
+                        },
+                        {
+                            "id": 14,
+                            "value": 1
+                        },
+                        {
+                            "id": 15,
+                            "value": 1
+                        },
+                        {
+                            "id": 16,
+                            "value": 1
+                        },
+                        {
+                            "id": 17,
+                            "value": 1
+                        },
+                        {
+                            "id": 18,
+                            "value": 1
+                        },
+                        {
+                            "id": 19,
+                            "value": 1
+                        },
+                        {
+                            "id": 20,
+                            "value": 1
+                        },
+                        {
+                            "id": 21,
+                            "value": 1
+                        },
+                        {
+                            "id": 22,
+                            "value": 1
+                        },
+                        {
+                            "id": 23,
+                            "value": 1
+                        },
+                        {
+                            "id": 24,
+                            "value": 1
+                        },
+                        {
+                            "id": 25,
+                            "value": 1
+                        },
+                        {
+                            "id": 26,
+                            "value": 1
+                        },
+                        {
+                            "id": 27,
+                            "value": 1
+                        },
+                        {
+                            "id": 28,
+                            "value": 1
+                        },
+                        {
+                            "id": 29,
+                            "value": 1
+                        },
+                        {
+                            "id": 30,
+                            "value": 1
+                        },
+                        {
+                            "id": 31,
+                            "value": 1
+                        },
+                        {
+                            "id": 32,
+                            "value": 1
+                        },
+                        {
+                            "id": 33,
+                            "value": 1
+                        },
+                        {
+                            "id": 34,
+                            "value": 1
+                        },
+                        {
+                            "id": 35,
+                            "value": 1
+                        },
+                        {
+                            "id": 36,
+                            "value": 1
+                        },
+                        {
+                            "id": 37,
+                            "value": 1
+                        },
+                        {
+                            "id": 38,
+                            "value": 1
+                        },
+                        {
+                            "id": 39,
+                            "value": 1
+                        }
+                    ],
+                    "offsets": [
+                        {
+                            "id": 0,
+                            "value": 2200
+                        },
+                        {
+                            "id": 1,
+                            "value": 2200
+                        },
+                        {
+                            "id": 2,
+                            "value": 2200
+                        },
+                        {
+                            "id": 3,
+                            "value": 2200
+                        },
+                        {
+                            "id": 4,
+                            "value": 2200
+                        },
+                        {
+                            "id": 5,
+                            "value": 2200
+                        },
+                        {
+                            "id": 6,
+                            "value": 2200
+                        },
+                        {
+                            "id": 7,
+                            "value": 2200
+                        },
+                        {
+                            "id": 8,
+                            "value": 2200
+                        },
+                        {
+                            "id": 9,
+                            "value": 2200
+                        },
+                        {
+                            "id": 10,
+                            "value": 2200
+                        },
+                        {
+                            "id": 11,
+                            "value": 2200
+                        },
+                        {
+                            "id": 12,
+                            "value": 2200
+                        },
+                        {
+                            "id": 13,
+                            "value": 2200
+                        },
+                        {
+                            "id": 14,
+                            "value": 2200
+                        },
+                        {
+                            "id": 15,
+                            "value": 2200
+                        },
+                        {
+                            "id": 16,
+                            "value": 2200
+                        },
+                        {
+                            "id": 17,
+                            "value": 2200
+                        },
+                        {
+                            "id": 18,
+                            "value": 2200
+                        },
+                        {
+                            "id": 19,
+                            "value": 2200
+                        },
+                        {
+                            "id": 20,
+                            "value": 2200
+                        },
+                        {
+                            "id": 21,
+                            "value": 2200
+                        },
+                        {
+                            "id": 22,
+                            "value": 2200
+                        },
+                        {
+                            "id": 23,
+                            "value": 2200
+                        },
+                        {
+                            "id": 24,
+                            "value": 2200
+                        },
+                        {
+                            "id": 25,
+                            "value": 2200
+                        },
+                        {
+                            "id": 26,
+                            "value": 2200
+                        },
+                        {
+                            "id": 27,
+                            "value": 2200
+                        },
+                        {
+                            "id": 28,
+                            "value": 2200
+                        },
+                        {
+                            "id": 29,
+                            "value": 2200
+                        },
+                        {
+                            "id": 30,
+                            "value": 2200
+                        },
+                        {
+                            "id": 31,
+                            "value": 2200
+                        },
+                        {
+                            "id": 32,
+                            "value": 2200
+                        },
+                        {
+                            "id": 33,
+                            "value": 2200
+                        },
+                        {
+                            "id": 34,
+                            "value": 2200
+                        },
+                        {
+                            "id": 35,
+                            "value": 2200
+                        },
+                        {
+                            "id": 36,
+                            "value": 2200
+                        },
+                        {
+                            "id": 37,
+                            "value": 2200
+                        },
+                        {
+                            "id": 38,
+                            "value": 2200
+                        },
+                        {
+                            "id": 39,
+                            "value": 2200
+                        }
+                    ],
+                    "trims": [
+                        {
+                            "id": 0,
+                            "value": 265
+                        },
+                        {
+                            "id": 1,
+                            "value": 122
+                        },
+                        {
+                            "id": 2,
+                            "value": 189
+                        },
+                        {
+                            "id": 3,
+                            "value": 138
+                        },
+                        {
+                            "id": 4,
+                            "value": 38
+                        },
+                        {
+                            "id": 5,
+                            "value": 172
+                        },
+                        {
+                            "id": 6,
+                            "value": 91
+                        },
+                        {
+                            "id": 7,
+                            "value": 189
+                        },
+                        {
+                            "id": 8,
+                            "value": 312
+                        },
+                        {
+                            "id": 9,
+                            "value": 184
+                        },
+                        {
+                            "id": 10,
+                            "value": 215
+                        },
+                        {
+                            "id": 11,
+                            "value": 64
+                        },
+                        {
+                            "id": 12,
+                            "value": 192
+                        },
+                        {
+                            "id": 13,
+                            "value": 265
+                        },
+                        {
+                            "id": 14,
+                            "value": 90
+                        },
+                        {
+                            "id": 15,
+                            "value": 334
+                        },
+                        {
+                            "id": 16,
+                            "value": 364
+                        },
+                        {
+                            "id": 17,
+                            "value": 399
+                        },
+                        {
+                            "id": 18,
+                            "value": 341
+                        },
+                        {
+                            "id": 19,
+                            "value": 96
+                        },
+                        {
+                            "id": 20,
+                            "value": 118
+                        },
+                        {
+                            "id": 21,
+                            "value": 357
+                        },
+                        {
+                            "id": 22,
+                            "value": 57
+                        },
+                        {
+                            "id": 23,
+                            "value": 314
+                        },
+                        {
+                            "id": 24,
+                            "value": 977
+                        },
+                        {
+                            "id": 25,
+                            "value": 483
+                        },
+                        {
+                            "id": 26,
+                            "value": 151
+                        },
+                        {
+                            "id": 27,
+                            "value": 458
+                        },
+                        {
+                            "id": 28,
+                            "value": 538
+                        },
+                        {
+                            "id": 29,
+                            "value": 734
+                        },
+                        {
+                            "id": 30,
+                            "value": 470
+                        },
+                        {
+                            "id": 31,
+                            "value": 70
+                        },
+                        {
+                            "id": 32,
+                            "value": 745
+                        },
+                        {
+                            "id": 33,
+                            "value": 90
+                        },
+                        {
+                            "id": 34,
+                            "value": 577
+                        },
+                        {
+                            "id": 35,
+                            "value": 62
+                        },
+                        {
+                            "id": 36,
+                            "value": 96
+                        },
+                        {
+                            "id": 37,
+                            "value": 157
+                        },
+                        {
+                            "id": 38,
+                            "value": 113
+                        },
+                        {
+                            "id": 39,
+                            "value": 148
+                        }
+                    ]
+                },
+                "afes": {
+                    "v_gains": [
+                        {
+                            "id": 0,
+                            "value": 2318
+                        },
+                        {
+                            "id": 1,
+                            "value": 2318
+                        },
+                        {
+                            "id": 2,
+                            "value": 2318
+                        },
+                        {
+                            "id": 3,
+                            "value": 2318
+                        },
+                        {
+                            "id": 4,
+                            "value": 2318
+                        }
+                    ],
+                    "v_biases": [
+                        {
+                            "id": 0,
+                            "value": 810
+                        },
+                        {
+                            "id": 1,
+                            "value": 814
+                        },
+                        {
+                            "id": 2,
+                            "value": 799
+                        },
+                        {
+                            "id": 3,
+                            "value": 1159
+                        },
+                        {
+                            "id": 4,
+                            "value": 1155
+                        }
+                    ],
+                    "adcs": [
+                        {
+                            "id": 0,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 1,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        }
+                    ],
+                    "pgas": [
+                        {
+                            "id": 0,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 1,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        }
+                    ],
+                    "lnas": [
+                        {
+                            "id": 0,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 1,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "id": 12,
+            "value": {
+                "self_trigger_threshold": 8000,
+                "full_stream_channels": [],
+                "channels": {
+                    "gains": [
+                        {
+                            "id": 0,
+                            "value": 1
+                        },
+                        {
+                            "id": 1,
+                            "value": 1
+                        },
+                        {
+                            "id": 2,
+                            "value": 1
+                        },
+                        {
+                            "id": 3,
+                            "value": 1
+                        },
+                        {
+                            "id": 4,
+                            "value": 1
+                        },
+                        {
+                            "id": 5,
+                            "value": 1
+                        },
+                        {
+                            "id": 6,
+                            "value": 1
+                        },
+                        {
+                            "id": 7,
+                            "value": 1
+                        },
+                        {
+                            "id": 8,
+                            "value": 1
+                        },
+                        {
+                            "id": 9,
+                            "value": 1
+                        },
+                        {
+                            "id": 10,
+                            "value": 1
+                        },
+                        {
+                            "id": 11,
+                            "value": 1
+                        },
+                        {
+                            "id": 12,
+                            "value": 1
+                        },
+                        {
+                            "id": 13,
+                            "value": 1
+                        },
+                        {
+                            "id": 14,
+                            "value": 1
+                        },
+                        {
+                            "id": 15,
+                            "value": 1
+                        },
+                        {
+                            "id": 16,
+                            "value": 1
+                        },
+                        {
+                            "id": 17,
+                            "value": 1
+                        },
+                        {
+                            "id": 18,
+                            "value": 1
+                        },
+                        {
+                            "id": 19,
+                            "value": 1
+                        },
+                        {
+                            "id": 20,
+                            "value": 1
+                        },
+                        {
+                            "id": 21,
+                            "value": 1
+                        },
+                        {
+                            "id": 22,
+                            "value": 1
+                        },
+                        {
+                            "id": 23,
+                            "value": 1
+                        },
+                        {
+                            "id": 24,
+                            "value": 1
+                        },
+                        {
+                            "id": 25,
+                            "value": 1
+                        },
+                        {
+                            "id": 26,
+                            "value": 1
+                        },
+                        {
+                            "id": 27,
+                            "value": 1
+                        },
+                        {
+                            "id": 28,
+                            "value": 1
+                        },
+                        {
+                            "id": 29,
+                            "value": 1
+                        },
+                        {
+                            "id": 30,
+                            "value": 1
+                        },
+                        {
+                            "id": 31,
+                            "value": 1
+                        },
+                        {
+                            "id": 32,
+                            "value": 1
+                        },
+                        {
+                            "id": 34,
+                            "value": 1
+                        },
+                        {
+                            "id": 37,
+                            "value": 1
+                        },
+                        {
+                            "id": 39,
+                            "value": 1
+                        }
+                    ],
+                    "offsets": [
+                        {
+                            "id": 0,
+                            "value": 2200
+                        },
+                        {
+                            "id": 1,
+                            "value": 2200
+                        },
+                        {
+                            "id": 2,
+                            "value": 2200
+                        },
+                        {
+                            "id": 3,
+                            "value": 2200
+                        },
+                        {
+                            "id": 4,
+                            "value": 2200
+                        },
+                        {
+                            "id": 5,
+                            "value": 2200
+                        },
+                        {
+                            "id": 6,
+                            "value": 2200
+                        },
+                        {
+                            "id": 7,
+                            "value": 2200
+                        },
+                        {
+                            "id": 8,
+                            "value": 2200
+                        },
+                        {
+                            "id": 9,
+                            "value": 2200
+                        },
+                        {
+                            "id": 10,
+                            "value": 2200
+                        },
+                        {
+                            "id": 11,
+                            "value": 2200
+                        },
+                        {
+                            "id": 12,
+                            "value": 2200
+                        },
+                        {
+                            "id": 13,
+                            "value": 2200
+                        },
+                        {
+                            "id": 14,
+                            "value": 2200
+                        },
+                        {
+                            "id": 15,
+                            "value": 2200
+                        },
+                        {
+                            "id": 16,
+                            "value": 2200
+                        },
+                        {
+                            "id": 17,
+                            "value": 2200
+                        },
+                        {
+                            "id": 18,
+                            "value": 2200
+                        },
+                        {
+                            "id": 19,
+                            "value": 2200
+                        },
+                        {
+                            "id": 20,
+                            "value": 2200
+                        },
+                        {
+                            "id": 21,
+                            "value": 2200
+                        },
+                        {
+                            "id": 22,
+                            "value": 2200
+                        },
+                        {
+                            "id": 23,
+                            "value": 2200
+                        },
+                        {
+                            "id": 24,
+                            "value": 2200
+                        },
+                        {
+                            "id": 25,
+                            "value": 2200
+                        },
+                        {
+                            "id": 26,
+                            "value": 2200
+                        },
+                        {
+                            "id": 27,
+                            "value": 2200
+                        },
+                        {
+                            "id": 28,
+                            "value": 2200
+                        },
+                        {
+                            "id": 29,
+                            "value": 2200
+                        },
+                        {
+                            "id": 30,
+                            "value": 2200
+                        },
+                        {
+                            "id": 31,
+                            "value": 2200
+                        },
+                        {
+                            "id": 32,
+                            "value": 2200
+                        },
+                        {
+                            "id": 34,
+                            "value": 2200
+                        },
+                        {
+                            "id": 37,
+                            "value": 2200
+                        },
+                        {
+                            "id": 39,
+                            "value": 2200
+                        }
+                    ],
+                    "trims": [
+                        {
+                            "id": 0,
+                            "value": 120
+                        },
+                        {
+                            "id": 1,
+                            "value": 167
+                        },
+                        {
+                            "id": 2,
+                            "value": 121
+                        },
+                        {
+                            "id": 3,
+                            "value": 144
+                        },
+                        {
+                            "id": 4,
+                            "value": 66
+                        },
+                        {
+                            "id": 5,
+                            "value": 111
+                        },
+                        {
+                            "id": 6,
+                            "value": 130
+                        },
+                        {
+                            "id": 7,
+                            "value": 122
+                        },
+                        {
+                            "id": 8,
+                            "value": 437
+                        },
+                        {
+                            "id": 9,
+                            "value": 3143
+                        },
+                        {
+                            "id": 10,
+                            "value": 332
+                        },
+                        {
+                            "id": 11,
+                            "value": 120
+                        },
+                        {
+                            "id": 12,
+                            "value": 41
+                        },
+                        {
+                            "id": 13,
+                            "value": 295
+                        },
+                        {
+                            "id": 14,
+                            "value": 107
+                        },
+                        {
+                            "id": 15,
+                            "value": 254
+                        },
+                        {
+                            "id": 16,
+                            "value": 380
+                        },
+                        {
+                            "id": 17,
+                            "value": 349
+                        },
+                        {
+                            "id": 18,
+                            "value": 1007
+                        },
+                        {
+                            "id": 19,
+                            "value": 367
+                        },
+                        {
+                            "id": 20,
+                            "value": 310
+                        },
+                        {
+                            "id": 21,
+                            "value": 67
+                        },
+                        {
+                            "id": 22,
+                            "value": 304
+                        },
+                        {
+                            "id": 23,
+                            "value": 306
+                        },
+                        {
+                            "id": 24,
+                            "value": 457
+                        },
+                        {
+                            "id": 25,
+                            "value": 555
+                        },
+                        {
+                            "id": 26,
+                            "value": 446
+                        },
+                        {
+                            "id": 27,
+                            "value": 1429
+                        },
+                        {
+                            "id": 28,
+                            "value": 532
+                        },
+                        {
+                            "id": 29,
+                            "value": 52
+                        },
+                        {
+                            "id": 30,
+                            "value": 563
+                        },
+                        {
+                            "id": 31,
+                            "value": 88
+                        },
+                        {
+                            "id": 32,
+                            "value": 62
+                        },
+                        {
+                            "id": 34,
+                            "value": 48
+                        },
+                        {
+                            "id": 37,
+                            "value": 804
+                        },
+                        {
+                            "id": 39,
+                            "value": 824
+                        }
+                    ]
+                },
+                "afes": {
+                    "v_gains": [
+                        {
+                            "id": 0,
+                            "value": 2318
+                        },
+                        {
+                            "id": 1,
+                            "value": 2318
+                        },
+                        {
+                            "id": 2,
+                            "value": 2318
+                        },
+                        {
+                            "id": 3,
+                            "value": 2318
+                        },
+                        {
+                            "id": 4,
+                            "value": 2318
+                        }
+                    ],
+                    "v_biases": [
+                        {
+                            "id": 0,
+                            "value": 1130
+                        },
+                        {
+                            "id": 1,
+                            "value": 1141
+                        },
+                        {
+                            "id": 2,
+                            "value": 1122
+                        },
+                        {
+                            "id": 3,
+                            "value": 1160
+                        },
+                        {
+                            "id": 4,
+                            "value": 1152
+                        }
+                    ],
+                    "adcs": [
+                        {
+                            "id": 0,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 1,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        }
+                    ],
+                    "pgas": [
+                        {
+                            "id": 0,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 1,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        }
+                    ],
+                    "lnas": [
+                        {
+                            "id": 0,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 1,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "id": 13,
+            "value": {
+                "self_trigger_threshold": 8000,
+                "full_stream_channels": [],
+                "channels": {
+                    "gains": [
+                        {
+                            "id": 0,
+                            "value": 1
+                        },
+                        {
+                            "id": 2,
+                            "value": 1
+                        },
+                        {
+                            "id": 5,
+                            "value": 1
+                        },
+                        {
+                            "id": 7,
+                            "value": 1
+                        }
+                    ],
+                    "offsets": [
+                        {
+                            "id": 0,
+                            "value": 2200
+                        },
+                        {
+                            "id": 2,
+                            "value": 2200
+                        },
+                        {
+                            "id": 5,
+                            "value": 2200
+                        },
+                        {
+                            "id": 7,
+                            "value": 2200
+                        }
+                    ],
+                    "trims": [
+                        {
+                            "id": 0,
+                            "value": 78
+                        },
+                        {
+                            "id": 2,
+                            "value": 168
+                        },
+                        {
+                            "id": 5,
+                            "value": 59
+                        },
+                        {
+                            "id": 7,
+                            "value": 153
+                        }
+                    ]
+                },
+                "afes": {
+                    "v_gains": [
+                        {
+                            "id": 0,
+                            "value": 2318
+                        },
+                        {
+                            "id": 1,
+                            "value": 2318
+                        },
+                        {
+                            "id": 2,
+                            "value": 2318
+                        },
+                        {
+                            "id": 3,
+                            "value": 2318
+                        },
+                        {
+                            "id": 4,
+                            "value": 2318
+                        }
+                    ],
+                    "v_biases": [
+                        {
+                            "id": 0,
+                            "value": 807
+                        },
+                        {
+                            "id": 1,
+                            "value": 0
+                        },
+                        {
+                            "id": 2,
+                            "value": 0
+                        },
+                        {
+                            "id": 3,
+                            "value": 0
+                        },
+                        {
+                            "id": 4,
+                            "value": 0
+                        }
+                    ],
+                    "adcs": [
+                        {
+                            "id": 0,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 1,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "resolution": 0,
+                                "output_format": 1,
+                                "SB_first": 1
+                            }
+                        }
+                    ],
+                    "pgas": [
+                        {
+                            "id": 0,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 1,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "lpf_cut_frequnecy": 0,
+                                "integrator_disable": 0,
+                                "gain": 0
+                            }
+                        }
+                    ],
+                    "lnas": [
+                        {
+                            "id": 0,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 1,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 3,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "value": {
+                                "clamp": 0,
+                                "integrator_disable": 0,
+                                "gain": 2
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
