@@ -172,10 +172,6 @@ private:
   void align_DDR();
   void configure_trigger_mode();
 
-  // bool channel_used( ChannelId id ) const {
-  //   return m_channel_confs[id].offset > 0;
-  // }
-  
   std::unique_ptr<DaphneInterface> m_interface;
   std::mutex m_mutex;  // mutex for interface
   std::atomic<bool> m_scrap_called = false;
@@ -184,28 +180,6 @@ private:
   static const ChannelId s_max_afes = 5;
   using conf_t = appmodel::DaphneV2ControllerModule;
   const conf_t* m_module_config = nullptr;
-  
-  // uint8_t  m_slot;
-  // uint16_t m_bias_ctrl;
-  // uint16_t m_self_threshold;
-
-  
-  // std::array<DaphneV2ControllerModule::ChannelConf, s_max_channels> m_channel_confs;
-  // // this array is indexed in the [0-40) range
-  
-  // struct AFEConf {
-  //   uint16_t v_gain = 0;  // 12 bit register
-  //   uint16_t v_bias = 0;  // 12 bit register
-  //   uint8_t  reg4   = 0;  // 4  bit register
-  //   uint16_t reg51 = 0;   // 14 bit register
-  //   uint16_t reg52 = 0;   // 16 bit register
-  // };
-  
-  // std::array<AFEConf, s_max_afes> m_afe_confs;
-  // // mapping from the channels to the AFE
-  // // 0-7 -> AFE 0,  8-15 -> AFE 1, 16-23 -> AFE 2, 24-31 -> AFE 3, 32-39 -> AFE 4 
-
-  // std::vector<ChannelId> m_full_stream_channels;
   
   static const uint16_t s_frame_alignment_good = 0x3f80;
 
