@@ -13,6 +13,8 @@
 #include "appmodel/DaphneV2Channel.hpp"
 #include "appmodel/DaphneV2AFE.hpp"
 #include "appmodel/DaphneV2ADC.hpp"
+#include "appmodel/DaphneV2LNA.hpp"
+#include "appmodel/DaphneV2PGA.hpp"
 #include "appmodel/DaphneConf.hpp"
 
 #include <string>
@@ -570,26 +572,28 @@ void DaphneV2ControllerModule::configure_analog_chain(bool initial_config) {
     
   } // channel loop
 
-  //   // to check if the configuration went throguh we can
-  //   //cmd (thing, "RD OFFSET CH " + std::to_string(ch), true);
-  //   // But Manuel said that this is not necessary to be done all the time
+  // to check if the configuration went throguh we can
+  //cmd (thing, "RD OFFSET CH " + std::to_string(ch), true);
+  // But Manuel said that this is not necessary to be done all the time
 
   for ( size_t afe = 0; afe < s_max_afes ; ++afe) {
 
     const auto & afe_conf = board_conf->get_afe(afe);
 
-    // result = m_interface -> send_command(
-    // 	"WR AFE " + std::to_string(afe) + " REG 52 V " + std::to_string(m_afe_confs[afe].reg52) );
-    // TLOG() << result.command << " -> " << result.result;
+    result = m_interface -> send_command( fmt::format("WR AFE {} REG 52 V {}",
+						      afe_conf.get_afe_id(),
+						      afe_conf.get_lna()->get_reg52()) );
+    TLOG() << result.command << " -> " << result.result;
 
     result = m_interface -> send_command( fmt::format("WR AFE {} REG 4 V {}",
 						      afe_conf.get_afe_id(),
-						      afe_conf.get_adc()->get_reg4() ) );
+						      afe_conf.get_adc()->get_reg4()) );
     TLOG() << result.command << " -> " << result.result;
 
-    // result = m_interface -> send_command(
-    // 	"WR AFE " + std::to_string(afe) + " REG 51 V " + std::to_string(m_afe_confs[afe].reg51) );
-    // TLOG() << result.command << " -> " << result.result;
+    result = m_interface -> send_command( fmt::format("WR AFE {} REG 51 V {}",
+						      afe_conf.get_afe_id(),
+						      afe_conf.get_pga()->get_reg51()) );
+    TLOG() << result.command << " -> " << result.result;
 
     result = m_interface -> send_command( fmt::format("WR AFE {} VGAIN V {}",
 						      afe_conf.get_afe_id(),
@@ -670,9 +674,10 @@ DaphneV2ControllerModule::configure_trigger_mode() {
     m_interface->write_register(0x6000, {threshold});
 
     std::bitset<DaphneV2ControllerModule::s_max_channels> mask;
+    auto board_conf = m_module_config->get_board_conf();
     // we unmask all the channels that are enabled
     for ( ChannelId ch = 0; ch < s_max_channels; ++ch ) {
-      if ( m_module_config->channel_used(ch) )
+      if ( board_conf->is_channel_used(ch) )
 	mask[ch] = true;
     }
     m_interface->write_register(0x6001, {(uint64_t)mask.to_ulong()});
