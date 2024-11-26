@@ -55,6 +55,7 @@ def add_daphne_conf(oksfile:str, object_name:str, json_file:str, timeout_ms:int 
 
     def_board = dal.DaphneV2BoardConf( "daphne-v2-default-board",
                                        bias_ctrl=0,
+                                       self_trigger_threshold=0,
                                        default_channel=def_channel,
                                        default_afe=def_afe )
     db.update_dal(def_board)

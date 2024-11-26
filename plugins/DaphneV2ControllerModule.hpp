@@ -165,8 +165,9 @@ private:
   //  void dump_buffers(const data_t&);
   
   // specific actions
-  void create_interface( const std::string & ip, std::chrono::milliseconds timeout )  ;
-  //  void validate_configuration(const DaphneV2ControllerModule::Conf &);   
+  void create_interface( const std::string & ip,
+			 std::chrono::milliseconds timeout )  ;
+  void validate_configuration(const appmodel::DaphneV2BoardConf &) const;   
   void configure_timing_endpoints();
   void configure_analog_chain(bool intial_config);
   void align_DDR();

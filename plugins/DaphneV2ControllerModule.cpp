@@ -241,7 +241,7 @@ DaphneV2ControllerModule::do_conf(const data_t&)
   create_interface(m_module_config->get_address(),
 		   m_module_config->get_daphne_conf()->get_timeout());
 
-  //validate_configuration(conf_as_cpp);
+  validate_configuration( * m_module_config->get_board_conf() );
   
   configure_timing_endpoints();
   
@@ -310,163 +310,58 @@ DaphneV2ControllerModule::create_interface(const std::string & ip, std::chrono::
   
 }
 
-// void
-// DaphneV2ControllerModule::validate_configuration(const appmodel::DaphneV2ControllerModuleModule & c) {
+void
+DaphneV2ControllerModule::validate_configuration(const appmodel::DaphneV2BoardConf & c) const {
 
-//   // channel configuration
-//   // there is another variable we use to configure each channel the TRIM control:
-//   // the command to drive it is: 'WR TRIM CH <id_channel> <value>'
-//   // and value should be in the range 0 - 4095
+  const auto & channel_confs = c.get_active_channels();
 
-//   auto c.get_board_conf();
-  
-//   // BIASCTRL is configured for the entired board and the max value is 4095
-//   if ( c->get_bias_ctrl() > 4095 ) 
-//     throw InvalidBiasControl(ERS_HERE, c.biasctrl);
+  for ( const auto & ch : channel_confs ) {
+    auto id = ch->get_channel_id();
+    if ( id >= DaphneV2ControllerModule::s_max_channels ) {
+      throw InvalidChannelId(ERS_HERE, id, DaphneV2ControllerModule::s_max_channels);
+    }
 
-//   m_bias_ctrl = c.biasctrl;
- 
-//   const auto & channel_conf = c.channels;
+    //CH OFFSET maximum is 2700 if GAIN is 1, 1500 if GAIN is 2
+    auto gain = ch->get_gain();
+    if ( gain != 1 && gain != 2 ) {
+      throw InvalidChannelConfiguration(ERS_HERE,
+					id, ch->get_trim(), ch->get_offset(), gain);
+    }
+    auto offset = ch -> get_offset();
+    if ( gain == 1 ) {
+      if ( offset > 2700 ) 
+ 	throw InvalidChannelConfiguration(ERS_HERE, id, ch->get_trim(), offset, gain);
+    } else if ( gain == 2 ) {
+      if ( offset > 1500 ) 
+ 	throw InvalidChannelConfiguration(ERS_HERE, id, ch->get_trim(), offset, gain);
+    }
+  } // loop over channels
 
-//   for ( const auto & ch : channel_conf ) {
+  // afe configuration
+  const auto & afe_confs = c.get_active_afes();
 
-//     if ( ch.id >= DaphneV2ControllerModule::s_max_channels ) {
-//       throw InvalidChannelId(ERS_HERE, ch.id, DaphneV2ControllerModule::s_max_channels);
-//     }
-    
-//     //CH TRIM maximum is 4095
-//     if ( ch.conf.trim > 4095 ) 
-//       throw InvalidChannelConfiguration(ERS_HERE, ch.id, ch.conf.trim, ch.conf.offset, ch.conf.gain);
+  for ( const auto & afe : afe_confs ) {
+    // an afe only serves 8 channels.
+    // Since channels can be disabled, we only use an AFE if at least one of its channels are configured
+    // this logic is already implemented in the BoardConf object
 
-//     //CH OFFSET maximum is 2700 if GAIN is 1, 1500 if GAIN is 2
-//     if ( ch.conf.gain != 1 && ch.conf.gain != 2 ) {
-//       throw InvalidChannelConfiguration(ERS_HERE, ch.id, ch.conf.trim, ch.conf.offset, ch.conf.gain);
-//     }
-//     if ( ch.conf.gain == 1 ) {
-//       if ( ch.conf.offset > 2700 ) 
-// 	throw InvalidChannelConfiguration(ERS_HERE, ch.id, ch.conf.trim, ch.conf.offset, ch.conf.gain);
-//     } else if ( ch.conf.gain == 2 ) {
-//       if ( ch.conf.offset > 1500 ) 
-// 	throw InvalidChannelConfiguration(ERS_HERE, ch.id, ch.conf.trim, ch.conf.offset, ch.conf.gain);
-//     }
-           
-//     m_channel_confs[ch.id] = ch.conf;
-//   }
+    // so first we check if the AFE ID is valid
+    auto id = afe->get_afe_id();
+    if ( id >= DaphneV2ControllerModule::s_max_afes ) 
+      throw InvalidChannelId( ERS_HERE, id, DaphneV2ControllerModule::s_max_afes);
 
-//   // afe configuration
-//   const auto & afe_conf = c.afes;
-
-//   for ( const auto & afe : afe_conf ) {
-//     // an afe only serves 8 channels.
-//     // Since channels can be disabled (offset = 0) we first check if at least one of the channel of the AFE
-//     // is enabled, otherwise the corresponding AFE is left in its default configuration, which is the disabled
-
-//     // the channel depend on the id of the AFE, so first we check if the AFE ID is valid
 //     // added v_bias controls the bias per AFE, and shares similar properties to v_gain
 //     // max value this variable can take in hardware is 80V 
 //     // max value it should take in configuration is 1500DAC ~ 55V
 
+  }  // loop over the AFE
 
-//     if ( afe.id >= DaphneV2ControllerModule::s_max_afes ) 
-//       throw InvalidChannelId( ERS_HERE, afe.id, DaphneV2ControllerModule::s_max_afes);
-
-//     bool used = false;
-//     for ( auto ch = afe.id * 8 ; ch < (afe.id+1)*8 ; ++ch ) {
-//       if ( channel_used(ch) ) {
-// 	used = true;
-// 	break;
-//       }
-//     }
-
-//     if ( used ) {
-
-//       AFEConf afe_conf;
-      
-//       if ( afe.v_gain >= 4096 )
-// 	// this is a 12 bit register
-//         throw InvalidAFEVoltage(ERS_HERE, afe.id, afe.v_gain, afe.v_bias);
-
-//       afe_conf.v_gain = afe.v_gain;
-      
-//       if ( afe.v_bias >= 1500 )
-// 	// this is a 12 bit register
-// 	// but the bias have to be under a certain value to operate in cold temperature
-// 	// The maximum value depends on the brand of the SiPM, but it's always smaller than 1500 anyway
-// 	throw InvalidAFEVoltage(ERS_HERE, afe.id, afe.v_gain, afe.v_bias);
-
-//       afe_conf.v_bias = afe.v_bias;
-
-//       // ADC, reg 4 has no parsing as it's all made of booleans
-//       std::bitset<5> reg4;
-//       // bits 0 and 2 are reserved
-//       reg4[1] = afe.adc.resolution;
-//       reg4[3] = afe.adc.output_format;
-//       reg4[4] = afe.adc.SB_first;
-
-//       afe_conf.reg4 = (decltype(afe_conf.reg4)) reg4.to_ulong() ;
-
-//       // PGA, reg 51
-//       std::bitset<14> reg51(afe.pga.lpf_cut_frequency);
-//       if ( afe.pga.lpf_cut_frequency != 0 && afe.pga.lpf_cut_frequency != 2 && afe.pga.lpf_cut_frequency != 4 )
-// 	throw InvalidPGAConf(ERS_HERE, afe.id, afe.pga.lpf_cut_frequency);
-      
-//       reg51 <<= 1;
-//       reg51[4] = afe.pga.integrator_disable;
-//       reg51[7] = true;  // clamp is always disabled and we are in low noise mode
-//       reg51[13] = afe.pga.gain;
-      
-//       afe_conf.reg51 = (decltype(afe_conf.reg51)) reg51.to_ulong() ;
-
-//       // LNA, reg52
-//       std::bitset<16> reg52;
-//       if ( afe.lna.clamp > 3 ) // only 4 options allowed
-// 	throw InvalidLNAConf(ERS_HERE, afe.id, afe.lna.clamp, afe.lna.gain);
-	
-//       decltype(reg52) clamp(afe.lna.clamp);
-//       clamp <<= 6;
-
-//       reg52[12] = afe.lna.integrator_disable;
-
-//       if ( afe.lna.gain > 2 )  // only 3 options allowed
-// 	throw InvalidLNAConf(ERS_HERE, afe.id, afe.lna.clamp, afe.lna.gain);
-
-//       decltype(reg52) gain(afe.lna.gain);
-//       clamp <<= 13;
-
-//       reg52 |= clamp;
-//       reg52 |= gain;
-
-//       afe_conf.reg52 = (decltype(afe_conf.reg52)) reg52.to_ulong() ;
-
-//       m_afe_confs[afe.id] = afe_conf;
-//     }
-//   }  // loop over the AFE
-
-//   // configuring the trigger mode
-//   if ( c.self_trigger_threshold > 16383 )
-//     // this is a 14 bit register
-//     InvalidThreshold(ERS_HERE, c.self_trigger_threshold);
-
-//   m_self_threshold = c.self_trigger_threshold;
-
-//   if ( m_self_threshold == 0 ) {
-//     // we need to set the list of channels to broadcast
-//     for ( const auto & ch : c.full_stream_channels ) {
-//       if ( ch >= DaphneV2ControllerModule::s_max_channels ) 
-// 	throw InvalidChannelId(ERS_HERE, ch, DaphneV2ControllerModule::s_max_channels);
-
-//       m_full_stream_channels.push_back(ch);
-
-//       if (m_full_stream_channels.size()>16) {
-// 	// we can only stream 16 channels at most
-// 	throw TooManyChannels( ERS_HERE, c.full_stream_channels.size() );
-//       }
-//     }
-//   }
-  
-// }
-
- 
+  auto size = c.get_full_stream_channels().size();
+  if (size>16) {
+    // we can only stream 16 channels at most
+    throw TooManyChannels( ERS_HERE, size );
+  }
+}
 
 void
 DaphneV2ControllerModule::configure_timing_endpoints() {
