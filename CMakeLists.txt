@@ -40,7 +40,6 @@ daq_add_plugin(DaphneV2ControllerModule duneDAQModule LINK_LIBRARIES daphnemodul
 daq_add_unit_test(DaphneInterface_test LINK_LIBRARIES daphnemodules) 
 
 ##############################################################################
-# daq_add_application(daphne_controller_test controller_test.cxx TEST LINK_LIBRARIES daphnemodules)
 
 daq_install()
 
