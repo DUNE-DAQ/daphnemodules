@@ -317,9 +317,6 @@ DaphneV2ControllerModule::validate_configuration(const appmodel::DaphneV2BoardCo
 
   for ( const auto & ch : channel_confs ) {
     auto id = ch->get_channel_id();
-    if ( id >= DaphneV2ControllerModule::s_max_channels ) {
-      throw InvalidChannelId(ERS_HERE, id, DaphneV2ControllerModule::s_max_channels);
-    }
 
     //CH OFFSET maximum is 2700 if GAIN is 1, 1500 if GAIN is 2
     auto gain = ch->get_gain();
@@ -336,25 +333,6 @@ DaphneV2ControllerModule::validate_configuration(const appmodel::DaphneV2BoardCo
  	throw InvalidChannelConfiguration(ERS_HERE, id, ch->get_trim(), offset, gain);
     }
   } // loop over channels
-
-  // afe configuration
-  const auto & afe_confs = c.get_active_afes();
-
-  for ( const auto & afe : afe_confs ) {
-    // an afe only serves 8 channels.
-    // Since channels can be disabled, we only use an AFE if at least one of its channels are configured
-    // this logic is already implemented in the BoardConf object
-
-    // so first we check if the AFE ID is valid
-    auto id = afe->get_afe_id();
-    if ( id >= DaphneV2ControllerModule::s_max_afes ) 
-      throw InvalidChannelId( ERS_HERE, id, DaphneV2ControllerModule::s_max_afes);
-
-//     // added v_bias controls the bias per AFE, and shares similar properties to v_gain
-//     // max value this variable can take in hardware is 80V 
-//     // max value it should take in configuration is 1500DAC ~ 55V
-
-  }  // loop over the AFE
 
   auto size = c.get_full_stream_channels().size();
   if (size>16) {
@@ -451,17 +429,17 @@ void DaphneV2ControllerModule::configure_analog_chain(bool initial_config) {
     // hence, this loop does both the job of enabling and disebling
     
     result = m_interface->send_command(fmt::format( "WR TRIM CH {} V {}",
-						    channel_conf.get_channel_id(),
+						    ch,
 						    channel_conf.get_trim() ) );
     TLOG() << result.command << " -> " << result.result;
     
     result = m_interface->send_command(fmt::format("WR OFFSET CH {} V {}",
-						   channel_conf.get_channel_id(),
+						   ch,
 						   channel_conf.get_offset() ) );
     TLOG() << result.command << " -> " << result.result;
 
     result = m_interface -> send_command(fmt::format("CFG OFFSET CH {} GAIN {}",
-						     channel_conf.get_channel_id(),
+						     ch,
 						     channel_conf.get_gain() ) );
     TLOG() << result.command << " -> " << result.result;
     
@@ -476,27 +454,27 @@ void DaphneV2ControllerModule::configure_analog_chain(bool initial_config) {
     const auto & afe_conf = board_conf->get_afe(afe);
 
     result = m_interface -> send_command( fmt::format("WR AFE {} REG 52 V {}",
-						      afe_conf.get_afe_id(),
+						      afe,
 						      afe_conf.get_lna()->get_reg52()) );
     TLOG() << result.command << " -> " << result.result;
 
     result = m_interface -> send_command( fmt::format("WR AFE {} REG 4 V {}",
-						      afe_conf.get_afe_id(),
+						      afe,
 						      afe_conf.get_adc()->get_reg4()) );
     TLOG() << result.command << " -> " << result.result;
 
     result = m_interface -> send_command( fmt::format("WR AFE {} REG 51 V {}",
-						      afe_conf.get_afe_id(),
+						      afe,
 						      afe_conf.get_pga()->get_reg51()) );
     TLOG() << result.command << " -> " << result.result;
 
     result = m_interface -> send_command( fmt::format("WR AFE {} VGAIN V {}",
-						      afe_conf.get_afe_id(),
+						      afe,
 						      afe_conf.get_attenuator() ) );
     TLOG() << result.command << " -> " << result.result;
 
     result = m_interface -> send_command( fmt::format("WR BIASSET AFE {} V {}",
-						      afe_conf.get_afe_id(),
+						      afe,
 						      afe_conf.get_v_bias() ) );
     TLOG() << result.command << " -> " << result.result;
 
