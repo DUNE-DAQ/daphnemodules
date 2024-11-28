@@ -124,7 +124,7 @@ DaphneV2ControllerModule::generate_opmon_data()
 	m_channel_counters[c].packets = pack;
       }
 
-      publish( std::move(c_info), { {"name", fmt::format("{}", c)} } );
+      publish( std::move(c_info), { {"channel", fmt::format("{}", c)} } );
 
     } catch ( const ers::Issue & e) {
       ers::warning( MonitoringFailed(ERS_HERE, fmt::format("Channel {}", c), e));
