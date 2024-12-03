@@ -1,7 +1,7 @@
 /**
- * @file DaphneInterface.hpp
+ * @file DaphneV2Interface.hpp
  *
- * Definition of the interface protocol to the daphne boards
+ * Definition of the interface protocol to the daphne V2 boards
  *
  * This is part of the DUNE DAQ Software Suite, copyright 2020.
  * Licensing/copyright details are in the COPYING file that you should have
@@ -9,8 +9,8 @@
  *
  */
 
-#ifndef DAPHNEMODULES_SRC_DAPHNEINTERFACE_HPP_
-#define DAPHNEMODULES_SRC_DAPHNEINTERFACE_HPP_ 
+#ifndef DAPHNEMODULES_SRC_DAPHNEV2INTERFACE_HPP_
+#define DAPHNEMODULES_SRC_DAPHNEV2INTERFACE_HPP_ 
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -74,18 +74,18 @@ namespace dunedaq::daphnemodules {
   };
   
   
-  class DaphneInterface {
+  class DaphneV2Interface {
 
   public:
-    DaphneInterface( const char* ipaddr, int port,
+    DaphneV2Interface( const char* ipaddr, int port,
 		     std::chrono::milliseconds timeout = std::chrono::milliseconds(500));
 
-    ~DaphneInterface() { if(m_connection_id>0) close();}
+    ~DaphneV2Interface() { if(m_connection_id>0) close();}
 
-    DaphneInterface(const DaphneInterface &) = delete;
-    DaphneInterface & operator= (const DaphneInterface & ) = delete;
-    DaphneInterface(DaphneInterface &&) = delete;
-    DaphneInterface & operator= (DaphneInterface &&) = delete;
+    DaphneV2Interface(const DaphneV2Interface &) = delete;
+    DaphneV2Interface & operator= (const DaphneV2Interface & ) = delete;
+    DaphneV2Interface(DaphneV2Interface &&) = delete;
+    DaphneV2Interface & operator= (DaphneV2Interface &&) = delete;
     
     std::vector<uint64_t> read_register(uint64_t addr, uint8_t size) const { return read(0x00, addr, size) ; }
     void write_register(uint64_t addr, std::vector<uint64_t> && data)  const { write(0x01, addr, std::move(data)) ; }
@@ -124,4 +124,4 @@ namespace dunedaq::daphnemodules {
 } // namespce  dunedaq::daphnemodules
 
 
-#endif // DAPHNEMODULES_SRC_DAPHNEINTERFACE_HPP_
+#endif // DAPHNEMODULES_SRC_DAPHNEV2INTERFACE_HPP_

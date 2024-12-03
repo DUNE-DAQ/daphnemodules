@@ -306,7 +306,7 @@ DaphneV2ControllerModule::create_interface(const std::string & ip, std::chrono::
 
   TLOG() << get_name() << ": using daphne at " << ip << " with slot " << (int)m_module_config->get_slot(); 
 
-  m_interface.reset( new  DaphneInterface( ip.c_str(), 2001, timeout ) );
+  m_interface.reset( new  DaphneV2Interface( ip.c_str(), 2001, timeout ) );
   
 }
 

@@ -1,18 +1,18 @@
 /** 
  *  
- * Implementations of DaphneInterface's functions                                                                    
+ * Implementations of DaphneV2Interface's functions                                                                    
  * 
  * This is part of the DUNE DAQ Software Suite, copyright 2020.                                                      
  * Licensing/copyright details are in the COPYING file that you should have         
  */
 
-#include "DaphneInterface.hpp"
+#include "DaphneV2Interface.hpp"
 #include "logging/Logging.hpp"
 #include <sys/time.h>
 
 using namespace dunedaq::daphnemodules;
 
-DaphneInterface::DaphneInterface( const char* ipaddr, int port,
+DaphneV2Interface::DaphneV2Interface( const char* ipaddr, int port,
 				  std::chrono::milliseconds timeout)
   : m_timeout(timeout) {
 
@@ -34,13 +34,13 @@ DaphneInterface::DaphneInterface( const char* ipaddr, int port,
 }
 
 
-void DaphneInterface::close() {
+void DaphneV2Interface::close() {
 
   ::close( m_connection_id );
 }
 
 
-bool DaphneInterface::validate_connection() const {
+bool DaphneV2Interface::validate_connection() const {
 
   auto ret = read_register( 0xaa55, 1);
 
@@ -50,7 +50,7 @@ bool DaphneInterface::validate_connection() const {
 }
 
 
-command_result DaphneInterface::send_command_retry( std::string cmd,
+command_result DaphneV2Interface::send_command_retry( std::string cmd,
 						    size_t retry ) const {
 
   do {
@@ -73,7 +73,7 @@ command_result DaphneInterface::send_command_retry( std::string cmd,
 }
 
 
-command_result DaphneInterface::send_command_interruptible( std::string cmd,
+command_result DaphneV2Interface::send_command_interruptible( std::string cmd,
 							    std::function<bool()> can_retry ) const {
 
   do {
@@ -94,7 +94,7 @@ command_result DaphneInterface::send_command_interruptible( std::string cmd,
 
 
 
-command_result DaphneInterface::send_command( std::string cmd) const {
+command_result DaphneV2Interface::send_command( std::string cmd) const {
 
   TLOG() << "Sending command " << cmd;
   std::vector<uint64_t> bytes;
@@ -168,7 +168,7 @@ command_result DaphneInterface::send_command( std::string cmd) const {
 }
 
 
-std::vector<uint64_t>  DaphneInterface::read(uint8_t command_id,
+std::vector<uint64_t>  DaphneV2Interface::read(uint8_t command_id,
 					     uint64_t addr, uint8_t size) const {
 
   const std::lock_guard<std::mutex> lock(m_access_mutex);
@@ -235,7 +235,7 @@ std::vector<uint64_t>  DaphneInterface::read(uint8_t command_id,
 }
 
 
-void  DaphneInterface::write(uint8_t command_id, uint64_t addr, std::vector<uint64_t> && data)  const {
+void  DaphneV2Interface::write(uint8_t command_id, uint64_t addr, std::vector<uint64_t> && data)  const {
 
   const std::lock_guard<std::mutex> lock(m_access_mutex);
   

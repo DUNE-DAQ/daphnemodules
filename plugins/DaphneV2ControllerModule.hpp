@@ -20,7 +20,7 @@
 #include <array>
 #include <mutex>
 
-#include "DaphneInterface.hpp"
+#include "DaphneV2Interface.hpp"
 
 #include "daphnemodules/opmon/DaphneControllerModule.pb.h"
 
@@ -173,7 +173,7 @@ private:
   void align_DDR();
   void configure_trigger_mode();
 
-  std::unique_ptr<DaphneInterface> m_interface;
+  std::unique_ptr<DaphneV2Interface> m_interface;
   std::mutex m_mutex;  // mutex for interface
   std::atomic<bool> m_scrap_called = false;
 
