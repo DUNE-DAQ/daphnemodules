@@ -113,6 +113,7 @@ namespace dunedaq::daphnemodules {
 
     
   private:
+    std::string m_ip;
     int m_connection_id = -1;
     sockaddr_in m_target;
     std::chrono::milliseconds m_timeout{5}; 

@@ -412,14 +412,14 @@ void DaphneV2ControllerModule::configure_analog_chain(bool initial_config) {
 
   if (initial_config) {
     auto result = m_interface->send_command("CFG AFE ALL INITIAL");
-    TLOG() << result.command << " -> " << result.result;
+    TLOG() << get_name() << ": " << result.command << " -> " << result.result;
   }
 
   auto board_conf = initial_config ? m_module_config->get_board_conf() :
     m_module_config->get_daphne_conf()->get_default_v2_settings();
     
   auto result = m_interface->send_command(fmt::format("WR VBIASCTRL V {}", board_conf->get_bias_ctrl()));
-  TLOG() << result.command << " -> " << result.result;
+  TLOG() << get_name() << ": " << result.command << " -> " << result.result;
   
   for ( size_t ch = 0; ch < s_max_channels; ++ch ) {
 
@@ -431,17 +431,17 @@ void DaphneV2ControllerModule::configure_analog_chain(bool initial_config) {
     result = m_interface->send_command(fmt::format( "WR TRIM CH {} V {}",
 						    ch,
 						    channel_conf.get_trim() ) );
-    TLOG() << result.command << " -> " << result.result;
+    TLOG() << get_name() << ": " << result.command << " -> " << result.result;
     
     result = m_interface->send_command(fmt::format("WR OFFSET CH {} V {}",
 						   ch,
 						   channel_conf.get_offset() ) );
-    TLOG() << result.command << " -> " << result.result;
+    TLOG() << get_name() << ": " << result.command << " -> " << result.result;
 
     result = m_interface -> send_command(fmt::format("CFG OFFSET CH {} GAIN {}",
 						     ch,
 						     channel_conf.get_gain() ) );
-    TLOG() << result.command << " -> " << result.result;
+    TLOG() << get_name() << ": " << result.command << " -> " << result.result;
     
   } // channel loop
 
@@ -456,27 +456,27 @@ void DaphneV2ControllerModule::configure_analog_chain(bool initial_config) {
     result = m_interface -> send_command( fmt::format("WR AFE {} REG 52 V {}",
 						      afe,
 						      afe_conf.get_lna()->get_reg52()) );
-    TLOG() << result.command << " -> " << result.result;
+    TLOG() << get_name() << ": " << result.command << " -> " << result.result;
 
     result = m_interface -> send_command( fmt::format("WR AFE {} REG 4 V {}",
 						      afe,
 						      afe_conf.get_adc()->get_reg4()) );
-    TLOG() << result.command << " -> " << result.result;
+    TLOG() << get_name() << ": " << result.command << " -> " << result.result;
 
     result = m_interface -> send_command( fmt::format("WR AFE {} REG 51 V {}",
 						      afe,
 						      afe_conf.get_pga()->get_reg51()) );
-    TLOG() << result.command << " -> " << result.result;
+    TLOG() << get_name() << ": " << result.command << " -> " << result.result;
 
     result = m_interface -> send_command( fmt::format("WR AFE {} VGAIN V {}",
 						      afe,
 						      afe_conf.get_attenuator() ) );
-    TLOG() << result.command << " -> " << result.result;
+    TLOG() << get_name() << ": " << result.command << " -> " << result.result;
 
     result = m_interface -> send_command( fmt::format("WR BIASSET AFE {} V {}",
 						      afe,
 						      afe_conf.get_v_bias() ) );
-    TLOG() << result.command << " -> " << result.result;
+    TLOG() << get_name() << ": " << result.command << " -> " << result.result;
 
   } // afe loop
   

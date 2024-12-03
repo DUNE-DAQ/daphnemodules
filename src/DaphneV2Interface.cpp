@@ -27,6 +27,7 @@ DaphneV2Interface::DaphneV2Interface( const char* ipaddr, int port,
   if ( ret <= 0 ) 
     throw InvalidIPAddress(ERS_HERE, ipaddr);
 
+  m_ip = ipaddr;
  
   if ( ! validate_connection() )
     throw FailedPing(ERS_HERE, ipaddr, port );
@@ -96,7 +97,7 @@ command_result DaphneV2Interface::send_command_interruptible( std::string cmd,
 
 command_result DaphneV2Interface::send_command( std::string cmd) const {
 
-  TLOG() << "Sending command " << cmd;
+  TLOG() << "Board: " << m_ip << ", sending command " << cmd;
   std::vector<uint64_t> bytes;
   for (char ch : cmd) {
     bytes.push_back(static_cast<uint64_t>(ch));
@@ -112,7 +113,7 @@ command_result DaphneV2Interface::send_command( std::string cmd) const {
     write_buffer(0x90000000, std::move(part));
   }
 
-  TLOG() << "Command sent, waiting for result";
+  TLOG() << "Board: " << m_ip << ", Command sent, waiting for result";
 
   
   command_result res;
