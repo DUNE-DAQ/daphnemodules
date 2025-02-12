@@ -8,8 +8,8 @@ moo.io.default_load_path = get_moo_model_path()
 
 # Load configuration types
 import moo.otypes
-moo.otypes.load_types("daphnemodules/daphnecontroller.jsonnet")
-import dunedaq.daphnemodules.daphnecontroller as daphnecontroller
+moo.otypes.load_types("daphnemodules/DaphneV2ControllerModule.jsonnet")
+import dunedaq.daphnemodules.DaphneV2ControllerModule as DaphneV2ControllerModule
 
 from appfwk.utils import acmd
 
@@ -25,7 +25,7 @@ def generate_daphne_rc_cmds(
     ):
 
     cmds = [
-        ("dump_buffers",    acmd([ ("", daphnecontroller.DumpBuffers(
+        ("dump_buffers",    acmd([ ("", DaphneV2ControllerModule.DumpBuffers(
             directory=directory,
             n_samples=n_samples))])),
         ]

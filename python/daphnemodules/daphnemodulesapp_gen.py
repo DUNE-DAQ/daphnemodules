@@ -8,9 +8,9 @@ moo.io.default_load_path = get_moo_model_path()
 
 # Load configuration types                                                                                
 import moo.otypes
-moo.otypes.load_types("daphnemodules/daphnecontroller.jsonnet")
+moo.otypes.load_types("daphnemodules/DaphneV2ControllerModule.jsonnet")
 
-import dunedaq.daphnemodules.daphnecontroller as daphnecontroller
+import dunedaq.daphnemodules.DaphneV2ControllerModule as DaphneV2ControllerModule
 
 from daqconf.core.app import App, ModuleGraph
 from daqconf.core.daqmodule import DAQModule
@@ -31,23 +31,23 @@ def unpack( j : dict, block : str )  -> dict :
 
     return ret
 
-def to_adc( j : dict ) -> daphnecontroller.ADCConf :
-    ret = daphnecontroller.ADCConf(
+def to_adc( j : dict ) -> DaphneV2ControllerModule.ADCConf :
+    ret = DaphneV2ControllerModule.ADCConf(
         resolution    = j['resolution'],
         output_format = j['output_format'],
         SB_first      = j['SB_first'])
     return ret
         
 
-def to_pga( j : dict ) -> daphnecontroller.PGAConf :
-    ret = daphnecontroller.PGAConf(
+def to_pga( j : dict ) -> DaphneV2ControllerModule.PGAConf :
+    ret = DaphneV2ControllerModule.PGAConf(
         lpf_cut_frequency  = j['lpf_cut_frequnecy'],
         integrator_disable = j['integrator_disable'],
         gain               = j['gain'] )
     return ret
 
-def to_lna( j : dict ) -> daphnecontroller.LNAConf :
-    ret = daphnecontroller.LNAConf(
+def to_lna( j : dict ) -> DaphneV2ControllerModule.LNAConf :
+    ret = DaphneV2ControllerModule.LNAConf(
         clamp              = j['clamp'],
         integrator_disable = j['integrator_disable'],
         gain               = j['gain'] )
@@ -62,9 +62,9 @@ def get_daphnemodules_app(
                           afe_gain : int,
                           channel_gain : int,
                           channel_offset : int,
-                          adc : daphnecontroller.ADCConf,
-                          pga : daphnecontroller.PGAConf,
-                          lna : daphnecontroller.LNAConf,
+                          adc : DaphneV2ControllerModule.ADCConf,
+                          pga : DaphneV2ControllerModule.PGAConf,
+                          lna : DaphneV2ControllerModule.LNAConf,
                           details,  
                           nickname="daphne",
                           host="localhost"):
@@ -92,7 +92,7 @@ def get_daphnemodules_app(
         ext_lnas      = unpack(afe_block, 'lnas')
             
     for afe in range(n_afe) :
-        afes.append( daphnecontroller.AFE(
+        afes.append( DaphneV2ControllerModule.AFE(
             id=afe,
             v_gain=afe_gain if afe not in ext_afe_gains else ext_afe_gains[afe],
             v_bias = 0      if afe not in ext_biases    else ext_biases[afe],
@@ -117,18 +117,18 @@ def get_daphnemodules_app(
         gain = channel_gain     if ch not in ext_gains   else ext_gains[ch]
         offset = channel_offset if ch not in ext_offsets else ext_offsets[ch]
         if ch in ext_trims :
-            conf = daphnecontroller.ChannelConf(
+            conf = DaphneV2ControllerModule.ChannelConf(
                 gain = gain,
                 offset = offset, 
                 trim = ext_trims[ch] )
         else :
-            conf = daphnecontroller.ChannelConf(
+            conf = DaphneV2ControllerModule.ChannelConf(
                 gain = gain, 
                 offset = offset )
 
-        channels.append( daphnecontroller.Channel( id = ch, conf = conf ) ) 
+        channels.append( DaphneV2ControllerModule.Channel( id = ch, conf = conf ) ) 
             
-    conf = daphnecontroller.Conf(
+    conf = DaphneV2ControllerModule.Conf(
         daphne_address=ip,
         slot=slot,
         timeout_ms=timeout_ms,
@@ -140,7 +140,7 @@ def get_daphnemodules_app(
     )
 
     modules = [DAQModule(name = "controller", 
-                         plugin = "DaphneController", 
+                         plugin = "DaphneV2ControllerModule", 
                          conf = conf
                          )]
 
