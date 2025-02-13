@@ -24,6 +24,8 @@
 
 #include "daphnemodules/opmon/DaphneControllerModule.pb.h"
 
+#include "logging/Logging.hpp" // NOTE: if ISSUES ARE DECLARED BEFORE include logging/Logging.hpp, TLOG_DEBUG<<issue wont work.
+
 
 namespace dunedaq {
   
@@ -144,7 +146,7 @@ class DaphneV2ControllerModule : public dunedaq::appfwk::DAQModule
 public:
   explicit DaphneV2ControllerModule(const std::string& name);
 
-  void init(std::shared_ptr<appfwk::ModuleConfiguration> mcfg) override;
+  void init(std::shared_ptr<appfwk::ConfigurationManager> cfgMgr) override;
 
   void generate_opmon_data() override;
 

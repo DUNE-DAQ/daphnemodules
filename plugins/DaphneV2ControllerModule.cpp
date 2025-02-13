@@ -44,9 +44,9 @@ DaphneV2ControllerModule::DaphneV2ControllerModule(const std::string& name)
 
 
 void
-DaphneV2ControllerModule::init(std::shared_ptr<appfwk::ModuleConfiguration> mcfg) {
+DaphneV2ControllerModule::init(std::shared_ptr<appfwk::ConfigurationManager> cfgMgr) {
 
-  auto mdal = mcfg->module<conf_t>(get_name());
+  auto mdal = cfgMgr->get_dal<conf_t>(get_name());
   if (!mdal) {
     throw ConfigurationFailed(ERS_HERE, get_name());
   }
