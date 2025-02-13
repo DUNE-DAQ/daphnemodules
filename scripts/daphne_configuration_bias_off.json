@@ -1,7 +1,7 @@
 {
     "10.73.137.104": {
         "slot": 4,
-        "bias_ctrl": 4095,
+        "bias_ctrl": 0,
         "self_trigger_threshold": 600,
         "full_stream_channels": [
             0,
@@ -55,13 +55,13 @@
                 0,
                 4
             ],
-            "atenuators": [
-                1,
-                1
+            "attenuators": [
+                2500,
+                2100
             ],
             "v_biases": [
-                783,
-                1154
+                0,
+                0
             ],
             "adcs": {
                 "resolution": [
@@ -109,7 +109,7 @@
     },
     "10.73.137.109": {
         "slot": 9,
-        "bias_ctrl": 4095,
+        "bias_ctrl": 0,
         "self_trigger_threshold": 600,
         "full_stream_channels": [],
         "channel_analog_conf": {
@@ -290,19 +290,19 @@
                 3,
                 4
             ],
-            "atenuators": [
-                1,
-                1,
-                1,
-                1,
-                1
+            "attenuators": [
+                2500,
+                2400,
+                2300,
+                2200,
+                2100
             ],
             "v_biases": [
-                804,
-                817,
-                1145,
-                1151,
-                1113
+                0,
+                0,
+                0,
+                0,
+                0
             ],
             "adcs": {
                 "resolution": [
@@ -377,7 +377,7 @@
     },
     "10.73.137.111": {
         "slot": 11,
-        "bias_ctrl": 4095,
+        "bias_ctrl": 0,
         "self_trigger_threshold": 600,
         "full_stream_channels": [],
         "channel_analog_conf": {
@@ -558,19 +558,19 @@
                 3,
                 4
             ],
-            "atenuators": [
-                1,
-                1,
-                1,
-                1,
-                1
+            "attenuators": [
+                2500,
+                2400,
+                2300,
+                2200,
+                2100
             ],
             "v_biases": [
-                810,
-                814,
-                799,
-                1158,
-                1155
+                0,
+                0,
+                0,
+                0,
+                0
             ],
             "adcs": {
                 "resolution": [
@@ -645,46 +645,9 @@
     },
     "10.73.137.112": {
         "slot": 12,
-        "bias_ctrl": 4095,
+        "bias_ctrl": 0,
         "self_trigger_threshold": 600,
-        "full_stream_channels": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-            10,
-            11,
-            12,
-            13,
-            14,
-            15,
-            16,
-            17,
-            18,
-            19,
-            20,
-            21,
-            22,
-            23,
-            24,
-            25,
-            26,
-            27,
-            28,
-            29,
-            30,
-            31,
-            32,
-            34,
-            37,
-            39
-        ],
+        "full_stream_channels": [],
         "channel_analog_conf": {
             "ids": [
                 0,
@@ -847,19 +810,19 @@
                 3,
                 4
             ],
-            "atenuators": [
-                1,
-                1,
-                1,
-                1,
-                1
+            "attenuators": [
+                2500,
+                2400,
+                2300,
+                2200,
+                2100
             ],
             "v_biases": [
-                1129,
-                1141,
-                1121,
-                1160,
-                1152
+                0,
+                0,
+                0,
+                0,
+                0
             ],
             "adcs": {
                 "resolution": [
@@ -934,14 +897,9 @@
     },
     "10.73.137.113": {
         "slot": 13,
-        "bias_ctrl": 4095,
+        "bias_ctrl": 0,
         "self_trigger_threshold": 600,
-        "full_stream_channels": [
-            0,
-            2,
-            5,
-            7
-        ],
+        "full_stream_channels": [],
         "channel_analog_conf": {
             "ids": [
                 0,
@@ -972,11 +930,11 @@
             "ids": [
                 0
             ],
-            "atenuators": [
-                1
+            "attenuators": [
+                2500
             ],
             "v_biases": [
-                807
+                0
             ],
             "adcs": {
                 "resolution": [

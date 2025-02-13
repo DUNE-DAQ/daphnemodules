@@ -1,5 +1,5 @@
 /**
- * @file DaphneController.hpp
+ * @file DaphneV2ControllerModule.hpp
  *
  * Developer(s) of this DAQModule have yet to replace this line with a brief description of the DAQModule.
  *
@@ -8,10 +8,11 @@
  * received with this code.
  */
 
-#ifndef DAPHNEMODULES_PLUGINS_DAPHNECONTROLLER_HPP_
-#define DAPHNEMODULES_PLUGINS_DAPHNECONTROLLER_HPP_
+#ifndef DAPHNEMODULES_PLUGINS_DaphneV2ControllerModule_HPP_
+#define DAPHNEMODULES_PLUGINS_DaphneV2ControllerModule_HPP_
 
 #include "appfwk/DAQModule.hpp"
+#include "appmodel/DaphneV2ControllerModule.hpp"
 
 #include <atomic>
 #include <limits>
@@ -19,14 +20,20 @@
 #include <array>
 #include <mutex>
 
-#include "DaphneInterface.hpp"
+#include "DaphneV2Interface.hpp"
 
-#include "daphnemodules/daphnecontroller/Structs.hpp"
-#include "daphnemodules/daphnecontrollerinfo/InfoStructs.hpp"
+#include "daphnemodules/opmon/DaphneControllerModule.pb.h"
 
 
 namespace dunedaq {
+  
+  ERS_DECLARE_ISSUE( daphnemodules,
+                     ConfigurationFailed,
+                     name << " failed to retrieve its conf object",
+                     ((std::string)name)
+                   )
 
+  
   ERS_DECLARE_ISSUE( daphnemodules,
                      MonitoringFailed,
                      "Monitoring of " << item << " failed",
@@ -132,69 +139,48 @@ namespace dunedaq {
 
 namespace dunedaq::daphnemodules {
 
-class DaphneController : public dunedaq::appfwk::DAQModule
+class DaphneV2ControllerModule : public dunedaq::appfwk::DAQModule
 {
 public:
-  explicit DaphneController(const std::string& name);
+  explicit DaphneV2ControllerModule(const std::string& name);
 
-  void init(const data_t&) override {;}
+  void init(std::shared_ptr<appfwk::ModuleConfiguration> mcfg) override;
 
-  void get_info(opmonlib::InfoCollector&, int /*level*/) override;
+  void generate_opmon_data() override;
 
-  DaphneController(const DaphneController&) = delete;
-  DaphneController& operator=(const DaphneController&) = delete;
-  DaphneController(DaphneController&&) = delete;
-  DaphneController& operator=(DaphneController&&) = delete;
+  DaphneV2ControllerModule(const DaphneV2ControllerModule&) = delete;
+  DaphneV2ControllerModule& operator=(const DaphneV2ControllerModule&) = delete;
+  DaphneV2ControllerModule(DaphneV2ControllerModule&&) = delete;
+  DaphneV2ControllerModule& operator=(DaphneV2ControllerModule&&) = delete;
 
-  ~DaphneController() = default;
+  ~DaphneV2ControllerModule() = default;
 
 private:
 
   using ChannelId = uint8_t;
   
-  // Commands DaphneController can receive
+  // Commands DaphneV2ControllerModule can receive
   void do_conf(const data_t&);
   void do_scrap(const data_t&);
-  void dump_buffers(const data_t&);
+  //  void dump_buffers(const data_t&);
   
   // specific actions
-  void create_interface( const std::string & ip, std::chrono::milliseconds timeout )  ;
-  void validate_configuration(const daphnecontroller::Conf &);   
+  void create_interface( const std::string & ip,
+			 std::chrono::milliseconds timeout )  ;
+  void validate_configuration(const appmodel::DaphneV2BoardConf &) const;   
   void configure_timing_endpoints();
   void configure_analog_chain(bool intial_config);
   void align_DDR();
   void configure_trigger_mode();
 
-  bool channel_used( ChannelId id ) const {
-    return m_channel_confs[id].offset > 0;
-  }
-  
-  std::unique_ptr<DaphneInterface> m_interface;
+  std::unique_ptr<DaphneV2Interface> m_interface;
   std::mutex m_mutex;  // mutex for interface
   std::atomic<bool> m_scrap_called = false;
 
-  uint8_t  m_slot;
-  uint16_t m_bias_ctrl;
-  uint16_t m_self_threshold;
-  
   static const ChannelId s_max_channels = 40;
-  std::array<daphnecontroller::ChannelConf, s_max_channels> m_channel_confs;
-  // this array is indexed in the [0-40) range
-  
-  struct AFEConf {
-    uint16_t v_gain = 0;  // 12 bit register
-    uint16_t v_bias = 0;  // 12 bit register
-    uint8_t  reg4   = 0;  // 4  bit register
-    uint16_t reg51 = 0;   // 14 bit register
-    uint16_t reg52 = 0;   // 16 bit register
-  };
-  
   static const ChannelId s_max_afes = 5;
-  std::array<AFEConf, s_max_afes> m_afe_confs;
-  // mapping from the channels to the AFE
-  // 0-7 -> AFE 0,  8-15 -> AFE 1, 16-23 -> AFE 2, 24-31 -> AFE 3, 32-39 -> AFE 4 
-
-  std::vector<ChannelId> m_full_stream_channels;
+  using conf_t = appmodel::DaphneV2ControllerModule;
+  const conf_t* m_module_config = nullptr;
   
   static const uint16_t s_frame_alignment_good = 0x3f80;
 
@@ -202,7 +188,9 @@ private:
   // counter use to see how many times we failed the parsing of the monitoing
 
   //monitoring
-  using counter_t = decltype(daphnecontrollerinfo::ChannelInfo::total_triggers);
+  using const_metric_counter_t = std::invoke_result<decltype(&dunedaq::daphnemodules::opmon::ChannelInfo::total_triggers),
+						    dunedaq::daphnemodules::opmon::ChannelInfo>::type;
+  using counter_t = std::remove_const<const_metric_counter_t>::type;
   struct Counters {
     std::atomic<counter_t> triggers = 0;
     std::atomic<counter_t> packets  = 0;
@@ -215,4 +203,4 @@ private:
 
 } // namespace dunedaq::daphnemodules
 
-#endif // DAPHNEMODULES_PLUGINS_DAPHNECONTROLLER_HPP_
+#endif // DAPHNEMODULES_PLUGINS_DaphneV2ControllerModule_HPP_
