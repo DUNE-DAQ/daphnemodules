@@ -540,6 +540,11 @@ DaphneV2ControllerModule::configure_trigger_mode() {
 
   auto c = m_module_config->get_board_conf();
 
+  m_interface->write_register(0x6100, {c->get_self_trigger_xcorr()});
+  m_interface->write_register(0x6002, {c->get_tp_conf()});
+  m_interface->write_register(0x6003, {c->get_compensator()});
+  m_interface->write_register(0x6004, {c->get_inverter()}); 
+  
   auto threshold = c->get_self_trigger_threshold();
   
   if ( threshold > 0 ) {
