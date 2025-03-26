@@ -1,6 +1,6 @@
 
 cmake_minimum_required(VERSION 3.12)
-project(daphnemodules VERSION 2.0.0)
+project(daphnemodules VERSION 2.0.1)
 
 find_package(daq-cmake REQUIRED)
 
