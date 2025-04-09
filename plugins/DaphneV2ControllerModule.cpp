@@ -38,6 +38,7 @@ DaphneV2ControllerModule::DaphneV2ControllerModule(const std::string& name)
   : dunedaq::appfwk::DAQModule(name)
 {
   register_command("conf", &DaphneV2ControllerModule::do_conf);
+  register_command("start", &DaphneV2ControllerModule::do_start);
   register_command("scrap", &DaphneV2ControllerModule::do_scrap);
   //  register_command("dump_buffers", &DaphneV2ControllerModule::dump_buffers);
 }
@@ -283,6 +284,23 @@ DaphneV2ControllerModule::do_conf(const data_t&)
   TLOG() << get_name() << ": board configured in " << duration.count() << " microseconds";
   
 }
+
+
+void
+DaphneV2ControllerModule::do_start(const data_t&)
+{
+
+  auto start_time = std::chrono::high_resolution_clock::now();
+
+  reset_counters();
+  
+  auto end_time = std::chrono::high_resolution_clock::now();
+
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+  TLOG() << get_name() << ": board started in " << duration.count() << " microseconds";
+  
+}
+
 
 
 void
