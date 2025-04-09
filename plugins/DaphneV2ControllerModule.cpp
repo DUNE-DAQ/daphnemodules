@@ -38,6 +38,7 @@ DaphneV2ControllerModule::DaphneV2ControllerModule(const std::string& name)
   : dunedaq::appfwk::DAQModule(name)
 {
   register_command("conf", &DaphneV2ControllerModule::do_conf);
+  register_command("start", &DaphneV2ControllerModule::do_start);
   register_command("scrap", &DaphneV2ControllerModule::do_scrap);
   //  register_command("dump_buffers", &DaphneV2ControllerModule::dump_buffers);
 }
@@ -79,22 +80,30 @@ DaphneV2ControllerModule::generate_opmon_data()
     
     // read total packages sent to felix
     auto tot_pack_buf = m_interface->read_register(s_tot_packets_counter_address, 1);
-    stream_info.set_total_packets(tot_pack_buf[0]);
-    if ( m_last_package_counter.load() != 0 ) {
-      stream_info.set_new_packets(stream_info.total_packets() - m_last_package_counter.exchange(stream_info.total_packets()));
-    } else {
-      m_last_package_counter = stream_info.total_packets();
-    }
+    const auto & total_packets = tot_pack_buf[0];
+    auto old_total_packets = m_last_package_counter.exchange(total_packets);
     
-  // read total packages not sent to felix
+    stream_info.set_total_packets(total_packets);
+    
+    if ( total_packets < old_total_packets ) {
+      stream_info.set_new_packets( total_packets  );
+    } else {
+      stream_info.set_new_packets( total_packets - old_total_packets );
+    }
+  
+    
+    // read total packages not sent to felix
     auto tot_dropped_buf = m_interface->read_register(s_dropped_counter_address, 1);
-    stream_info.set_total_dropped_packets(tot_dropped_buf[0]);
-    if ( m_last_unsent_counter.load() != 0 ) {
-      stream_info.set_new_dropped_packets(stream_info.total_dropped_packets() - m_last_unsent_counter.exchange(stream_info.total_dropped_packets()));
-    } else {
-      m_last_unsent_counter = stream_info.total_dropped_packets();
-    }
+    const auto & tot_dropped = tot_dropped_buf[0];
+    auto old_tot_dropped = m_last_unsent_counter.exchange(tot_dropped);
     
+    stream_info.set_total_dropped_packets(tot_dropped);
+    if ( tot_dropped < old_tot_dropped ) {
+      stream_info.set_new_dropped_packets( tot_dropped );
+    } else {
+      stream_info.set_new_dropped_packets( tot_dropped - old_tot_dropped );
+    }
+
     publish( std::move(stream_info) );
   } catch ( const ers::Issue & e ) {
     ers::warning( MonitoringFailed(ERS_HERE, "data stream", e));
@@ -105,23 +114,29 @@ DaphneV2ControllerModule::generate_opmon_data()
     
     try { 
       opmon::ChannelInfo c_info;
-      
+
+      auto & channel_counters = m_channel_counters[c];
+
       auto trig_buf = m_interface->read_register(s_start_counter_buffer+c*8, 1);  
       const auto & trig = trig_buf[0];
-      c_info.set_total_triggers(trig);
-      if ( m_channel_counters[c].triggers.load() != 0 ) {
-	c_info.set_new_triggers(trig - m_channel_counters[c].triggers.exchange(trig));
-      } else {
-	m_channel_counters[c].triggers = trig;
-      }
+      auto old_trig = channel_counters.triggers.exchange(trig);
       
+      c_info.set_total_triggers(trig);
+      if ( trig < old_trig ) {
+	c_info.set_new_triggers(trig);
+      } else {
+	c_info.set_new_triggers(trig - old_trig);
+      }
+
       auto pack_buf = m_interface->read_register(s_packets_counter_address+c*8, 1);
       const auto & pack = pack_buf[0];
+      auto old_pack = channel_counters.packets.exchange(pack);
+      
       c_info.set_total_packets(pack);
-      if ( m_channel_counters[c].packets.load() != 0 ) {
-	c_info.set_new_packets(pack - m_channel_counters[c].packets.exchange(pack));
+      if ( pack < old_pack ) {
+	c_info.set_new_packets(pack);
       } else {
-	m_channel_counters[c].packets = pack;
+	c_info.set_new_packets(pack - old_pack);
       }
 
       publish( std::move(c_info), { {"channel", fmt::format("{}", c)} } );
@@ -250,6 +265,8 @@ DaphneV2ControllerModule::do_conf(const data_t&)
   align_DDR();
   
   configure_trigger_mode();
+
+  reset_counters();
   
   // we get a list of 
   // Let's say I want to see 0x5001
@@ -267,6 +284,23 @@ DaphneV2ControllerModule::do_conf(const data_t&)
   TLOG() << get_name() << ": board configured in " << duration.count() << " microseconds";
   
 }
+
+
+void
+DaphneV2ControllerModule::do_start(const data_t&)
+{
+
+  auto start_time = std::chrono::high_resolution_clock::now();
+
+  reset_counters();
+  
+  auto end_time = std::chrono::high_resolution_clock::now();
+
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+  TLOG() << get_name() << ": board started in " << duration.count() << " microseconds";
+  
+}
+
 
 
 void
@@ -499,14 +533,6 @@ void DaphneV2ControllerModule::align_DDR() {
   m_interface->write_register(0x2001, {1234});
   // this is correct to be done 3 times
 
-  // wriring in regiester 0x2001 for 3 times resets every counter so we reset the counters on the Module side as well
-  // to aling with the board
-  for ( auto & c : m_channel_counters ) {
-    c.triggers = 0;
-    c.packets = 0;
-  }
-  m_last_package_counter = 0;
-  
   std::this_thread::sleep_for(std::chrono::milliseconds(5));
   // this is necessary to give time to the board to align the AFE DDR
   // Otherwise further checks become pointless
@@ -593,6 +619,19 @@ DaphneV2ControllerModule::configure_trigger_mode() {
 
   TLOG() << get_name() << ": trigger mode configured";
   
+}
+
+
+void DaphneV2ControllerModule::reset_counters() {
+
+  m_last_package_counter = 0;
+  m_last_unsent_counter = 0;
+  for ( auto & c : m_channel_counters ) {
+    c.triggers = 0;
+    c.packets = 0;
+  }
+  m_interface->write_register(0x4004, {1234});
+
 }
 
 

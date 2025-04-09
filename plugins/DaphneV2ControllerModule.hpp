@@ -163,6 +163,7 @@ private:
   
   // Commands DaphneV2ControllerModule can receive
   void do_conf(const data_t&);
+  void do_start(const data_t&);
   void do_scrap(const data_t&);
   //  void dump_buffers(const data_t&);
   
@@ -175,6 +176,8 @@ private:
   void align_DDR();
   void configure_trigger_mode();
 
+  void reset_counters();
+  
   std::unique_ptr<DaphneV2Interface> m_interface;
   std::mutex m_mutex;  // mutex for interface
   std::atomic<bool> m_scrap_called = false;
