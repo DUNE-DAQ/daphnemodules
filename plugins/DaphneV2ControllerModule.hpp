@@ -175,6 +175,8 @@ private:
   void align_DDR();
   void configure_trigger_mode();
 
+  void reset_counters();
+  
   std::unique_ptr<DaphneV2Interface> m_interface;
   std::mutex m_mutex;  // mutex for interface
   std::atomic<bool> m_scrap_called = false;
