@@ -257,6 +257,8 @@ DaphneV2ControllerModule::do_conf(const data_t&)
 		   m_module_config->get_daphne_conf()->get_timeout());
 
   validate_configuration( * m_module_config->get_board_conf() );
+
+  disable_links();
   
   configure_timing_endpoints();
   
@@ -312,6 +314,8 @@ DaphneV2ControllerModule::do_scrap(const data_t&)
   
   // during configuration no other operations are allowed
   const std::lock_guard<std::mutex> lock(m_mutex);
+
+  disable_links();
 
   configure_analog_chain(false);
 
@@ -558,6 +562,13 @@ void DaphneV2ControllerModule::align_DDR() {
   TLOG() << get_name() << ": done aligning DDR";
 }
 
+void
+DaphneV2ControllerModule::disable_links()
+{
+  TLOG() << get_name() << ": disabling all links";
+  m_interface->write_register(0x3001, {0x0});
+  TLOG() << get_name() << ": all links disabled";
+}
 
 void
 DaphneV2ControllerModule::configure_trigger_mode() {
