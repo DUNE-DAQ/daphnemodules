@@ -175,7 +175,7 @@ private:
   void configure_analog_chain(bool intial_config);
   void align_DDR();
   void configure_trigger_mode();
-
+  void disable_links();
   void reset_counters();
   
   std::unique_ptr<DaphneV2Interface> m_interface;
