@@ -17,7 +17,7 @@
 #include "appmodel/DaphneV2PGA.hpp"
 #include "appmodel/DaphneConf.hpp"
 
-#include "detdataformats/DetID.hpp"
+#include "fddetdataformats/DAPHNEFrame.hpp"
 
 #include <string>
 #include <logging/Logging.hpp>
@@ -393,14 +393,14 @@ DaphneV2ControllerModule::configure_timing_endpoints() {
   const auto * board = m_module_config->get_board_conf();
   
   std::bitset<26> config_value(board->get_slot_id());
-  config_value << 10;
+  config_value <<= 10;
   config_value |=  board -> get_crate_id();
-  config_value << 6;
+  config_value <<= 6;
   config_value |=  board -> get_detector_id();
-  config_value << 6;
-  config_value |= std::bitset<6>(detdataformats::DetID::s_det_id_version).to_ulong();
+  config_value <<= 6;
+  config_value |= std::bitset<6>(fddetdataformats::DAPHNEFrame::version).to_ulong();
   
-  TLOG() << get_name() << ": configuring timing endpoint";
+  TLOG() << get_name() << ": configuring timing endpoint with value " << config_value.to_string();
   m_interface->write_register(0x4001, {0x1});
   m_interface->write_register(0x3000, {config_value.to_ulong()});
   m_interface->write_register(0x4003, {1234});

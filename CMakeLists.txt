@@ -12,6 +12,7 @@ find_package(appfwk REQUIRED)
 find_package(opmonlib REQUIRED)
 find_package(fmt REQUIRED)
 find_package(detdataformats REQUIRED)
+find_package(fddetdataformats REQUIRED)
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
 ##############################################################################
@@ -31,7 +32,7 @@ daq_add_library( *.cpp LINK_LIBRARIES appfwk::appfwk fmt::fmt) # Any source file
 
 # See https://dune-daq-sw.readthedocs.io/en/latest/packages/daq-cmake/#daq_add_plugin
 
-daq_add_plugin(DaphneV2ControllerModule duneDAQModule LINK_LIBRARIES daphnemodules appmodel::appmodel detdataformats::detdataformats)
+daq_add_plugin(DaphneV2ControllerModule duneDAQModule LINK_LIBRARIES daphnemodules appmodel::appmodel fddetdataformats::fddetdataformats )
 
 ##############################################################################
 
