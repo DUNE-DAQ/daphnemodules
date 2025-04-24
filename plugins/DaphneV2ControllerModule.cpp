@@ -17,6 +17,8 @@
 #include "appmodel/DaphneV2PGA.hpp"
 #include "appmodel/DaphneConf.hpp"
 
+#include "detdataformats/DetID.hpp"
+
 #include <string>
 #include <logging/Logging.hpp>
 #include <fstream>
@@ -382,9 +384,25 @@ DaphneV2ControllerModule::validate_configuration(const appmodel::DaphneV2BoardCo
 void
 DaphneV2ControllerModule::configure_timing_endpoints() {
 
+  // 0x00003000  Output record header parameters, read-write, bits 25 to 6, bits 5 to 0 are read only, 26 bits defined as:
+  // bits 25..22 = slot_id(3..0), default "0010"
+  // bits 21..12 = crate_id(9..0), default is "0000000001"
+  // bits 11..6  = detector_id(5..0), default is "000010"
+  // bits 5..0   = version_id(5..0), default is "000010"
+
+  const auto * board = m_module_config->get_board_conf();
+  
+  std::bitset<26> config_value(board->get_slot_id());
+  config_value << 10;
+  config_value |=  board -> get_crate_id();
+  config_value << 6;
+  config_value |=  board -> get_detector_id();
+  config_value << 6;
+  config_value |= std::bitset<6>(detdataformats::DetID::s_det_id_version).to_ulong();
+  
   TLOG() << get_name() << ": configuring timing endpoint";
   m_interface->write_register(0x4001, {0x1});
-  m_interface->write_register(0x3000, {0x002081 + uint64_t(0x400000 * m_module_config->get_slot())});
+  m_interface->write_register(0x3000, {config_value.to_ulong()});
   m_interface->write_register(0x4003, {1234});
 
   // waiting for the PLL to lock

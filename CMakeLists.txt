@@ -1,6 +1,6 @@
 
 cmake_minimum_required(VERSION 3.12)
-project(daphnemodules VERSION 2.1.1)
+project(daphnemodules VERSION 2.2.0)
 
 find_package(daq-cmake REQUIRED)
 
@@ -11,6 +11,7 @@ find_package(conffwk REQUIRED)
 find_package(appfwk REQUIRED)
 find_package(opmonlib REQUIRED)
 find_package(fmt REQUIRED)
+find_package(detdataformats REQUIRED)
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
 ##############################################################################
@@ -30,7 +31,7 @@ daq_add_library( *.cpp LINK_LIBRARIES appfwk::appfwk fmt::fmt) # Any source file
 
 # See https://dune-daq-sw.readthedocs.io/en/latest/packages/daq-cmake/#daq_add_plugin
 
-daq_add_plugin(DaphneV2ControllerModule duneDAQModule LINK_LIBRARIES daphnemodules appmodel::appmodel)
+daq_add_plugin(DaphneV2ControllerModule duneDAQModule LINK_LIBRARIES daphnemodules appmodel::appmodel detdataformats::detdataformats)
 
 ##############################################################################
 
