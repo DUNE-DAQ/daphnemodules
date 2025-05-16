@@ -14,6 +14,30 @@ find_package(fmt REQUIRED)
 find_package(detdataformats REQUIRED)
 find_package(fddetdataformats REQUIRED)
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+find_package(cppzmq            REQUIRED)
+find_package(Protobuf          REQUIRED)
+find_package(ers               REQUIRED)
+find_package(logging           REQUIRED)
+find_package(absl              REQUIRED)
+
+#############################################################################
+
+execute_process(
+  COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
+          --proto_path=${CMAKE_CURRENT_SOURCE_DIR}/proto
+          --cpp_out=${CMAKE_CURRENT_SOURCE_DIR}/proto
+          ${DAPHNE_PROTO_SRC})
+file(GLOB DAPHNE_PROTO_CC proto/*.pb.cc)
+
+daq_add_library(
+  daphne_core
+  src/*.cpp src/daphnemod/*.cpp ${DAPHNE_PROTO_CC}
+  LINK_LIBRARIES
+    ${Protobuf_LIBRARY} cppzmq ers::ers logging::logging
+    appfwk::appfwk fmt::fmt)
+
+daq_add_plugin(DaphneMezzModule duneDAQModule
+               LINK_LIBRARIES daphne_core appmodel::appmodel)
 
 ##############################################################################
 
