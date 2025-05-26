@@ -1,7 +1,8 @@
-syntax = "proto3"
+syntax = "proto3";
 
 package daphne;
 
+import "daphnemodules/daphne_control_envelope.proto"; 
 
 message cmd_writeAFEReg {
 	int32  id          = 1;
@@ -87,45 +88,45 @@ message cmd_readTrim_allAFE {
 }
 
 message cmd_readTrim_singleChannel {
-	int id = 1;
+	int32 id = 1;
 	uint32 trimChannel = 2;
 }
 
 message cmd_readOffset_allChannels {
-	int id = 1;
+	int32 id = 1;
 }
 
 message cmd_readOffset_allAFE {
-	int id = 1;
+	int32 id = 1;
 	uint32 afeBlock = 2;
 }
 
 message cmd_readOffset_singleChannel {
-	int id = 1;
-	uint32 offsetChannel = 2
+	int32 id = 1;
+	uint32 offsetChannel = 2;
 }
 
 message cmd_readVbiasControl {
-	int id = 1;
+	int32 id = 1;
 }
 
 message cmd_readCurrentMonitor {
-	int id = 1;
+	int32 id = 1;
 	uint32 currentMonitorChannel = 2;
 }
 
 message cmd_readBiasVoltageMonitor {
-	int id = 1;
+	int32 id = 1;
 	uint32 afeBlock = 2;
 }
 
 message cmd_cfgAFEReset {
-	int id = 1;
+	int32 id = 1;
 	uint32 afeBlock = 2;
 }
 
 message cmd_cfgAFEPowerDown {
-	int id = 1;
+	int32 id = 1;
 	uint32 afeBlock = 2;
 	bool pwrState = 3;
 }

@@ -1,7 +1,7 @@
 syntax = "proto3";
 package daphne;
 
-import "daphne_control_envelope.proto";
+import "daphnemodules/daphne_control_envelope.proto";
 
 message ChannelConfig  { uint32 id=1; uint32 trim=2; uint32 offset=3; uint32 gain=4; }
 message AFEConfig      { uint32 id=1; uint32 v_gain=2; uint32 v_bias=3;
