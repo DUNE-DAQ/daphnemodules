@@ -31,4 +31,7 @@ daq_add_plugin(DaphneV2ControllerModule  duneDAQModule
 daq_add_unit_test(DaphneInterface_test
     LINK_LIBRARIES daphnemodules Boost::unit_test_framework)
 
+daq_add_unit_test(DaphneMezzModule_test
+    LINK_LIBRARIES daphnemodules Boost::unit_test_framework)
+
 daq_install()
