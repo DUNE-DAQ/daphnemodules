@@ -59,6 +59,14 @@ BOOST_AUTO_TEST_CASE(ConfigureFromJson)
 
   BOOST_TEST_MESSAGE("Sending configuration to IP: " + ip_key);
 
+  std::cerr << "DEBUG slot = " << device["slot"] << "\n";
+  std::cerr << "DEBUG bias_ctrl = " << device["bias_ctrl"] << "\n";
+  std::cerr << "DEBUG self_trigger_threshold = " << device["self_trigger_threshold"] << "\n";
+  std::cerr << "DEBUG self_trigger_xcorr = " << device["self_trigger_xcorr"] << "\n";
+  std::cerr << "DEBUG tp_conf = " << device["tp_conf"] << "\n";
+  std::cerr << "DEBUG compensator = " << device["compensator"] << "\n";
+  std::cerr << "DEBUG inverter = " << device["inverter"] << "\n";
+
   ConfigureRequest req;
   req.set_daphne_address(ip_key);
   req.set_slot(device["slot"]);
@@ -92,25 +100,37 @@ BOOST_AUTO_TEST_CASE(ConfigureFromJson)
   const auto& lna         = afes["lnas"];
 
   for (size_t i = 0; i < afe_ids.size(); ++i) {
-    auto* afe = req.add_afes();
+    std::cerr << "DEBUG afe[" << i << "] id=" << afe_ids[i] << "\n";
+    std::cerr << "  attenuator=" << afe_atten[i] << "\n";
+    std::cerr << "  vbias=" << afe_vbias[i] << "\n";
+    std::cerr << "  adc.resolution=" << adc["resolution"][i] << "\n";
+    std::cerr << "  adc.output_format=" << adc["output_format"][i] << "\n";
+    std::cerr << "  adc.SB_first=" << adc["SB_first"][i] << "\n";
+    std::cerr << "  pga.lpf_cut_frequency=" << pga["lpf_cut_frequency"][i] << "\n";
+    std::cerr << "  pga.integrator_disable=" << pga["integrator_disable"][i] << "\n";
+    std::cerr << "  pga.gain=" << pga["gain"][i] << "\n";
+    std::cerr << "  lna.clamp=" << lna["clamp"][i] << "\n";
+    std::cerr << "  lna.gain=" << lna["gain"][i] << "\n";
+    std::cerr << "  lna.integrator_disable=" << lna["integrator_disable"][i] << "\n";
+      auto* afe = req.add_afes();
     afe->set_id(afe_ids[i]);
-    afe->set_v_gain(afe_atten[i]);
+    afe->set_v_gain(afe_atten[i].get<bool>());
     afe->set_v_bias(afe_vbias[i]);
 
     auto* adc_conf = afe->mutable_adc();
     adc_conf->set_resolution(adc["resolution"][i]);
     adc_conf->set_output_format(adc["output_format"][i]);
-    adc_conf->set_sb_first(adc["SB_first"][i]);
+    adc_conf->set_sb_first(adc["SB_first"][i].get<bool>());
 
     auto* pga_conf = afe->mutable_pga();
     pga_conf->set_lpf_cut_frequency(pga["lpf_cut_frequency"][i]);
-    pga_conf->set_integrator_disable(pga["integrator_disable"][i]);
+    pga_conf->set_integrator_disable(pga["integrator_disable"][i].get<bool>());
     pga_conf->set_gain(pga["gain"][i]);
 
     auto* lna_conf = afe->mutable_lna();
-    lna_conf->set_clamp(lna["clamp"][i]);
+    lna_conf->set_clamp(lna["clamp"][i].get<bool>());
     lna_conf->set_gain(lna["gain"][i]);
-    lna_conf->set_integrator_disable(lna["integrator_disable"][i]);
+    lna_conf->set_integrator_disable(lna["integrator_disable"][i].get<bool>());
   }
 
   ControlEnvelope env;
