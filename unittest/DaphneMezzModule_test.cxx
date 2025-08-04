@@ -45,6 +45,7 @@ BOOST_AUTO_TEST_SUITE(DaphneMezzModule_test)
 
 BOOST_AUTO_TEST_CASE(ConfigureFromJson)
 {
+  std::cerr << "🧪 RUNNING PATCHED TEST BINARY\n";
   std::ifstream jfile(json_config_path);
   BOOST_REQUIRE_MESSAGE(jfile, "Cannot open JSON file: " << json_config_path);
 
@@ -114,23 +115,69 @@ BOOST_AUTO_TEST_CASE(ConfigureFromJson)
     std::cerr << "  lna.integrator_disable=" << lna["integrator_disable"][i] << "\n";
       auto* afe = req.add_afes();
     afe->set_id(afe_ids[i]);
-    afe->set_v_gain(afe_atten[i].get<bool>());
+    try {
+      afe->set_v_gain(afe_atten[i].get<bool>());
+    } catch (const json::type_error& e) {
+      std::cerr << "ERROR: afe_atten[" << i << "] is not boolean: " << e.what() << std::endl;
+      throw;
+    }
     afe->set_v_bias(afe_vbias[i]);
 
     auto* adc_conf = afe->mutable_adc();
-    adc_conf->set_resolution(adc["resolution"][i]);
-    adc_conf->set_output_format(adc["output_format"][i]);
-    adc_conf->set_sb_first(adc["SB_first"][i].get<bool>());
+    try {
+      adc_conf->set_resolution(adc["resolution"][i].get<bool>());
+    } catch (const json::type_error& e) {
+      std::cerr << "ERROR: adc.resolution[" << i << "] is not boolean: " << e.what() << std::endl;
+      throw;
+    }
+    try {
+      adc_conf->set_output_format(adc["output_format"][i].get<bool>());
+    } catch (const json::type_error& e) {
+      std::cerr << "ERROR: adc.output_format[" << i << "] is not boolean: " << e.what() << std::endl;
+      throw;
+    }    
+    try {
+      adc_conf->set_sb_first(adc["SB_first"][i].get<bool>());
+    } catch (const json::type_error& e) {
+      std::cerr << "ERROR: adc.SB_first[" << i << "] is not boolean: " << e.what() << std::endl;
+      throw;
+    }
 
     auto* pga_conf = afe->mutable_pga();
     pga_conf->set_lpf_cut_frequency(pga["lpf_cut_frequency"][i]);
-    pga_conf->set_integrator_disable(pga["integrator_disable"][i].get<bool>());
-    pga_conf->set_gain(pga["gain"][i]);
+    
+    try {
+      pga_conf->set_integrator_disable(pga["integrator_disable"][i].get<bool>());
+    } catch (const json::type_error& e) {
+      std::cerr << "ERROR: pga.integrator_disable[" << i << "] is not boolean: " << e.what() << std::endl;
+      throw;
+    }
+    try {
+      pga_conf->set_gain(pga["gain"][i].get<bool>());
+    } catch (const json::type_error& e) {
+      std::cerr << "ERROR: pga.gain[" << i << "] is not boolean: " << e.what() << std::endl;
+      throw;
+    }    
 
     auto* lna_conf = afe->mutable_lna();
-    lna_conf->set_clamp(lna["clamp"][i].get<bool>());
-    lna_conf->set_gain(lna["gain"][i]);
-    lna_conf->set_integrator_disable(lna["integrator_disable"][i].get<bool>());
+    try {
+      lna_conf->set_clamp(lna["clamp"][i].get<bool>());
+    } catch (const json::type_error& e) {
+      std::cerr << "ERROR: lna.clamp[" << i << "] is not boolean: " << e.what() << std::endl;
+      throw;
+    }
+    try {
+      lna_conf->set_gain(lna["gain"][i].get<bool>());
+    } catch (const json::type_error& e) {
+      std::cerr << "ERROR: lna.gain[" << i << "] is not boolean: " << e.what() << std::endl;
+      throw;
+    }    
+    try {
+      lna_conf->set_integrator_disable(lna["integrator_disable"][i].get<bool>());
+    } catch (const json::type_error& e) {
+      std::cerr << "ERROR: lna.integrator_disable[" << i << "] is not boolean: " << e.what() << std::endl;
+      throw;
+    }    
   }
 
   ControlEnvelope env;
@@ -139,7 +186,7 @@ BOOST_AUTO_TEST_CASE(ConfigureFromJson)
 
   zmq::context_t ctx(1);
   zmq::socket_t sock(ctx, zmq::socket_type::req);
-  sock.connect("tcp://" + ip_key + ":9000");
+  sock.connect("tcp://" + ip_key + ":8888");
 
   std::string out_str = env.SerializeAsString();
   zmq::message_t message(out_str.size());
