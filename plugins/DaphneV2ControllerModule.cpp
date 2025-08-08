@@ -403,7 +403,9 @@ DaphneV2ControllerModule::configure_timing_endpoints() {
   TLOG() << get_name() << ": configuring timing endpoint with value " << config_value.to_string();
   m_interface->write_register(0x4001, {0x1});
   m_interface->write_register(0x3000, {config_value.to_ulong()});
-  m_interface->write_register(0x4003, {1234});
+  if ( m_module_config->get_daphne_conf()->get_time_reset() ) {
+    m_interface->write_register(0x4003, {1234});
+  }
 
   // waiting for the PLL to lock
   std::bitset<16> check;
