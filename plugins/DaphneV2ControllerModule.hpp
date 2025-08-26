@@ -162,10 +162,10 @@ private:
   using ChannelId = uint8_t;
   
   // Commands DaphneV2ControllerModule can receive
-  void do_conf(const data_t&);
-  void do_start(const data_t&);
-  void do_scrap(const data_t&);
-  //  void dump_buffers(const data_t&);
+  void do_conf(const CommandData_t&);
+  void do_start(const CommandData_t&);
+  void do_scrap(const CommandData_t&);
+  //  void dump_buffers(const CommandData_t&);
   
   // specific actions
   void create_interface( const std::string & ip,
