@@ -43,6 +43,8 @@ DaphneV2ControllerModule::DaphneV2ControllerModule(const std::string& name)
   register_command("start", &DaphneV2ControllerModule::do_start);
   register_command("scrap", &DaphneV2ControllerModule::do_scrap);
   //  register_command("dump_buffers", &DaphneV2ControllerModule::dump_buffers);
+
+  pointless_new_function();
 }
 
 
