@@ -23,4 +23,4 @@ jobs:
     name: Build against the development release
     uses: DUNE-DAQ/.github/.github/workflows/dunedaq-develop-cpp-ci.yml@develop
     with:
-      source_branch: ${{ github.head_ref }}
+      source_branch: atest
