@@ -8,6 +8,7 @@ on:
       - develop
       - patch/*
       - prep-release/*
+      - johnfreeman/sandbox_target
     paths-ignore:
       - 'docs/**'
       - '.github/**'
