@@ -24,4 +24,4 @@ jobs:
     name: Build against the development release
     uses: DUNE-DAQ/.github/.github/workflows/dunedaq-develop-cpp-ci.yml@johnfreeman/daq-release_issue485_correlated_branches
     with:
-      caller_branch: ${{ github.head_ref }}
+      caller_branch: ${{ github.head_ref || || github.ref_name }}
