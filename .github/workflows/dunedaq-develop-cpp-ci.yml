@@ -8,12 +8,12 @@ on:
       - develop
       - patch/*
       - prep-release/*
-      - johnfreeman/sandbox_target
+      - johnfreeman/sandbox_target*
     paths-ignore:
       - 'docs/**'
       - '.github/**'
   pull_request:
-    branches: [ "johnfreeman/sandbox_target" ]
+    branches: [ "johnfreeman/sandbox_target*" ]
   schedule:
     - cron: "0 9 * * *"
 
