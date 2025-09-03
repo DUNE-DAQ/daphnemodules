@@ -15,8 +15,8 @@ on:
   pull_request:
     branches:
       - develop
-      - prep-release/*
       - johnfreeman/sandbox_target3
+      - prep-release/*
   schedule:
     - cron: "0 9 * * *"
 
