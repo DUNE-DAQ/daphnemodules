@@ -1,4 +1,7 @@
 
+# JCF, Sep-3-2025: this line has been added for its own sake; this
+# should not be merged into develop.
+
 cmake_minimum_required(VERSION 3.12)
 project(daphnemodules VERSION 2.2.1)
 
