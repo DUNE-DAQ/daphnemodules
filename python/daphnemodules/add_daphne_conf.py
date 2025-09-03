@@ -18,6 +18,11 @@ def add_daphne_conf(oksfile:str, object_name:str, json_file:str, timeout_ms:int 
 
     print(data)
 
+    schemafile='schema/appmodel/PDS.schema.xml'
+    dal = conffwk.dal.module('dal', schemafile)
+
+    ## first create the defaults
+    
     for key, value in data.items() :
         slot = value["slot"]
         channels = dict()
@@ -37,8 +42,6 @@ def add_daphne_conf(oksfile:str, object_name:str, json_file:str, timeout_ms:int 
             
 
     
-##    schemafile='schema/appmodel/PDS.schema.xml'
-##    dal = conffwk.dal.module('dal', schemafile)
 
     ## create default objects, they will override old configurations
 ##    def_channel = dal.DaphneV2Channel( "daphne-v2-default-channel",
