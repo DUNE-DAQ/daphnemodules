@@ -13,7 +13,10 @@ on:
       - 'docs/**'
       - '.github/**'
   pull_request:
-    branches: [ "johnfreeman/sandbox_target*" ]
+    branches:
+      - develop
+      - prep-release/*
+      - johnfreeman/sandbox_target3
   schedule:
     - cron: "0 9 * * *"
 
