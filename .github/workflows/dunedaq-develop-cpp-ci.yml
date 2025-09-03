@@ -13,10 +13,7 @@ on:
       - 'docs/**'
       - '.github/**'
   pull_request:
-    branches:
-      - develop
-      - prep-release/*
-      - johnfreeman/sandbox_target3
+    branches: [ "johnfreeman/sandbox_target*" ]
   schedule:
     - cron: "0 9 * * *"
 
@@ -25,7 +22,7 @@ on:
 jobs:
   build_develop_dispatch:
     name: Build against the development release
-    uses: DUNE-DAQ/.github/.github/workflows/dunedaq-develop-cpp-ci.yml@johnfreeman/sandbox_for_syntax
+    uses: DUNE-DAQ/.github/.github/workflows/dunedaq-develop-cpp-ci.yml@johnfreeman/daq-release_issue485_correlated_branches
     with:
       caller_branch: ${{ github.head_ref || github.ref_name }}
       target_branch: ${{ github.base_ref || github.ref_name }}
