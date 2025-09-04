@@ -70,8 +70,8 @@ def add_daphne_conf(oksfile:str, object_name:str, json_file:str, timeout_ms:int 
     ## Loop over the boards in the configuration
     for key, value in data.items() :
         slot = value["slot"]
-        channels = dict()
-        afes = dict()
+        channels = [] 
+        afes = []
 
         ## create the channels
         raw_channels = value["channel_analog_conf"]
@@ -86,7 +86,7 @@ def add_daphne_conf(oksfile:str, object_name:str, json_file:str, timeout_ms:int 
                                    offset=raw_offsets[i],
                                    trim=raw_trims[i] )
             db.update_dal(c)
-            channels[idx]=c
+            channels.append(c)
             
         ## create the afes
         raw_afes = value["afes"]
@@ -132,9 +132,26 @@ def add_daphne_conf(oksfile:str, object_name:str, json_file:str, timeout_ms:int 
                                    lna=lna,
                                    pga=pga )
             db.update_dal(afe)
-            afes[idx] = afe
+            afes.append(afe)
 
-            
+        ## create the board conf
+        board = dal.DaphneV2BoardConf( f"{object_name}-daphne-{slot}-conf",
+                                       bias_ctrl=value["bias_ctrl"],
+                                       self_trigger_threshold=value["self_trigger_threshold"],
+                                       full_stream_channels=value["full_stream_channels"],
+                                       self_trigger_xcorr=value["self_trigger_xcorr"], 
+                                       tp_conf=value["tp_conf"],
+                                       compensator=value["compensator"],
+                                       inverter=value["inverter"],
+                                       slot_id=slot,
+                                       # crate_id = geo->get_crate_id(),
+                                       # detector_id = geo->get_detector_id(),
+                                       active_channels=channels,
+                                       active_afes=afes,
+                                       default_channel=def_channel,
+                                       default_afe=def_afe )
+        db.update_dal(board)
+
         
 
     ## create default objects, they will override old configurations
