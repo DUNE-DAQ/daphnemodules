@@ -164,7 +164,7 @@ DaphneV2ControllerModule::generate_opmon_data()
     if ( ! std::regex_match( cmd_res.result, string_values, volt_regex ) ) {
       ++m_error_counter;
       WrongMonitoringString temp_error(ERS_HERE,
-				       m_module_config -> get_slot(), m_error_counter, cmd_res.result);
+				       m_module_config -> get_slot_id(), m_error_counter, cmd_res.result);
       TLOG() << temp_error;
       if ( m_error_counter >= 10 ) {
 	ers::error( temp_error );
@@ -247,7 +247,7 @@ DaphneV2ControllerModule::do_conf(const CommandData_t&)
 {
   auto start_time = std::chrono::high_resolution_clock::now();
 
-  auto slot = m_module_config->get_slot();
+  auto slot = m_module_config->get_slot_id();
   if ( slot >= 16 ) 
     //   // the slot used laster in the code is a 4 bit register, so we need to check we are not overflowing
     throw InvalidSlot(ERS_HERE, slot, m_module_config->get_address());
@@ -344,7 +344,7 @@ DaphneV2ControllerModule::create_interface(const std::string & ip, std::chrono::
     throw InvalidIPAddress(ERS_HERE, ip);
   }
 
-  TLOG() << get_name() << ": using daphne at " << ip << " with slot " << (int)m_module_config->get_slot(); 
+  TLOG() << get_name() << ": using daphne at " << ip << " with slot " << (int)m_module_config->get_slot_id(); 
 
   m_interface.reset( new  DaphneV2Interface( ip.c_str(), 2001, timeout ) );
   
@@ -390,13 +390,11 @@ DaphneV2ControllerModule::configure_timing_endpoints() {
   // bits 11..6  = detector_id(5..0), default is "000010"
   // bits 5..0   = version_id(5..0), default is "000010"
 
-  const auto * board = m_module_config->get_board_conf();
-  
-  std::bitset<26> config_value(board->get_slot_id());
+  std::bitset<26> config_value(m_module_config->get_slot_id());
   config_value <<= 10;
-  config_value |=  board -> get_crate_id();
+  config_value |=  m_module_config -> get_crate_id();
   config_value <<= 6;
-  config_value |=  board -> get_detector_id();
+  config_value |=  m_module_config -> get_detector_id();
   config_value <<= 6;
   config_value |= std::bitset<6>(fddetdataformats::DAPHNEFrame::version).to_ulong();
   
@@ -419,7 +417,7 @@ DaphneV2ControllerModule::configure_timing_endpoints() {
   } while (!check[0]);
 
   if ( ! check[0] ) {
-    throw PLLNotLocked(ERS_HERE, m_module_config->get_slot(), "MMCM0");
+    throw PLLNotLocked(ERS_HERE, m_module_config->get_slot_id(), "MMCM0");
   }
   
   m_interface->write_buffer(0x4002, {1234});
@@ -435,7 +433,7 @@ DaphneV2ControllerModule::configure_timing_endpoints() {
   } while (!check[1]);
 
   if ( ! check[1] ) {
-    throw PLLNotLocked(ERS_HERE, m_module_config->get_slot(), "MMCM1");
+    throw PLLNotLocked(ERS_HERE, m_module_config->get_slot_id(), "MMCM1");
   }
   
   // at this point everything that is in register 0x4000 is the status of the timing endpoint
@@ -457,7 +455,7 @@ DaphneV2ControllerModule::configure_timing_endpoints() {
   } while (!check[12]);
 
   if ( ! check[12] ) {
-    throw TimingEndpointNotReady(ERS_HERE, m_module_config->get_slot(), check.to_string() );
+    throw TimingEndpointNotReady(ERS_HERE, m_module_config->get_slot_id(), check.to_string() );
   }
   
   TLOG() << get_name() << ": done donfiguring timing endpoint";
@@ -575,7 +573,7 @@ void DaphneV2ControllerModule::align_DDR() {
 
       // things are ok when the data is 0x3f80
       if ( data[0] != DaphneV2ControllerModule::s_frame_alignment_good ) 
-	throw DDRNotAligned(ERS_HERE, m_module_config->get_slot(), afe, data[0] );
+	throw DDRNotAligned(ERS_HERE, m_module_config->get_slot_id(), afe, data[0] );
     } //afe used
   }
 
