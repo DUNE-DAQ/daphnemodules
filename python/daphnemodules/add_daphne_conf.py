@@ -66,6 +66,7 @@ def add_daphne_conf(oksfile:str, object_name:str, json_file:str, timeout_ms:int 
                                        default_afe=def_afe )
     db.update_dal(def_board)
 
+    maps=[]
     
     ## Loop over the boards in the configuration
     for key, value in data.items() :
@@ -135,7 +136,8 @@ def add_daphne_conf(oksfile:str, object_name:str, json_file:str, timeout_ms:int 
             afes.append(afe)
 
         ## create the board conf
-        board = dal.DaphneV2BoardConf( f"{object_name}-daphne-{slot}-conf",
+        name = f"{object_name}-daphne-{slot}-conf"
+        board = dal.DaphneV2BoardConf( name,
                                        bias_ctrl=value["bias_ctrl"],
                                        self_trigger_threshold=value["self_trigger_threshold"],
                                        full_stream_channels=value["full_stream_channels"],
@@ -152,16 +154,23 @@ def add_daphne_conf(oksfile:str, object_name:str, json_file:str, timeout_ms:int 
                                        default_afe=def_afe )
         db.update_dal(board)
 
+        link=dal.DaphneMap(name,
+                           ip=key,
+                           conf=board)
+        db.update_dal(link)
         
+        maps.append(link)
 
+        
     ## create default objects, they will override old configurations
 
     
-##    new_conf = dal.DaphneConf(object_name,
-##                              timeout_ms=timeout_ms,
-##                              json_file=data,
-##                              default_v2_settings=def_board )
-##    db.update_dal(new_conf)
+    new_conf = dal.DaphneConf(object_name,
+                              timeout_ms=timeout_ms,
+                              boards=maps,
+                              default_v2_settings=def_board )
+    
+    db.update_dal(new_conf)
     
     db.commit()
 
