@@ -81,7 +81,7 @@ def add_daphne_conf(oksfile:str, object_name:str, json_file:str, timeout_ms:int 
         raw_offsets = raw_channels["offsets"]
         raw_trims = raw_channels["trims"]
         for i, idx in enumerate(raw_ids):   ## idx in [0-39]
-            c=dal.DaphneV2Channel( f"{object_name}-daphne-{slot}-channel-{idx}",
+            c=dal.DaphneV2Channel( f"{object_name}-daphne-{key}-channel-{idx}",
                                    channel_id=idx,
                                    gain=raw_gains[i],
                                    offset=raw_offsets[i],
@@ -107,25 +107,25 @@ def add_daphne_conf(oksfile:str, object_name:str, json_file:str, timeout_ms:int 
         raw_pga_integrators = raw_pgas["integrator_disable"]
         raw_pga_gains = raw_pgas["gain"]
         for i, idx in enumerate(raw_afe_ids):   ## idx in [0-5]
-            adc = dal.DaphneV2ADC( f"{object_name}-daphne-{slot}-adc-{idx}",
+            adc = dal.DaphneV2ADC( f"{object_name}-daphne-{key}-adc-{idx}",
                                    low_resolution = raw_adc_res[i],
                                    output_offset_binary = raw_adc_format[i],
                                    MSB_first=raw_adc_SB[i] )
             db.update_dal(adc)
 
-            lna = dal.DaphneV2LNA(f"{object_name}-daphne-{slot}-lna-{idx}",
+            lna = dal.DaphneV2LNA(f"{object_name}-daphne-{key}-lna-{idx}",
                                   clamp=raw_lna_clamps[i],
                                   gain=raw_lna_gains[i],
                                   integrator_disable=raw_lna_integrators[i] )
             db.update_dal(lna)
 
-            pga = dal.DaphneV2PGA(f"{object_name}-daphne-{slot}-pga-{idx}",
+            pga = dal.DaphneV2PGA(f"{object_name}-daphne-{key}-pga-{idx}",
                                   lpf_cut_frequency=raw_pga_cuts[i],
                                   gain=raw_pga_gains[i],
                                   integrator_disable=raw_pga_integrators[i] )
             db.update_dal(pga)
 
-            afe = dal.DaphneV2AFE( f"{object_name}-daphne-{slot}-afe-{idx}",
+            afe = dal.DaphneV2AFE( f"{object_name}-daphne-{key}-afe-{idx}",
                                    afe_id=idx,
                                    attenuator=raw_afe_attenuators[i],
                                    v_bias=raw_afe_biases[i],
@@ -136,7 +136,7 @@ def add_daphne_conf(oksfile:str, object_name:str, json_file:str, timeout_ms:int 
             afes.append(afe)
 
         ## create the board conf
-        name = f"{object_name}-daphne-{slot}-conf"
+        name = f"{object_name}-daphne-{key}-conf"
         board = dal.DaphneV2BoardConf( name,
                                        bias_ctrl=value["bias_ctrl"],
                                        self_trigger_threshold=value["self_trigger_threshold"],
@@ -145,9 +145,6 @@ def add_daphne_conf(oksfile:str, object_name:str, json_file:str, timeout_ms:int 
                                        tp_conf=value["tp_conf"],
                                        compensator=value["compensator"],
                                        inverter=value["inverter"],
-                                       slot_id=slot,
-                                       # crate_id = geo->get_crate_id(),
-                                       # detector_id = geo->get_detector_id(),
                                        active_channels=channels,
                                        active_afes=afes,
                                        default_channel=def_channel,
