@@ -136,9 +136,9 @@ def add_daphne_conf(oksfile:str, object_name:str, json_file:str, timeout_ms:int 
 
         ## create the board conf
         name = f"{object_name}-daphne-{key}-conf"
-        detector = value["detector"]
-        crate = value["crate"]
-        slot = value["slot"]
+        detector = value["detector_id"]
+        crate = value["crate_id"]
+        slot = value["slot_id"]
         board = dal.DaphneV2BoardConf( name,
                                        bias_ctrl=value["bias_ctrl"],
                                        self_trigger_threshold=value["self_trigger_threshold"],
@@ -150,15 +150,15 @@ def add_daphne_conf(oksfile:str, object_name:str, json_file:str, timeout_ms:int 
                                        active_channels=channels,
                                        active_afes=afes,
                                        address=value["ip"],
-                                       detector=detector,
-                                       crate=crate,
-                                       slot=slot,
+                                       detector_id=detector,
+                                       crate_id=crate,
+                                       slot_id=slot,
                                        default_channel=def_channel,
                                        default_afe=def_afe )
         db.update_dal(board)
 
         link=dal.DaphneMap(name,
-                           id=f"{detector}.{crate}.{slot}",
+                           key=f"{detector}.{crate}.{slot}",
                            conf=board)
         db.update_dal(link)
         
