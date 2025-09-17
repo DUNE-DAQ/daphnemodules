@@ -44,10 +44,10 @@ namespace dunedaq {
 
   ERS_DECLARE_ISSUE( daphnemodules,
                      WrongMonitoringString,
-                     "Board in slot " << slot
+                     "Board " << id
 		     << ": response from board was not parsed correctly for "
 		     << counter << " times. Last Rseponse: " << response,
-                     ((uint16_t)slot)((uint16_t)counter)((std::string)response)
+                     ((std::string)id)((uint16_t)counter)((std::string)response)
                    )
 
   ERS_DECLARE_ISSUE( daphnemodules,
