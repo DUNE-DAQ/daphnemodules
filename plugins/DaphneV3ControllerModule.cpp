@@ -1,4 +1,4 @@
-#include "DaphneMezzModule.hpp"
+#include "DaphneV3ControllerModule.hpp"
 #include "logging/Logging.hpp"
 #include "daphnemodules/daphne_control_high.pb.h"
 #include "daphnemodules/daphne_control_envelope.pb.h"
@@ -7,20 +7,20 @@
 
 namespace dunedaq::daphnemodules {
 
-DaphneMezzModule::DaphneMezzModule(const std::string& name)
+DaphneV3ControllerModule::DaphneV3ControllerModule(const std::string& name)
   : appfwk::DAQModule(name)
 {
-  register_command("conf",  &DaphneMezzModule::do_conf);
-  register_command("start", &DaphneMezzModule::do_start);
-  register_command("scrap", &DaphneMezzModule::do_scrap);
+  register_command("conf",  &DaphneV3ControllerModule::do_conf);
+  register_command("start", &DaphneV3ControllerModule::do_start);
+  register_command("scrap", &DaphneV3ControllerModule::do_scrap);
 }
 
-void DaphneMezzModule::init(std::shared_ptr<appfwk::ConfigurationManager> cfg)
+void DaphneV3ControllerModule::init(std::shared_ptr<appfwk::ConfigurationManager> cfg)
 {
 }
 
 
-void DaphneMezzModule::do_conf(const CommandData_t&)
+void DaphneV3ControllerModule::do_conf(const CommandData_t&)
 {
   using namespace daphne;
 
@@ -89,9 +89,9 @@ void DaphneMezzModule::do_conf(const CommandData_t&)
   }
 }
 
-void DaphneMezzModule::do_start(const CommandData_t& )  { /* nothing yet */ }
-void DaphneMezzModule::do_scrap(const CommandData_t&)  { m_iface.reset(); }
+void DaphneV3ControllerModule::do_start(const CommandData_t& )  { /* nothing yet */ }
+void DaphneV3ControllerModule::do_scrap(const CommandData_t&)  { m_iface.reset(); }
 
 } // namespace dunedaq::daphnemodules
 
-DEFINE_DUNE_DAQ_MODULE(dunedaq::daphnemodules::DaphneMezzModule)
+DEFINE_DUNE_DAQ_MODULE(dunedaq::daphnemodules::DaphneV3ControllerModule)

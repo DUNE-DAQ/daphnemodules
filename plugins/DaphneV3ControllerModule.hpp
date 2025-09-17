@@ -6,10 +6,10 @@
 
 namespace dunedaq::daphnemodules {
 
-class DaphneMezzModule : public appfwk::DAQModule
+class DaphneV3ControllerModule : public appfwk::DAQModule
 {
 public:
-  explicit DaphneMezzModule(const std::string& name);
+  explicit DaphneV3ControllerModule(const std::string& name);
   void init(std::shared_ptr<appfwk::ConfigurationManager>) override;
 
 private:
