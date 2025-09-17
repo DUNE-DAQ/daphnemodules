@@ -20,7 +20,7 @@ void DaphneMezzModule::init(std::shared_ptr<appfwk::ConfigurationManager> cfg)
 }
 
 
-void DaphneMezzModule::do_conf(const data_t&)
+void DaphneMezzModule::do_conf(const CommandData_t&)
 {
   using namespace daphne;
 
@@ -89,8 +89,8 @@ void DaphneMezzModule::do_conf(const data_t&)
   }
 }
 
-void DaphneMezzModule::do_start(const data_t&)  { /* nothing yet */ }
-void DaphneMezzModule::do_scrap(const data_t&)  { m_iface.reset(); }
+void DaphneMezzModule::do_start(const CommandData_t& )  { /* nothing yet */ }
+void DaphneMezzModule::do_scrap(const CommandData_t&)  { m_iface.reset(); }
 
 } // namespace dunedaq::daphnemodules
 

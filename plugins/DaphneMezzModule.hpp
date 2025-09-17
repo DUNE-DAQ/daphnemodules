@@ -13,9 +13,9 @@ public:
   void init(std::shared_ptr<appfwk::ConfigurationManager>) override;
 
 private:
-  void do_conf(const data_t&);
-  void do_start(const data_t&);
-  void do_scrap(const data_t&);
+  void do_conf(const CommandData_t&);
+  void do_start(const CommandData_t&);
+  void do_scrap(const CommandData_t&);
 
   std::unique_ptr<DaphneV2Interface> m_iface;
 };
