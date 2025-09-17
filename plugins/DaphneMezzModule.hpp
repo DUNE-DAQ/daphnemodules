@@ -1,0 +1,23 @@
+#pragma once
+
+#include "appfwk/DAQModule.hpp"
+#include "MezzCommandBuilder.hpp"
+#include "DaphneV2Interface.hpp" 
+
+namespace dunedaq::daphnemodules {
+
+class DaphneMezzModule : public appfwk::DAQModule
+{
+public:
+  explicit DaphneMezzModule(const std::string& name);
+  void init(std::shared_ptr<appfwk::ConfigurationManager>) override;
+
+private:
+  void do_conf(const data_t&);
+  void do_start(const data_t&);
+  void do_scrap(const data_t&);
+
+  std::unique_ptr<DaphneV2Interface> m_iface;
+};
+
+} 

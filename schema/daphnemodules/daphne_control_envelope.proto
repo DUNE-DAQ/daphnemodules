@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package daphne;
+
+enum MsgType {
+  UNKNOWN       = 0;
+  CONFIGURE_CLKS= 1;
+  CONFIGURE_FE  = 2;  // Configure FrontEnd 
+  SCRAP         = 3;
+  DUMP_BUFFERS  = 4;
+  GET_INFO      = 5;
+  RAW_CMD       = 99;
+}
+
+message ControlEnvelope {
+  MsgType type  = 1;
+  bytes   payload = 2;   
+}
