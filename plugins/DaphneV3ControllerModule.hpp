@@ -46,6 +46,8 @@ private:
   using AFEId = std::remove_const<const_afe_id_t>::type;
 
   static const AFEId s_max_afes = 5;
+
+  static const size_t s_default_control_port = 40001;
   
 };
 

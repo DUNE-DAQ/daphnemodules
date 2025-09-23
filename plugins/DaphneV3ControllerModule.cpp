@@ -10,6 +10,7 @@
 #include "appmodel/DaphneV2ADC.hpp"
 #include "appmodel/DaphneV2PGA.hpp"
 #include "appmodel/DaphneV2LNA.hpp"
+#include "fmt/format.h"
 
 #include <zmq.hpp>
 
@@ -90,8 +91,7 @@ void DaphneV3ControllerModule::do_conf(const CommandData_t&)
     afe->mutable_adc()->set_sb_first(adc->get_MSB_first());
 
     auto* pga = afe_conf.get_pga();
-    #warning VALUE INCONSISTENCY
-    afe->mutable_pga()->set_lpf_cut_frequency(5);
+    afe->mutable_pga()->set_lpf_cut_frequency(pga->get_lpf_cut_frequency());
     afe->mutable_pga()->set_integrator_disable(pga->get_integrator_disable());
     afe->mutable_pga()->set_gain(pga->get_gain());
 
@@ -106,13 +106,19 @@ void DaphneV3ControllerModule::do_conf(const CommandData_t&)
 
   // Step 2: Wrap in Envelope
   ControlEnvelope env;
-  env.set_type(CONFIGURE_FE);
+  env.set_type(CONFIGURE_FE);   // in scrap it's SCRAP
   env.set_payload(req.SerializeAsString());
 
   // Step 3: ZMQ send/recv
   zmq::context_t context(1);
   zmq::socket_t socket(context, zmq::socket_type::req);
-  socket.connect("tcp://193.206.157.36:9000");
+
+  // find out if the address has a port with a regex
+ 
+  // if not use the default
+  
+  auto connection = fmt::format("tcp://{}:9000", board_conf->get_address());
+  socket.connect(connection);
 
   std::string out_str = env.SerializeAsString();
   zmq::message_t message(out_str.size());
