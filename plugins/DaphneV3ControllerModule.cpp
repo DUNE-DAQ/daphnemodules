@@ -3,6 +3,14 @@
 #include "daphnemodules/daphne_control_high.pb.h"
 #include "daphnemodules/daphne_control_envelope.pb.h"
 
+#include "appmodel/DaphneConf.hpp"
+#include "appmodel/DaphneV2BoardConf.hpp"
+#include "appmodel/DaphneV2Channel.hpp"
+#include "appmodel/DaphneV2AFE.hpp"
+#include "appmodel/DaphneV2ADC.hpp"
+#include "appmodel/DaphneV2PGA.hpp"
+#include "appmodel/DaphneV2LNA.hpp"
+
 #include <zmq.hpp>
 
 namespace dunedaq::daphnemodules {
@@ -17,44 +25,84 @@ DaphneV3ControllerModule::DaphneV3ControllerModule(const std::string& name)
 
 void DaphneV3ControllerModule::init(std::shared_ptr<appfwk::ConfigurationManager> cfg)
 {
+  auto mdal = cfg->get_dal<conf_t>(get_name());
+  if (!mdal) {
+    throw ConfigurationFailed(ERS_HERE, get_name());
+  }
+  m_module_config = mdal;
 }
 
 
 void DaphneV3ControllerModule::do_conf(const CommandData_t&)
 {
+
+  auto start_time = std::chrono::high_resolution_clock::now();
+
+  
   using namespace daphne;
 
+  // validation to be taken from the previous version
+  // this should include the slot check 
+
+  auto board_conf = m_module_config->get_board_conf();
+  auto general_conf = m_module_config->get_daphne_conf();
+  
   // Step 1: Build the ConfigureRequest
   ConfigureRequest req;
-  req.set_daphne_address("192.168.0.10");
-  req.set_slot(1);
-  req.set_timeout_ms(500);
-  req.set_biasctrl(800);
-  req.set_self_trigger_threshold(0);
-  req.set_self_trigger_xcorr(0);
-  req.set_tp_conf(0);
-  req.set_compensator(0);
-  req.set_inverters(0);
+  req.set_daphne_address(board_conf->get_address());
+  req.set_slot(board_conf->get_slot_id());
+  req.set_timeout_ms(general_conf->get_timeout_ms());
+  req.set_biasctrl(board_conf->get_bias_ctrl());
+  req.set_self_trigger_threshold(board_conf->get_self_trigger_threshold());
+  req.set_self_trigger_xcorr(board_conf->get_self_trigger_xcorr());
+  req.set_tp_conf(board_conf->get_tp_conf());
+  req.set_compensator(board_conf->get_compensator());
+  req.set_inverters(board_conf->get_inverter());
 
-  auto* ch = req.add_channels();
-  ch->set_id(0);
-  ch->set_trim(64);
-  ch->set_offset(1000);
-  ch->set_gain(1);
+  for ( ChannelId ch = 0; ch < s_max_channels; ++ch ) {
 
-  auto* afe = req.add_afes();
-  afe->set_id(0);
-  afe->set_v_gain(1);
-  afe->set_v_bias(800);
-  afe->mutable_adc()->set_resolution(true);
-  afe->mutable_adc()->set_output_format(false);
-  afe->mutable_adc()->set_sb_first(true);
-  afe->mutable_pga()->set_lpf_cut_frequency(5);
-  afe->mutable_pga()->set_integrator_disable(false);
-  afe->mutable_pga()->set_gain(true);
-  afe->mutable_lna()->set_clamp(2);
-  afe->mutable_lna()->set_gain(2);
-  afe->mutable_lna()->set_integrator_disable(false);
+    const auto & channel_conf = board_conf->get_channel(ch);
+    // get_channel returns the running value if the bool argument is true,
+    // and the default values when the bool argument is false
+    // hence, this loop does both the job of enabling and disebling
+
+    auto* channel = req.add_channels();
+    channel->set_id(ch);
+    channel->set_trim(channel_conf.get_trim());
+    channel->set_offset(channel_conf.get_offset());
+    channel->set_gain(channel_conf.get_gain());
+    
+  } // loop over channels
+
+
+  for ( AFEId id = 0; id < s_max_channels; ++id ) {
+
+    const auto & afe_conf = board_conf->get_afe(id);
+
+    auto* afe = req.add_afes();
+    afe->set_id(id);
+    afe->set_v_gain(afe_conf.get_attenuator());
+    afe->set_v_bias(afe_conf.get_v_bias());
+
+    auto* adc = afe_conf.get_adc();
+    afe->mutable_adc()->set_resolution(adc->get_low_resolution());
+    afe->mutable_adc()->set_output_format(adc->get_output_offset_binary());
+    afe->mutable_adc()->set_sb_first(adc->get_MSB_first());
+
+    auto* pga = afe_conf.get_pga();
+    #warning VALUE INCONSISTENCY
+    afe->mutable_pga()->set_lpf_cut_frequency(5);
+    afe->mutable_pga()->set_integrator_disable(pga->get_integrator_disable());
+    afe->mutable_pga()->set_gain(pga->get_gain());
+
+    auto* lna = afe_conf.get_lna();
+    afe->mutable_lna()->set_clamp(lna->get_clamp());
+    afe->mutable_lna()->set_gain(lna->get_gain());
+    afe->mutable_lna()->set_integrator_disable(lna->get_integrator_disable());
+        
+  }  // loop over AFE
+  
+
 
   // Step 2: Wrap in Envelope
   ControlEnvelope env;
@@ -87,11 +135,23 @@ void DaphneV3ControllerModule::do_conf(const CommandData_t&)
   } else {
     TLOG() << "Unexpected message type: " << response_env.type();
   }
+
+  auto end_time = std::chrono::high_resolution_clock::now();
+  
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+  TLOG() << get_name() << ": board configured in " << duration.count() << " microseconds";
+  
 }
 
 void DaphneV3ControllerModule::do_start(const CommandData_t& )  { /* nothing yet */ }
 void DaphneV3ControllerModule::do_scrap(const CommandData_t&)  { m_iface.reset(); }
 
+void DaphneV3ControllerModule::configure_analog_chain(bool initial_config) {
+  return;
+}
+
+
+  
 } // namespace dunedaq::daphnemodules
 
 DEFINE_DUNE_DAQ_MODULE(dunedaq::daphnemodules::DaphneV3ControllerModule)

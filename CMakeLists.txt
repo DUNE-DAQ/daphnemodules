@@ -21,7 +21,7 @@ daq_add_library(
     daphnemodules/zmqclient/*.cpp
     LINK_LIBRARIES cppzmq appfwk::appfwk fmt::fmt )
 
-daq_add_plugin(DaphneMezzModule duneDAQModule
+daq_add_plugin(DaphneV3ControllerModule duneDAQModule
     LINK_LIBRARIES daphnemodules appmodel::appmodel)
 
 daq_add_plugin(DaphneV2ControllerModule  duneDAQModule
