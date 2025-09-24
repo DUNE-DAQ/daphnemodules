@@ -10,7 +10,9 @@
 #include "appmodel/DaphneV2ADC.hpp"
 #include "appmodel/DaphneV2PGA.hpp"
 #include "appmodel/DaphneV2LNA.hpp"
-#include "fmt/format.h"
+
+#include <fmt/format.h>
+#include <regex>
 
 #include <zmq.hpp>
 
@@ -114,11 +116,16 @@ void DaphneV3ControllerModule::do_conf(const CommandData_t&)
   zmq::socket_t socket(context, zmq::socket_type::req);
 
   // find out if the address has a port with a regex
- 
-  // if not use the default
-  
-  auto connection = fmt::format("tcp://{}:9000", board_conf->get_address());
-  socket.connect(connection);
+  static const std::regex ip_with_port("^[^/\s:]+(?::\d{1,5})?$");
+  std::smatch string_values; 
+  if (! std::regex_match( board_conf->get_address(), string_values, ip_with_port ) ) {
+    // throw that the address is wrong
+  }
+
+  auto connection = string_values.size() > 1 ?
+    fmt::format("tcp://{}", board_conf->get_address()) :
+    fmt::format("tcp://{}:{}", board_conf->get_address(), s_default_control_port) ;
+   socket.connect(connection);
 
   std::string out_str = env.SerializeAsString();
   zmq::message_t message(out_str.size());
