@@ -243,7 +243,7 @@ DaphneV2ControllerModule::generate_opmon_data()
 }
 
 void
-DaphneV2ControllerModule::do_conf(const CommandData_t&)
+DaphneV2ControllerModule::do_conf(const data_t&)
 {
   auto start_time = std::chrono::high_resolution_clock::now();
 
@@ -292,7 +292,7 @@ DaphneV2ControllerModule::do_conf(const CommandData_t&)
 
 
 void
-DaphneV2ControllerModule::do_start(const CommandData_t&)
+DaphneV2ControllerModule::do_start(const data_t&)
 {
 
   auto start_time = std::chrono::high_resolution_clock::now();
@@ -309,7 +309,7 @@ DaphneV2ControllerModule::do_start(const CommandData_t&)
 
 
 void
-DaphneV2ControllerModule::do_scrap(const CommandData_t&)
+DaphneV2ControllerModule::do_scrap(const data_t&)
 {
   auto start_time = std::chrono::high_resolution_clock::now();
 

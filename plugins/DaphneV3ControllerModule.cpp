@@ -36,7 +36,7 @@ void DaphneV3ControllerModule::init(std::shared_ptr<appfwk::ConfigurationManager
 }
 
 
-void DaphneV3ControllerModule::do_conf(const CommandData_t&)
+void DaphneV3ControllerModule::do_conf(const data_t&)
 {
 
   auto start_time = std::chrono::high_resolution_clock::now();
@@ -156,8 +156,8 @@ void DaphneV3ControllerModule::do_conf(const CommandData_t&)
   
 }
 
-void DaphneV3ControllerModule::do_start(const CommandData_t& )  { /* nothing yet */ }
-void DaphneV3ControllerModule::do_scrap(const CommandData_t&)  { m_iface.reset(); }
+void DaphneV3ControllerModule::do_start(const data_t& )  { /* nothing yet */ }
+void DaphneV3ControllerModule::do_scrap(const data_t&)  { m_iface.reset(); }
 
 void DaphneV3ControllerModule::configure_analog_chain(bool initial_config) {
   return;
