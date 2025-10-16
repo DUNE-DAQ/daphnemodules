@@ -24,7 +24,7 @@ static void send_and_recv(zmq::socket_t& sock, const ControlEnvelope& env, Contr
 int main(int argc, char** argv)
 {
   // ---- Hardcoded target ----
-  const std::string host = (argc > 1) ? argv[1] : "127.0.0.1";
+  const std::string host = (argc > 1) ? argv[1] : "10.73.137.161";
   const int         port = (argc > 2) ? std::stoi(argv[2]) : 9000; // match your server’s port
   const std::string endpoint = "tcp://" + host + ":" + std::to_string(port);
   std::cerr << "[SMOKE] connecting to " << endpoint << "\n";
