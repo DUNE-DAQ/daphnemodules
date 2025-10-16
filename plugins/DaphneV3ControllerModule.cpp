@@ -1,7 +1,6 @@
 #include "DaphneV3ControllerModule.hpp"
 #include "logging/Logging.hpp"
 #include "daphnemodules/daphne_control_high.pb.h"
-#include "daphnemodules/daphne_control_envelope.pb.h"
 
 #include "appmodel/DaphneConf.hpp"
 #include "appmodel/DaphneV2BoardConf.hpp"
