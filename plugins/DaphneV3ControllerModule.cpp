@@ -83,7 +83,7 @@ void DaphneV3ControllerModule::do_conf(const data_t&)
 
     auto* afe = req.add_afes();
     afe->set_id(id);
-    afe->set_v_gain(afe_conf.get_attenuator());
+    afe->set_attenuators(afe_conf.get_attenuator());
     afe->set_v_bias(afe_conf.get_v_bias());
 
     auto* adc = afe_conf.get_adc();
