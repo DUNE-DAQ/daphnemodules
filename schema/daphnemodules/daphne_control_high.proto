@@ -198,6 +198,8 @@ enum Direction {
 // Requests are EVEN, responses are ODD = (request + 1)
 // Start at a high range to avoid collisions with legacy MessageType.
 enum MessageTypeV2 {
+  MT2_UNSPECIFIED                    = 0;  //First entry protobuf requirement
+
   // High-level
   MT2_CONFIGURE_CLKS_REQ             = 200;
   MT2_CONFIGURE_CLKS_RESP            = 201;
