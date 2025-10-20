@@ -1,213 +1,136 @@
-/**
- * Integration test for DaphneMezzModule using protobuf and ZeroMQ.
- * Loads configuration from a JSON file passed as: -- --json path/to/file.json
- */
-
-#define BOOST_TEST_MODULE DaphneMezzModule_test 
-
-#include <boost/test/unit_test.hpp>
-#include <nlohmann/json.hpp>
-
-#include "daphnemodules/daphne_control_high.pb.h"
-#include "daphnemodules/daphne_control_envelope.pb.h"
-
-#include <zmq.hpp>
-#include <fstream>
 #include <iostream>
 #include <string>
+#include <vector>
+#include <stdexcept>
+#include <cstdlib>      // getenv
+#include <cstring>      // std::strcmp
+#include <zmq.hpp>
 
-using json = nlohmann::json;
+#include "daphnemodules/daphne_control_high.pb.h"
 using namespace daphne;
 
-std::string json_config_path;
-
-// Struct to parse custom --json argument
-struct ArgsParser {
-  ArgsParser() {
-    auto& argc = boost::unit_test::framework::master_test_suite().argc;
-    auto& argv = boost::unit_test::framework::master_test_suite().argv;
-
-    for (int i = 1; i < argc - 1; ++i) {
-      if (std::string(argv[i]) == "--json") {
-        json_config_path = argv[i + 1];
-      }
-    }
-
-    if (json_config_path.empty()) {
-      throw std::runtime_error("Missing required argument: --json path/to/config.json");
-    }
+static std::vector<zmq::message_t> recv_multipart(zmq::socket_t& s) {
+  std::vector<zmq::message_t> frames;
+  while (true) {
+    zmq::message_t part;
+    auto ok = s.recv(part, zmq::recv_flags::none);
+    if (!ok || *ok <= 0) throw std::runtime_error("No response from slow controller");
+    frames.emplace_back(std::move(part));
+    if (!s.get(zmq::sockopt::rcvmore)) break;
   }
-};
+  return frames;
+}
 
-BOOST_GLOBAL_FIXTURE(ArgsParser);
+static void usage(const char* prog) {
+  std::cerr << "Usage: " << prog << " [--ip <addr>] [--port <num>]\n"
+            << "       " << prog << " [ip] [port]\n"
+            << "Env:   DAPHNE_IP, DAPHNE_PORT\n"
+            << "Default: 10.73.137.161:9000\n";
+}
 
-BOOST_AUTO_TEST_SUITE(DaphneMezzModule_test)
+int main(int argc, char** argv) {
+  // ---- Defaults
+  std::string ip = "10.73.137.161";
+  int port = 9000;
 
-BOOST_AUTO_TEST_CASE(ConfigureFromJson)
-{
-  std::cerr << "🧪 RUNNING PATCHED TEST BINARY\n";
-  std::ifstream jfile(json_config_path);
-  BOOST_REQUIRE_MESSAGE(jfile, "Cannot open JSON file: " << json_config_path);
+  // ---- Env
+  if (const char* eip = std::getenv("DAPHNE_IP"); eip && *eip) ip = eip;
+  if (const char* ep  = std::getenv("DAPHNE_PORT"); ep  && *ep) { try { port = std::stoi(ep); } catch (...) {} }
 
-  json cfg;
-  jfile >> cfg;
-
-  BOOST_REQUIRE_MESSAGE(!cfg.empty(), "JSON config is empty");
-
-  const auto ip_it = cfg.begin();
-  const std::string ip_key = ip_it.key();
-  const json device = ip_it.value();
-
-  BOOST_TEST_MESSAGE("Sending configuration to IP: " + ip_key);
-
-  std::cerr << "DEBUG slot = " << device["slot"] << "\n";
-  std::cerr << "DEBUG bias_ctrl = " << device["bias_ctrl"] << "\n";
-  std::cerr << "DEBUG self_trigger_threshold = " << device["self_trigger_threshold"] << "\n";
-  std::cerr << "DEBUG self_trigger_xcorr = " << device["self_trigger_xcorr"] << "\n";
-  std::cerr << "DEBUG tp_conf = " << device["tp_conf"] << "\n";
-  std::cerr << "DEBUG compensator = " << device["compensator"] << "\n";
-  std::cerr << "DEBUG inverter = " << device["inverter"] << "\n";
-
-  ConfigureRequest req;
-  req.set_daphne_address(ip_key);
-  req.set_slot(device["slot"]);
-  req.set_timeout_ms(500);
-  req.set_biasctrl(device["bias_ctrl"]);
-  req.set_self_trigger_threshold(device["self_trigger_threshold"]);
-  req.set_self_trigger_xcorr(device["self_trigger_xcorr"]);
-  req.set_tp_conf(device["tp_conf"]);
-  req.set_compensator(device["compensator"]);
-  req.set_inverters(device["inverter"]);
-
-  const auto& ch_ids     = device["channel_analog_conf"]["ids"];
-  const auto& ch_gains   = device["channel_analog_conf"]["gains"];
-  const auto& ch_offsets = device["channel_analog_conf"]["offsets"];
-  const auto& ch_trims   = device["channel_analog_conf"]["trims"];
-
-  for (size_t i = 0; i < ch_ids.size(); ++i) {
-    auto* ch = req.add_channels();
-    ch->set_id(ch_ids[i]);
-    ch->set_trim(ch_trims[i]);
-    ch->set_offset(ch_offsets[i]);
-    ch->set_gain(ch_gains[i]);
+  // ---- CLI flags (priority over env)
+  for (int i = 1; i < argc; ++i) {
+    if (!std::strcmp(argv[i], "--help") || !std::strcmp(argv[i], "-h")) {
+      usage(argv[0]); return 0;
+    }
+    if (!std::strcmp(argv[i], "--ip") && i + 1 < argc) { ip = argv[++i]; continue; }
+    if (!std::strcmp(argv[i], "--port") && i + 1 < argc) { try { port = std::stoi(argv[++i]); } catch (...) {} continue; }
   }
+  // ---- Positional args (fallback if flags not used)
+  if (argc >= 2 && argv[1][0] != '-') ip = argv[1];
+  if (argc >= 3 && argv[2][0] != '-') { try { port = std::stoi(argv[2]); } catch (...) {} }
 
-  const auto& afes        = device["afes"];
-  const auto& afe_ids     = afes["ids"];
-  const auto& afe_atten   = afes["attenuators"];
-  const auto& afe_vbias   = afes["v_biases"];
-  const auto& adc         = afes["adcs"];
-  const auto& pga         = afes["pgas"];
-  const auto& lna         = afes["lnas"];
+  const std::string endpoint = "tcp://" + ip + ":" + std::to_string(port);
+  std::cerr << "[SMOKE] connecting to " << endpoint << "\n";
 
-  for (size_t i = 0; i < afe_ids.size(); ++i) {
-    std::cerr << "DEBUG afe[" << i << "] id=" << afe_ids[i] << "\n";
-    std::cerr << "  attenuator=" << afe_atten[i] << "\n";
-    std::cerr << "  vbias=" << afe_vbias[i] << "\n";
-    std::cerr << "  adc.resolution=" << adc["resolution"][i] << "\n";
-    std::cerr << "  adc.output_format=" << adc["output_format"][i] << "\n";
-    std::cerr << "  adc.SB_first=" << adc["SB_first"][i] << "\n";
-    std::cerr << "  pga.lpf_cut_frequency=" << pga["lpf_cut_frequency"][i] << "\n";
-    std::cerr << "  pga.integrator_disable=" << pga["integrator_disable"][i] << "\n";
-    std::cerr << "  pga.gain=" << pga["gain"][i] << "\n";
-    std::cerr << "  lna.clamp=" << lna["clamp"][i] << "\n";
-    std::cerr << "  lna.gain=" << lna["gain"][i] << "\n";
-    std::cerr << "  lna.integrator_disable=" << lna["integrator_disable"][i] << "\n";
-      auto* afe = req.add_afes();
-    afe->set_id(afe_ids[i]);
-    try {
-      afe->set_v_gain(afe_atten[i].get<bool>());
-    } catch (const json::type_error& e) {
-      std::cerr << "ERROR: afe_atten[" << i << "] is not boolean: " << e.what() << std::endl;
-      throw;
-    }
-    afe->set_v_bias(afe_vbias[i]);
+  GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-    auto* adc_conf = afe->mutable_adc();
-    try {
-      adc_conf->set_resolution(adc["resolution"][i].get<bool>());
-    } catch (const json::type_error& e) {
-      std::cerr << "ERROR: adc.resolution[" << i << "] is not boolean: " << e.what() << std::endl;
-      throw;
-    }
-    try {
-      adc_conf->set_output_format(adc["output_format"][i].get<bool>());
-    } catch (const json::type_error& e) {
-      std::cerr << "ERROR: adc.output_format[" << i << "] is not boolean: " << e.what() << std::endl;
-      throw;
-    }    
-    try {
-      adc_conf->set_sb_first(adc["SB_first"][i].get<bool>());
-    } catch (const json::type_error& e) {
-      std::cerr << "ERROR: adc.SB_first[" << i << "] is not boolean: " << e.what() << std::endl;
-      throw;
-    }
+  // ---- Build ConfigureRequest (matches server)
+  ConfigureRequest cfg;
+  cfg.set_daphne_address(ip);
+  cfg.set_slot(0);
+  cfg.set_timeout_ms(500);
+  cfg.set_biasctrl(1300);
+  cfg.set_self_trigger_threshold(0x1F40);
+  cfg.set_self_trigger_xcorr(0x68);
+  cfg.set_tp_conf(0x0010DB35);
+  cfg.set_compensator(0xFFFFFFFFFFull);
+  cfg.set_inverters(0xFF00000000ull);
 
-    auto* pga_conf = afe->mutable_pga();
-    pga_conf->set_lpf_cut_frequency(pga["lpf_cut_frequency"][i]);
-    
-    try {
-      pga_conf->set_integrator_disable(pga["integrator_disable"][i].get<bool>());
-    } catch (const json::type_error& e) {
-      std::cerr << "ERROR: pga.integrator_disable[" << i << "] is not boolean: " << e.what() << std::endl;
-      throw;
-    }
-    try {
-      pga_conf->set_gain(pga["gain"][i].get<bool>());
-    } catch (const json::type_error& e) {
-      std::cerr << "ERROR: pga.gain[" << i << "] is not boolean: " << e.what() << std::endl;
-      throw;
-    }    
-
-    auto* lna_conf = afe->mutable_lna();
-    try {
-      lna_conf->set_clamp(lna["clamp"][i].get<bool>());
-    } catch (const json::type_error& e) {
-      std::cerr << "ERROR: lna.clamp[" << i << "] is not boolean: " << e.what() << std::endl;
-      throw;
-    }
-    try {
-      lna_conf->set_gain(lna["gain"][i].get<bool>());
-    } catch (const json::type_error& e) {
-      std::cerr << "ERROR: lna.gain[" << i << "] is not boolean: " << e.what() << std::endl;
-      throw;
-    }    
-    try {
-      lna_conf->set_integrator_disable(lna["integrator_disable"][i].get<bool>());
-    } catch (const json::type_error& e) {
-      std::cerr << "ERROR: lna.integrator_disable[" << i << "] is not boolean: " << e.what() << std::endl;
-      throw;
-    }    
+  for (uint32_t ch = 0; ch < 40; ++ch) {
+    auto* c = cfg.add_channels();
+    c->set_id(ch);
+    c->set_trim(0);
+    c->set_offset(2275);
+    c->set_gain(1);
+  }
+  for (uint32_t afe = 0; afe < 5; ++afe) {
+    auto* a = cfg.add_afes();
+    a->set_id(afe);
+    a->set_attenuators(1600);
+    a->set_v_bias(0);
+    a->mutable_adc()->set_resolution(true);
+    a->mutable_adc()->set_output_format(true);
+    a->mutable_adc()->set_sb_first(false);
+    a->mutable_pga()->set_lpf_cut_frequency(4);
+    a->mutable_pga()->set_integrator_disable(true);
+    a->mutable_pga()->set_gain(0);
+    a->mutable_lna()->set_clamp(0);
+    a->mutable_lna()->set_gain(2);
+    a->mutable_lna()->set_integrator_disable(true);
   }
 
   ControlEnvelope env;
   env.set_type(CONFIGURE_FE);
-  env.set_payload(req.SerializeAsString());
+  env.set_payload(cfg.SerializeAsString());
 
-  zmq::context_t ctx(1);
-  zmq::socket_t sock(ctx, zmq::socket_type::req);
-  sock.connect("tcp://" + ip_key + ":8888");
+  try {
+    zmq::context_t ctx(1);
+    zmq::socket_t  sock(ctx, zmq::socket_type::dealer);
+    sock.set(zmq::sockopt::routing_id, "zmq-config-smoke");
+    sock.set(zmq::sockopt::rcvtimeo, 4000);
+    sock.set(zmq::sockopt::sndtimeo, 4000);
+    sock.connect(endpoint);
 
-  std::string out_str = env.SerializeAsString();
-  zmq::message_t message(out_str.size());
-  memcpy(message.data(), out_str.data(), out_str.size());
-  sock.send(message, zmq::send_flags::none);
+    std::string out = env.SerializeAsString();
+    zmq::message_t msg(out.size());
+    std::memcpy(msg.data(), out.data(), out.size());
+    if (!sock.send(msg, zmq::send_flags::none)) {
+      std::cerr << "send() timed out\n"; return 2;
+    }
 
-  zmq::message_t reply;
-  auto result = sock.recv(reply, zmq::recv_flags::none);
-  BOOST_REQUIRE_MESSAGE(result && *result > 0, "No response received from mezzanine");
+    auto frames = recv_multipart(sock);
+    const zmq::message_t& payload = frames.back();
 
-  ControlEnvelope response_env;
-  BOOST_REQUIRE_MESSAGE(response_env.ParseFromArray(reply.data(), reply.size()), "Failed to parse response envelope");
+    ControlEnvelope reply_env;
+    if (!reply_env.ParseFromArray(payload.data(), static_cast<int>(payload.size()))) {
+      std::cerr << "Failed to parse reply envelope\n"; return 3;
+    }
+    if (reply_env.type() != CONFIGURE_FE) {
+      std::cerr << "Unexpected reply type: " << reply_env.type() << "\n"; return 4;
+    }
 
-  BOOST_CHECK_EQUAL(response_env.type(), CONFIGURE_FE);
+    ConfigureResponse resp;
+    if (!resp.ParseFromString(reply_env.payload())) {
+      std::cerr << "Failed to parse ConfigureResponse\n"; return 5;
+    }
 
-  ConfigureResponse response;
-  BOOST_REQUIRE_MESSAGE(response.ParseFromString(response_env.payload()), "Failed to parse ConfigureResponse");
+    std::cout << "Success: " << std::boolalpha << resp.success() << "\n";
+    std::cout << "Message:\n" << resp.message() << "\n";
+    google::protobuf::ShutdownProtobufLibrary();
+    return resp.success() ? 0 : 6;
 
-  BOOST_CHECK_MESSAGE(response.success(), "Mezzanine reported failure");
-  BOOST_TEST_MESSAGE("Success: " + std::string(response.success() ? "true" : "false"));
-  BOOST_TEST_MESSAGE("Message: " + response.message());
+  } catch (const std::exception& e) {
+    std::cerr << "Exception: " << e.what() << "\n";
+    return 7;
+  }
 }
-
-BOOST_AUTO_TEST_SUITE_END()
