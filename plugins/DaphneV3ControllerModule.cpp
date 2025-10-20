@@ -1,7 +1,6 @@
 #include "DaphneV3ControllerModule.hpp"
 #include "logging/Logging.hpp"
 #include "daphnemodules/daphne_control_high.pb.h"
-#include "daphnemodules/daphne_control_envelope.pb.h"
 
 #include "appmodel/DaphneConf.hpp"
 #include "appmodel/DaphneV2BoardConf.hpp"
@@ -84,7 +83,7 @@ void DaphneV3ControllerModule::do_conf(const CommandData_t&)
 
     auto* afe = req.add_afes();
     afe->set_id(id);
-    afe->set_v_gain(afe_conf.get_attenuator());
+    afe->set_attenuators(afe_conf.get_attenuator());
     afe->set_v_bias(afe_conf.get_v_bias());
 
     auto* adc = afe_conf.get_adc();
