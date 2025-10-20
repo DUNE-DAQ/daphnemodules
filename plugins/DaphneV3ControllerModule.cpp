@@ -38,6 +38,7 @@ void DaphneV3ControllerModule::init(std::shared_ptr<appfwk::ConfigurationManager
 void DaphneV3ControllerModule::do_conf(const CommandData_t&)
 {
 
+  TLOG() << get_name() << " starting configuring";
   auto start_time = std::chrono::high_resolution_clock::now();
 
   
@@ -103,7 +104,7 @@ void DaphneV3ControllerModule::do_conf(const CommandData_t&)
         
   }  // loop over AFE
   
-
+  TLOG() << get_name() << " Message ready to send";
 
   // Step 2: Wrap in Envelope
   ControlEnvelope env;
@@ -118,13 +119,15 @@ void DaphneV3ControllerModule::do_conf(const CommandData_t&)
   static const std::regex ip_with_port("^[^/\s:]+(?::\d{1,5})?$");
   std::smatch string_values; 
   if (! std::regex_match( board_conf->get_address(), string_values, ip_with_port ) ) {
-    // throw that the address is wrong
+    TLOG() << get_name() << " in error"; // throw that the address is wrong
   }
 
   auto connection = string_values.size() > 1 ?
     fmt::format("tcp://{}", board_conf->get_address()) :
     fmt::format("tcp://{}:{}", board_conf->get_address(), s_default_control_port) ;
-   socket.connect(connection);
+  socket.connect(connection);
+
+  TLOG() << get_name() << " sending data to " << connection;
 
   std::string out_str = env.SerializeAsString();
   zmq::message_t message(out_str.size());
