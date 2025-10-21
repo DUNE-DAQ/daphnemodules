@@ -2,20 +2,14 @@
 
 #include "appfwk/DAQModule.hpp"
 #include "MezzCommandBuilder.hpp"
-#include "DaphneV2Interface.hpp"
+#include "DaphneV3Interface.hpp"
 
+#include "daphnemodules/CommonIssues.hpp"
 #include "daphnemodules/daphne_control_high.pb.h"
 #include "appmodel/DaphneV3ControllerModule.hpp"
 
 namespace dunedaq {
 
-  #warning MOVE THIS TO A FILE TO AVOID DUPLICATION
-  ERS_DECLARE_ISSUE( daphnemodules,
-                     ConfigurationFailed,
-                     name << " failed to retrieve its conf object",
-                     ((std::string)name)
-		     )
-  
   namespace daphnemodules {
 
 class DaphneV3ControllerModule : public appfwk::DAQModule
@@ -31,7 +25,7 @@ private:
 
   void configure_analog_chain(bool intial_config);
   
-  std::unique_ptr<DaphneV2Interface> m_iface;
+  std::unique_ptr<DaphneV3Interface> m_iface;
 
   using conf_t = appmodel::DaphneV3ControllerModule;
   const conf_t* m_module_config = nullptr;

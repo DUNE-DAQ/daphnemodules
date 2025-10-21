@@ -21,6 +21,7 @@
 #include <mutex>
 
 #include "DaphneV2Interface.hpp"
+#include "daphnemodules/CommonIssues.hpp"
 
 #include "daphnemodules/opmon/DaphneControllerModule.pb.h"
 
@@ -28,13 +29,6 @@
 
 
 namespace dunedaq {
-  
-  ERS_DECLARE_ISSUE( daphnemodules,
-                     ConfigurationFailed,
-                     name << " failed to retrieve its conf object",
-                     ((std::string)name)
-                   )
-
   
   ERS_DECLARE_ISSUE( daphnemodules,
                      MonitoringFailed,
