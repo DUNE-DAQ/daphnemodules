@@ -9,8 +9,10 @@
 
 #include <zmq.hpp>
 #include "daphnemodules/daphne_control_high.pb.h"
+#include "DaphneV3Interface.hpp"
 
 using namespace daphne;
+using namespace dunedaq::daphnemodules;
 
 // ------------- small helpers -------------
 static std::vector<zmq::message_t> recv_multipart(zmq::socket_t& s) {
@@ -71,9 +73,14 @@ int main(int argc, char** argv) {
   if (argc >= 2 && argv[1][0] != '-') ip = argv[1];
   if (argc >= 3 && argv[2][0] != '-') { try { port = std::stoi(argv[2]); } catch (...) {} }
 
-  const std::string endpoint = "tcp://" + ip + ":" + std::to_string(port);
+  const std::string address = ip + ":" + std::to_string(port);
+  const std::string endpoint = "tcp://" + address;
   std::cerr << "[SMOKE-V2] connecting to " << endpoint << " route=" << route << "\n";
 
+
+  
+  DaphneV3Interface iface( address, route);
+  
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   // ---- Build ConfigureRequest (same payload you used before)
@@ -126,61 +133,65 @@ int main(int argc, char** argv) {
   }
 
   try {
-    zmq::context_t ctx(1);
-    zmq::socket_t  sock(ctx, zmq::socket_type::dealer);
-    sock.set(zmq::sockopt::routing_id, "zmq-config-smoke-v2");
-    sock.set(zmq::sockopt::rcvtimeo, 4000);
-    sock.set(zmq::sockopt::sndtimeo, 4000);
-    sock.connect(endpoint);
+    // zmq::context_t ctx(1);
+    // zmq::socket_t  sock(ctx, zmq::socket_type::dealer);
+    // sock.set(zmq::sockopt::routing_id, "zmq-config-smoke-v2");
+    // sock.set(zmq::sockopt::rcvtimeo, 4000);
+    // sock.set(zmq::sockopt::sndtimeo, 4000);
+    // sock.connect(endpoint);
 
+    
     // send
-    {
-      std::string bytes = req.SerializeAsString();
-      zmq::message_t msg(bytes.size());
-      std::memcpy(msg.data(), bytes.data(), bytes.size());
-      if (!sock.send(msg, zmq::send_flags::none)) {
-        std::cerr << "send() timed out\n"; return 2;
-      }
-    }
+    // {
+    //   std::string bytes = req.SerializeAsString();
+    //   zmq::message_t msg(bytes.size());
+    //   std::memcpy(msg.data(), bytes.data(), bytes.size());
+    //   if (!sock.send(msg, zmq::send_flags::none)) {
+    //     std::cerr << "send() timed out\n"; return 2;
+    //   }
+    // }
 
-    // recv
-    auto frames = recv_multipart(sock);
-    const zmq::message_t& payload = frames.back();
+    // // recv
+    // auto frames = recv_multipart(sock);
+    // const zmq::message_t& payload = frames.back();
 
-    ControlEnvelopeV2 rep;
-    if (!rep.ParseFromArray(payload.data(), static_cast<int>(payload.size()))) {
-      std::cerr << "Failed to parse ControlEnvelopeV2 reply\n"; return 3;
-    }
+    // ControlEnvelopeV2 rep;
+    // if (!rep.ParseFromArray(payload.data(), static_cast<int>(payload.size()))) {
+    //   std::cerr << "Failed to parse ControlEnvelopeV2 reply\n"; return 3;
+    // }
 
-    // validate V2 transport
-    bool ok_dir  = (rep.dir()  == DIR_RESPONSE);
-    bool ok_type = (rep.type() == MT2_CONFIGURE_FE_RESP);
-    bool ok_tid  = (rep.task_id()   == req.task_id());
-    bool ok_corr = (rep.correl_id() == req.msg_id());
-    if (!ok_dir || !ok_type || !ok_tid || !ok_corr) {
-      std::cerr << "Correlation/type mismatch:"
-                << "\n  dir:  got " << rep.dir()  << " expect " << DIR_RESPONSE
-                << "\n  type: got " << rep.type() << " expect " << MT2_CONFIGURE_FE_RESP
-                << "\n  task: got " << rep.task_id()  << " expect " << req.task_id()
-                << "\n  corr: got " << rep.correl_id()<< " expect " << req.msg_id()
-                << "\n";
-      return 4;
-    }
+    
+    // // validate V2 transport
+    // bool ok_dir  = (rep.dir()  == DIR_RESPONSE);
+    // bool ok_type = (rep.type() == MT2_CONFIGURE_FE_RESP);
+    // bool ok_tid  = (rep.task_id()   == req.task_id());
+    // bool ok_corr = (rep.correl_id() == req.msg_id());
+    // if (!ok_dir || !ok_type || !ok_tid || !ok_corr) {
+    //   std::cerr << "Correlation/type mismatch:"
+    //             << "\n  dir:  got " << rep.dir()  << " expect " << DIR_RESPONSE
+    //             << "\n  type: got " << rep.type() << " expect " << MT2_CONFIGURE_FE_RESP
+    //             << "\n  task: got " << rep.task_id()  << " expect " << req.task_id()
+    //             << "\n  corr: got " << rep.correl_id()<< " expect " << req.msg_id()
+    //             << "\n";
+    //   return 4;
+    // }
 
-    // decode payload
-    ConfigureResponse resp;
-    if (!resp.ParseFromString(rep.payload())) {
-      std::cerr << "Failed to parse ConfigureResponse\n"; return 5;
-    }
+    // // decode payload
+    // ConfigureResponse resp;
+    // if (!resp.ParseFromString(rep.payload())) {
+    //   std::cerr << "Failed to parse ConfigureResponse\n"; return 5;
+    // }
 
-    std::cout << "[V2 meta]\n";
-    std::cout << "  task_id      : " << rep.task_id() << "\n";
-    std::cout << "  msg_id       : " << rep.msg_id() << "\n";
-    std::cout << "  correl_id    : " << rep.correl_id() << "\n";
-    std::cout << "  timestamp_ns : " << rep.timestamp_ns() << "\n";
-    if (!rep.route().empty())
-      std::cout << "  route        : " << rep.route() << "\n";
-    std::cout << "\n";
+    auto resp = iface.send<ConfigureResponse>( cfg.SerializeAsString(), MT2_CONFIGURE_FE_REQ, MT2_CONFIGURE_FE_RESP);
+    
+    // std::cout << "[V2 meta]\n";
+    // std::cout << "  task_id      : " << rep.task_id() << "\n";
+    // std::cout << "  msg_id       : " << rep.msg_id() << "\n";
+    // std::cout << "  correl_id    : " << rep.correl_id() << "\n";
+    // std::cout << "  timestamp_ns : " << rep.timestamp_ns() << "\n";
+    // if (!rep.route().empty())
+    //   std::cout << "  route        : " << rep.route() << "\n";
+    // std::cout << "\n";
     std::cout << "Success: " << std::boolalpha << resp.success() << "\n";
     std::cout << "Message:\n" << resp.message() << "\n";
 
