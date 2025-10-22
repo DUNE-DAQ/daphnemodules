@@ -23,9 +23,13 @@ private:
   void do_start(const CommandData_t&);
   void do_scrap(const CommandData_t&);
 
+  void create_interface( const std::string & address,
+                         std::chrono::milliseconds timeout )  ;
+
+  
   void configure_analog_chain(bool intial_config);
   
-  std::unique_ptr<DaphneV3Interface> m_iface;
+  std::unique_ptr<DaphneV3Interface> m_iface = nullptr;
 
   using conf_t = appmodel::DaphneV3ControllerModule;
   const conf_t* m_module_config = nullptr;

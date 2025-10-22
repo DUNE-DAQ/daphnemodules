@@ -49,6 +49,10 @@ void DaphneV3ControllerModule::do_conf(const CommandData_t&)
 
   auto board_conf = m_module_config->get_board_conf();
   auto general_conf = m_module_config->get_daphne_conf();
+
+  create_interface( board_conf->get_address(),
+		    general_conf->get_timeout() );
+		      
   
   // Step 1: Build the ConfigureRequest
   ConfigureRequest req;
@@ -78,7 +82,7 @@ void DaphneV3ControllerModule::do_conf(const CommandData_t&)
   } // loop over channels
 
 
-  for ( AFEId id = 0; id < s_max_channels; ++id ) {
+  for ( AFEId id = 0; id < s_max_afes; ++id ) {
 
     const auto & afe_conf = board_conf->get_afe(id);
 
@@ -165,6 +169,12 @@ void DaphneV3ControllerModule::configure_analog_chain(bool initial_config) {
   return;
 }
 
+  void DaphneV3ControllerModule::create_interface( const std::string & address,
+						   std::chrono::milliseconds timeout )  {
+
+    m_iface = make_unique<DaphneV3Interface>( address, get_name(), timeout);
+    
+  }
 
   
 } // namespace dunedaq::daphnemodules
