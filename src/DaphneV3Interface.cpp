@@ -30,26 +30,29 @@ DaphneV3Interface::DaphneV3Interface( std::string address,
   
   m_socket.set(zmq::sockopt::routing_id, routing);
   auto value = (int) timeout.count();
+  TLOG() << routing << " timeout set to " << value << " ms";
   m_socket.set(zmq::sockopt::rcvtimeo, value);
   m_socket.set(zmq::sockopt::sndtimeo, value);
   
   
   // find out if the address has a port with a regex
-  static const std::regex ip_with_port("^([^/\s:]+)(?::(\d{1,5}))?$");
+  static const std::regex ip_with_port(R"(^([^\/\s:]+)(?::(\d{1,5}))?$)");
   std::smatch string_values; 
   if (! std::regex_match( address, string_values, ip_with_port ) ) {
-    throw InvalidAddress(ERS_HERE, address);
+    throw InvalidIPAddress(ERS_HERE, address);
   }
 
-  m_connection = string_values.size() > 2 ?
+  TLOG() << "Argument size: " << string_values.size();
+  m_connection = string_values[2].matched ?
     fmt::format("tcp://{}", address) :
     fmt::format("tcp://{}:{}", address, s_default_control_port) ;
+  TLOG() << "Connecting to : " << m_connection;
   
   m_socket.connect(m_connection);
 
   if ( ! validate_connection() ) {
     auto add = string_values[1];
-    auto port = string_values.size() > 2 ? std::stoi(string_values[2]) : s_default_control_port;
+    auto port = string_values[2].matched ? std::stoi(string_values[2]) : s_default_control_port;
     throw FailedPing(ERS_HERE, add, port );
   }
 
@@ -105,7 +108,7 @@ std::string DaphneV3Interface::_receive() {
   
   ControlEnvelopeV2 rep;
   if (!rep.ParseFromArray(reply.data(), (int)reply.size() )) {
-    throw FailedDecoding(ERS_HERE, reply.to_string());
+    throw FailedDecoding(ERS_HERE, rep.GetTypeName(), reply.to_string());
   }
   
   if (rep.version() != 2 || rep.dir() != DIR_RESPONSE) {
@@ -179,9 +182,16 @@ bool DaphneV3Interface::read_test_register(uint64_t& value) const
 bool DaphneV3Interface::validate_connection()
 {
   static const uint64_t good_value = 0xdeadbeef;
-  uint64_t val = 0;
-  if (!read_test_register(val)) return false;
-  return val == good_value;
+
+  TestRegRequest req; // empty
+  auto reply = send( req.SerializeAsString(), MessageTypeV2::MT2_READ_TEST_REG_REQ);
+
+  TestRegResponse out;
+  if (!out.ParseFromString(reply) ) {
+    throw FailedDecoding(ERS_HERE, out.GetTypeName(), reply);
+  }
+
+  return out.value() == good_value;
 }
 
 

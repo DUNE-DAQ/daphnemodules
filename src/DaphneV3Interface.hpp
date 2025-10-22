@@ -25,7 +25,7 @@
 
 #include "daphnemodules/daphne_control_high.pb.h"
 
-
+#include "daphnemodules/CommonIssues.hpp"
 
 namespace dunedaq {
 
@@ -35,12 +35,6 @@ namespace dunedaq {
 		     ERS_EMPTY
 		   ) 
 
-  ERS_DECLARE_ISSUE( daphnemodules,
-		     InvalidAddress,
-		     "Invalid address: " << address,
-		     ((std::string)address)
-		   ) 
-  
   ERS_DECLARE_ISSUE( daphnemodules,
 		     FailedPing,
 		     "Failed to ping daphne board at " << ip << ':' << port,
@@ -67,8 +61,8 @@ namespace dunedaq {
 
   ERS_DECLARE_ISSUE( daphnemodules,
 		     FailedDecoding,
-		     "Failed to de-serialise envelope. Message: " << message,
-		     ((std::string)message)
+		     "Failed to de-serialise to " << type << ". Message: " << message,
+		     ((std::string)type)((std::string)message)
 		     ) 
   
   ERS_DECLARE_ISSUE( daphnemodules,

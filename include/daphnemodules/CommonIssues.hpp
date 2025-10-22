@@ -12,6 +12,11 @@ namespace dunedaq {
                      ((std::string)name)
                    )
 
+  ERS_DECLARE_ISSUE( daphnemodules,
+                     InvalidIPAddress,
+                     "Invalid address: " << ip,
+                     ((std::string)ip)
+                   ) 
   
 
 } // dunedaq namespace
