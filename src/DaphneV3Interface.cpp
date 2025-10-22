@@ -18,27 +18,37 @@
 using namespace dunedaq::daphnemodules;
 
 DaphneV3Interface::DaphneV3Interface( std::string address,
+				      std::string routing, 
 				      std::chrono::milliseconds timeout)
   : m_context(1)
-  , m_socket(m_context, zmq::socket_type::req)
+  , m_socket(m_context, zmq::socket_type::dealer)
   , m_timeout(timeout) {
 
+
+  m_socket.set(zmq::sockopt::routing_id, routing);
+  auto value = (int) timeout.count();
+  m_socket.set(zmq::sockopt::rcvtimeo, value);
+  m_socket.set(zmq::sockopt::sndtimeo, value);
+  
   
   // find out if the address has a port with a regex
-  static const std::regex ip_with_port("^[^/\s:]+(?::\d{1,5})?$");
+  static const std::regex ip_with_port("^([^/\s:]+)(?::(\d{1,5}))?$");
   std::smatch string_values; 
   if (! std::regex_match( address, string_values, ip_with_port ) ) {
-    // throw that the address is wrong
+    throw InvalidAddress(ERS_HERE, address);
   }
 
-  auto connection = string_values.size() > 1 ?
+  auto connection = string_values.size() > 2 ?
     fmt::format("tcp://{}", address) :
     fmt::format("tcp://{}:{}", address, s_default_control_port) ;
+  
   m_socket.connect(connection);
 
-  #warning RE-INSTATE
-  // if ( ! validate_connection() )
-    //throw FailedPing(ERS_HERE, ipaddr, port );
+  if ( ! validate_connection() ) {
+    auto add = string_values[1];
+    auto port = string_values.size() > 2 ? std::stoi(string_values[2]) : s_default_control_port;
+    throw FailedPing(ERS_HERE, add, port );
+  }
 
 }
 
