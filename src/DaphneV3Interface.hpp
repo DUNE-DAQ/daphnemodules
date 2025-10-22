@@ -23,6 +23,9 @@
 
 #include <zmq.hpp>
 
+#include "daphnemodules/daphne_control_high.pb.h"
+
+
 
 namespace dunedaq {
 
@@ -84,8 +87,12 @@ namespace dunedaq::daphnemodules {
 
     bool validate_connection() const ;
 
+    // this takes the serilised message and encodes it into the envelope
+    std::string send( std::string && message, daphne::MessageTypeV2 );
+    
     
   protected:
+    void _send( std::string && message, daphne::MessageTypeV2 );
     
     void close();
     
