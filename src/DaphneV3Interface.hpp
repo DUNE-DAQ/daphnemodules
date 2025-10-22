@@ -111,8 +111,6 @@ namespace dunedaq::daphnemodules {
     T send( std::string && message, daphne::MessageTypeV2 sent_type, daphne::MessageTypeV2 received_type );
     
     bool validate_connection();
-
-    bool read_test_register(uint64_t& value) const;
     
   protected:
     void _send( std::string && message, daphne::MessageTypeV2 );
