@@ -136,5 +136,6 @@ namespace dunedaq::daphnemodules {
 
 } // namespce  dunedaq::daphnemodules
 
+#include <DaphneV3Interface.hxx>
 
 #endif // DAPHNEMODULES_SRC_DAPHNEV3INTERFACE_HPP_

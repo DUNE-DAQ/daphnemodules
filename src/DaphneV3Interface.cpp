@@ -50,11 +50,11 @@ DaphneV3Interface::DaphneV3Interface( std::string address,
   
   m_socket.connect(m_connection);
 
-  if ( ! validate_connection() ) {
-    auto add = string_values[1];
-    auto port = string_values[2].matched ? std::stoi(string_values[2]) : s_default_control_port;
-    throw FailedPing(ERS_HERE, add, port );
-  }
+  // if ( ! validate_connection() ) {
+  //   auto add = string_values[1];
+  //   auto port = string_values[2].matched ? std::stoi(string_values[2]) : s_default_control_port;
+  //   throw FailedPing(ERS_HERE, add, port );
+  // }
 
 }
 
@@ -117,32 +117,6 @@ ControlEnvelopeV2 DaphneV3Interface::_receive() {
 
   return rep;
 }
-
-template<class T>
-T DaphneV3Interface::send( std::string && message, daphne::MessageTypeV2 sent_type, daphne::MessageTypeV2 received_type ) {
-
-  std::unique_lock<std::mutex> lock(m_access_mutex);
-
-  _send(std::move(message), sent_type);
-
-  auto ret = _receive();
-
-  lock.unlock();
-
-  const auto ty = ret.type();
-  T out;
-  if ( ty != received_type ) {
-    throw FailedDecoding(ERS_HERE, out.GetTypeName(), ret.payload(),
-			 TypeMismatch(ERS_HERE, MessageTypeV2_Name(ty), MessageTypeV2_Name(received_type)) );
-  }
-
-  if (!out.ParseFromString(ret.payload())) {
-    throw FailedDecoding(ERS_HERE, out.GetTypeName(), ret.payload());
-  }
-
-  return out;
-}
-
 
 
 bool DaphneV3Interface::read_test_register(uint64_t& value) const
