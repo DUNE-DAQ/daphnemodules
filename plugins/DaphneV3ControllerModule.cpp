@@ -176,6 +176,36 @@ void DaphneV3ControllerModule::configure_analog_chain(bool initial_config) {
     
   }
 
+  void DaphneV3ControllerModule::validate_configuration(const conf_t & c) const {
+    
+    const auto & channel_confs = c.get_active_channels();
+
+  for ( const auto & ch : channel_confs ) {
+    auto id = ch->get_channel_id();
+    
+    //CH OFFSET maximum is 2700 if GAIN is 1, 1500 if GAIN is 2
+    auto gain = ch->get_gain();
+    if ( gain != 1 && gain != 2 ) {
+      throw InvalidChannelConfiguration(ERS_HERE,
+                                        id, ch->get_trim(), ch->get_offset(), gain);
+    }
+    auto offset = ch -> get_offset();
+    if ( gain == 1 ) {
+      if ( offset > 2700 ) 
+        throw InvalidChannelConfiguration(ERS_HERE, id, ch->get_trim(), offset, gain);
+    } else if ( gain == 2 ) {
+      if ( offset > 1500 ) 
+        throw InvalidChannelConfiguration(ERS_HERE, id, ch->get_trim(), offset, gain);
+    }
+  } // loop over channels
+
+  auto size = c.get_full_stream_channels().size();
+  if (size>16) {
+    // we can only stream 16 channels at most
+    throw TooManyChannels( ERS_HERE, size );
+  }
+
+  }
   
 } // namespace dunedaq::daphnemodules
 

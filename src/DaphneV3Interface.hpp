@@ -89,7 +89,7 @@ namespace dunedaq::daphnemodules {
 
   public:
     DaphneV3Interface( std::string address,  // it can contain the port or not
-		       std::string rounting,  // this should be the name of the controller module
+		       std::string routing,  // this should be the name of the controller module
 		       std::chrono::milliseconds timeout = std::chrono::milliseconds(500));
     
 

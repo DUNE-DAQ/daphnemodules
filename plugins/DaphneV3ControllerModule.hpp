@@ -26,13 +26,14 @@ private:
   void create_interface( const std::string & address,
                          std::chrono::milliseconds timeout )  ;
 
+  using conf_t = appmodel::DaphneV3ControllerModule;
+  const conf_t* m_module_config = nullptr;
+  void validate_configuration(const conf_t &) const;   
   
   void configure_analog_chain(bool intial_config);
   
   std::unique_ptr<DaphneV3Interface> m_iface = nullptr;
 
-  using conf_t = appmodel::DaphneV3ControllerModule;
-  const conf_t* m_module_config = nullptr;
 
   using const_channel_id_t = std::invoke_result<decltype(&daphne::ChannelConfig::id),
 						daphne::ChannelConfig>::type;
