@@ -123,10 +123,12 @@ namespace dunedaq::daphnemodules {
     
     zmq::socket_t m_socket;
     mutable std::mutex m_access_mutex;
-
+    
     std::string m_connection;
     
     std::chrono::milliseconds m_timeout{1000};
+
+    uint64_t m_message_counter = 0;
 
     static const size_t s_default_control_port = 40001;
   }; 

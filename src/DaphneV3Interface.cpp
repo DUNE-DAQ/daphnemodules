@@ -90,7 +90,11 @@ void DaphneV3Interface::_send( std::string && message, daphne::MessageTypeV2 typ
 
   env.set_type(type);
   env.set_payload(message);
-  #warning ADD TIME and possibly other missing types
+
+  // additional information
+  env.set_msg_id( m_message_counter++ );
+  env.set_timestamp_ns(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count());
+
   
   std::string bytes = env.SerializeAsString();
 
