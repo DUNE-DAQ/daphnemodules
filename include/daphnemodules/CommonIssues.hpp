@@ -18,6 +18,18 @@ namespace dunedaq {
                      ((std::string)ip)
                    ) 
   
+    ERS_DECLARE_ISSUE( daphnemodules,
+		       InvalidChannelConfiguration,
+		       "Channel " << id << " has invalid configuration, trim: " << trim << ", offset: " << offset << ", gain:"<< gain,
+		       ((uint32_t)id)((uint32_t)trim)((uint32_t)offset)((uint32_t)gain)
+		       )
+
+  
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     TooManyChannels,
+                     "Too many full stream channels. Total requested:  " << tot,
+                     ((size_t)tot)
+                     )
 
 } // dunedaq namespace
 

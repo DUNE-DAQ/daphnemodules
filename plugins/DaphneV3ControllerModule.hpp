@@ -7,6 +7,8 @@
 #include "daphnemodules/CommonIssues.hpp"
 #include "daphnemodules/daphne_control_high.pb.h"
 #include "appmodel/DaphneV3ControllerModule.hpp"
+#include "appmodel/DaphneV2BoardConf.hpp"
+
 
 namespace dunedaq {
 
@@ -28,7 +30,7 @@ private:
 
   using conf_t = appmodel::DaphneV3ControllerModule;
   const conf_t* m_module_config = nullptr;
-  void validate_configuration(const conf_t &) const;   
+  void validate_configuration(const appmodel::DaphneV2BoardConf &) const;   
   
   void configure_analog_chain(bool intial_config);
   

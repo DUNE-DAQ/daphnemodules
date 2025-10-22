@@ -80,13 +80,6 @@ namespace dunedaq {
 		     ((uint32_t)id)((uint32_t)max)
 		   )
 
-  
-  ERS_DECLARE_ISSUE( daphnemodules,
-		     InvalidChannelConfiguration,
-                     "Channel " << id << " has invalid configuration, trim: " << trim << ", offset: " << offset << ", gain:" << gain,
-		     ((uint32_t)id)((uint32_t)trim)((uint32_t)offset)((uint32_t)gain)
-		   )
-
   ERS_DECLARE_ISSUE( daphnemodules,
 		     InvalidAFEVoltage,
                      "AFE " << id << " has invalid voltage, gain: " << gain << ", bias: " << bias,
@@ -111,13 +104,6 @@ namespace dunedaq {
                      "Invalid threshold: " << threshold,
 		     ((uint32_t)threshold)
 		     )
-
-    ERS_DECLARE_ISSUE( daphnemodules,
-		       TooManyChannels,
-                     "Too many full stream channels. Total requested:  " << tot,
-		     ((size_t)tot)
-		     )
-
   
    ERS_DECLARE_ISSUE( daphnemodules,
                      InvalidBiasCtrlConfiguration,

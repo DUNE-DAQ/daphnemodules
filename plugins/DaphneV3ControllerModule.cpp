@@ -44,15 +44,16 @@ void DaphneV3ControllerModule::do_conf(const CommandData_t&)
   
   using namespace daphne;
 
-  // validation to be taken from the previous version
-  // this should include the slot check 
-
   auto board_conf = m_module_config->get_board_conf();
   auto general_conf = m_module_config->get_daphne_conf();
 
   create_interface( board_conf->get_address(),
 		    general_conf->get_timeout() );
-		      
+
+  // validation to be taken from the previous version
+  // this should include the slot check
+  validate_configuration(*board_conf);
+
   
   // Step 1: Build the ConfigureRequest
   ConfigureRequest req;
@@ -176,7 +177,7 @@ void DaphneV3ControllerModule::configure_analog_chain(bool initial_config) {
     
   }
 
-  void DaphneV3ControllerModule::validate_configuration(const conf_t & c) const {
+  void DaphneV3ControllerModule::validate_configuration(const appmodel::DaphneV2BoardConf & c) const {
     
     const auto & channel_confs = c.get_active_channels();
 
