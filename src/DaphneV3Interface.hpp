@@ -80,7 +80,7 @@ namespace dunedaq::daphnemodules {
     DaphneV3Interface & operator= (const DaphneV3Interface & ) = delete;
     DaphneV3Interface(DaphneV3Interface &&) = delete;
     DaphneV3Interface & operator= (DaphneV3Interface &&) = delete;
-
+    bool read_test_register(uint64_t& value) const;
     bool validate_connection() const ;
 
     

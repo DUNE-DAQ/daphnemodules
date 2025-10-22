@@ -45,13 +45,13 @@ static void usage(const char* prog) {
   std::cerr << "Usage: " << prog << " [--ip <addr>] [--port <num>] [--route <name>]\n"
             << "       " << prog << " [ip] [port]\n"
             << "Env:   DAPHNE_IP, DAPHNE_PORT\n"
-            << "Default: 10.73.137.161:9000, route=mezz/0\n";
+            << "Default: 10.73.137.161:40001, route=mezz/0\n";
 }
 
 int main(int argc, char** argv) {
   // ---- Defaults
   std::string ip = "10.73.137.161";
-  int port = 9000;
+  int port = 40001;
   std::string route = "mezz/0";
 
   // ---- Env
