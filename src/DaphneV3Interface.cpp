@@ -68,7 +68,7 @@ void DaphneV3Interface::close() {
 }
 
 
-std::string DaphneV3Interface::send( std::string && message, daphne::MessageTypeV2 type) {
+ControlEnvelopeV2 DaphneV3Interface::send( std::string && message, daphne::MessageTypeV2 type) {
 
   const std::lock_guard<std::mutex> lock(m_access_mutex);
   
@@ -95,7 +95,7 @@ void DaphneV3Interface::_send( std::string && message, daphne::MessageTypeV2 typ
   }
 }
 
-std::string DaphneV3Interface::_receive() {
+ControlEnvelopeV2 DaphneV3Interface::_receive() {
 
   zmq::message_t reply;
   if (! m_socket.recv(reply, zmq::recv_flags::none)) {
@@ -115,9 +115,33 @@ std::string DaphneV3Interface::_receive() {
     ers::warning(UnexpectedDirection(ERS_HERE, rep.version(), Direction_Name(rep.dir()), reply.to_string() )); 
   }
 
-  return rep.payload();
+  return rep;
 }
 
+template<class T>
+T DaphneV3Interface::send( std::string && message, daphne::MessageTypeV2 sent_type, daphne::MessageTypeV2 received_type ) {
+
+  std::unique_lock<std::mutex> lock(m_access_mutex);
+
+  _send(std::move(message), sent_type);
+
+  auto ret = _receive();
+
+  lock.unlock();
+
+  const auto ty = ret.type();
+  T out;
+  if ( ty != received_type ) {
+    throw FailedDecoding(ERS_HERE, out.GetTypeName(), ret.payload(),
+			 TypeMismatch(ERS_HERE, MessageTypeV2_Name(ty), MessageTypeV2_Name(received_type)) );
+  }
+
+  if (!out.ParseFromString(ret.payload())) {
+    throw FailedDecoding(ERS_HERE, out.GetTypeName(), ret.payload());
+  }
+
+  return out;
+}
 
 
 
@@ -184,14 +208,11 @@ bool DaphneV3Interface::validate_connection()
   static const uint64_t good_value = 0xdeadbeef;
 
   TestRegRequest req; // empty
-  auto reply = send( req.SerializeAsString(), MessageTypeV2::MT2_READ_TEST_REG_REQ);
-
-  TestRegResponse out;
-  if (!out.ParseFromString(reply) ) {
-    throw FailedDecoding(ERS_HERE, out.GetTypeName(), reply);
-  }
-
-  return out.value() == good_value;
+  auto reply = send<TestRegResponse>( req.SerializeAsString(),
+				      MessageTypeV2::MT2_READ_TEST_REG_REQ,
+				      MessageTypeV2::MT2_READ_TEST_REG_RESP );
+  
+  return reply.value() == good_value;
 }
 
 

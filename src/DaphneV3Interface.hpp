@@ -60,6 +60,13 @@ namespace dunedaq {
 		     ) 
 
   ERS_DECLARE_ISSUE( daphnemodules,
+		     TypeMismatch,
+		     "Received message of type " << type << " instead of " << expected,
+		     ((std::string)type)((std::string)expected)
+		     ) 
+
+  
+  ERS_DECLARE_ISSUE( daphnemodules,
 		     FailedDecoding,
 		     "Failed to de-serialise to " << type << ". Message: " << message,
 		     ((std::string)type)((std::string)message)
@@ -96,7 +103,7 @@ namespace dunedaq::daphnemodules {
     // this takes the serilised message and encodes it into the envelope
     // It returns the serialised reply
     
-    std::string send( std::string && message, daphne::MessageTypeV2 );
+    daphne::ControlEnvelopeV2 send( std::string && message, daphne::MessageTypeV2 );
 
     // this takes the serilised message and encodes it into the envelope
     // It returns the de-serialised objects
@@ -109,7 +116,7 @@ namespace dunedaq::daphnemodules {
     
   protected:
     void _send( std::string && message, daphne::MessageTypeV2 );
-    std::string _receive();
+    daphne::ControlEnvelopeV2 _receive();
     
     void close();
     
