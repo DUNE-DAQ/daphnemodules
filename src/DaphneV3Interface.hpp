@@ -85,16 +85,16 @@ namespace dunedaq::daphnemodules {
     DaphneV3Interface(DaphneV3Interface &&) = delete;
     DaphneV3Interface & operator= (DaphneV3Interface &&) = delete;
 
-    bool validate_connection() const ;
-
     // this takes the serilised message and encodes it into the envelope
     std::string send( std::string && message, daphne::MessageTypeV2 );
     
-    bool read_test_register(uint64_t& value) const;
     bool validate_connection() const ;
+
+    bool read_test_register(uint64_t& value) const;
     
   protected:
     void _send( std::string && message, daphne::MessageTypeV2 );
+    std::string _receive();
     
     void close();
     

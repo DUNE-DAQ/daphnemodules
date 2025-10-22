@@ -62,17 +62,77 @@ void DaphneV3Interface::close() {
 }
 
 
-bool DaphneV3Interface::validate_connection() const {
+std::string DaphneV3Interface::send( std::string && message, daphne::MessageTypeV2 ) {
 
-  static const uint64_t good_value = 0xdeadbeef; 
-
-  #warning FIX ME
-  return true;
+  return "";
 }
 
 
+bool DaphneV3Interface::read_test_register(uint64_t& value) const
+{
+  using namespace daphne; // protobuf package
+
+  auto* sock = const_cast<zmq::socket_t*>(&m_socket);
+
+  try {
+    TestRegRequest req; // empty
+    ControlEnvelopeV2 env;
+    env.set_version(2);
+    env.set_dir(DIR_REQUEST);
+
+    env.set_type(static_cast<MessageTypeV2>(304));
+    env.set_payload(req.SerializeAsString());
 
 
+    std::string bytes = env.SerializeAsString();
+
+    if (!sock->send(zmq::buffer(bytes), zmq::send_flags::none)) {
+      return false;
+    }
+
+    zmq::message_t reply;
+    if (!sock->recv(reply, zmq::recv_flags::none)) {
+      return false; // timeout or EAGAIN
+    }
+    if (reply.size() <= 0) {
+      return false;
+    }
+
+    ControlEnvelopeV2 rep;
+    if (!rep.ParseFromArray(reply.data(), static_cast<int>(reply.size()))) {
+      return false;
+    }
+    if (rep.version() != 2 || rep.dir() != DIR_RESPONSE) {
+      return false;
+    }
+
+    const auto ty = rep.type();
+    if (!(ty == MT2_READ_TEST_REG_RESP || ty == static_cast<MessageTypeV2>(305))) {
+      return false;
+    }
+
+    TestRegResponse out;
+    if (!out.ParseFromString(rep.payload())) {
+      return false;
+    }
+
+    value = out.value();
+    return true;
+
+  } catch (const zmq::error_t&) {
+    return false;
+  } catch (...) {
+    return false;
+  }
+}
+
+bool DaphneV3Interface::validate_connection() const
+{
+  static const uint64_t good_value = 0xdeadbeef;
+  uint64_t val = 0;
+  if (!read_test_register(val)) return false;
+  return val == good_value;
+}
 
 
 

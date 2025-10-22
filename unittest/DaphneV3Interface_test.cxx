@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(connection_test)
   std::cout << "[TEST] Connecting to " << address << std::endl;
 
   std::chrono::milliseconds timeout(3000);
-  DaphneV3Interface iface(address, timeout);
+  DaphneV3Interface iface(address, "v3_unittest", timeout);
 
   uint64_t val = 0;
   bool ok = iface.read_test_register(val);
