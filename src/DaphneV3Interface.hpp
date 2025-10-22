@@ -48,22 +48,36 @@ namespace dunedaq {
 		   ) 
 
   ERS_DECLARE_ISSUE( daphnemodules,
-		     FailedSocketInteraction,
-		     "Failed to call " << command,
-		     ((std::string)command)
+		     FailedSend,
+		     "Failed to send message of type " << type,
+		     ((std::string)type)
 		   ) 
 
   ERS_DECLARE_ISSUE( daphnemodules,
-		     CommandTimeout,
-		     "Command " << command << " timed out after " << timeout_us << " microseconds",
-		     ((std::string)command)((unsigned int)timeout_us)
+		     FailedReceive,
+		     "Failed to receive message from " << connection,
+		     ((std::string)connection)
 		   ) 
 
   ERS_DECLARE_ISSUE( daphnemodules,
-		     SocketTimeout,
-		     "Socket timed out after " << timeout_us << " microseconds",
-		     ((unsigned int)timeout_us)
-		   ) 
+		     EmptyPayload,
+		     "Empty payload received from " << connection,
+		     ((std::string)connection)
+		     ) 
+
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     FailedDecoding,
+		     "Failed to de-serialise envelope. Message: " << message,
+		     ((std::string)message)
+		     ) 
+  
+  ERS_DECLARE_ISSUE( daphnemodules,
+		     UnexpectedDirection,
+		     "Message received with unexpeted properties. Version: " << version << ", direction " << ". Message: " << message,
+		     ((uint32_t)version)((std::string)direction)((std::string)message)
+		     ) 
+
+  
  
   } // dunedaq namespace
 
@@ -86,9 +100,16 @@ namespace dunedaq::daphnemodules {
     DaphneV3Interface & operator= (DaphneV3Interface &&) = delete;
 
     // this takes the serilised message and encodes it into the envelope
-    std::string send( std::string && message, daphne::MessageTypeV2 );
+    // It returns the serialised reply
     
-    bool validate_connection() const ;
+    std::string send( std::string && message, daphne::MessageTypeV2 );
+
+    // this takes the serilised message and encodes it into the envelope
+    // It returns the de-serialised objects
+    template<class T>
+    T send( std::string && message, daphne::MessageTypeV2 sent_type, daphne::MessageTypeV2 received_type );
+    
+    bool validate_connection();
 
     bool read_test_register(uint64_t& value) const;
     
@@ -101,8 +122,10 @@ namespace dunedaq::daphnemodules {
   private:
     zmq::context_t m_context;
     
-    zmq::socket_t m_socket; 
+    zmq::socket_t m_socket;
     mutable std::mutex m_access_mutex;
+
+    std::string m_connection;
     
     std::chrono::milliseconds m_timeout{1000};
 

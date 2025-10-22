@@ -16,6 +16,7 @@
 #include <sys/time.h>
 
 using namespace dunedaq::daphnemodules;
+using namespace daphne;
 
 DaphneV3Interface::DaphneV3Interface( std::string address,
 				      std::string routing, 
@@ -25,6 +26,8 @@ DaphneV3Interface::DaphneV3Interface( std::string address,
   , m_timeout(timeout) {
 
 
+  const std::lock_guard<std::mutex> lock(m_access_mutex);
+  
   m_socket.set(zmq::sockopt::routing_id, routing);
   auto value = (int) timeout.count();
   m_socket.set(zmq::sockopt::rcvtimeo, value);
@@ -38,11 +41,11 @@ DaphneV3Interface::DaphneV3Interface( std::string address,
     throw InvalidAddress(ERS_HERE, address);
   }
 
-  auto connection = string_values.size() > 2 ?
+  m_connection = string_values.size() > 2 ?
     fmt::format("tcp://{}", address) :
     fmt::format("tcp://{}:{}", address, s_default_control_port) ;
   
-  m_socket.connect(connection);
+  m_socket.connect(m_connection);
 
   if ( ! validate_connection() ) {
     auto add = string_values[1];
@@ -62,10 +65,57 @@ void DaphneV3Interface::close() {
 }
 
 
-std::string DaphneV3Interface::send( std::string && message, daphne::MessageTypeV2 ) {
+std::string DaphneV3Interface::send( std::string && message, daphne::MessageTypeV2 type) {
 
-  return "";
+  const std::lock_guard<std::mutex> lock(m_access_mutex);
+  
+  _send(std::move(message), type);
+
+  return _receive();
 }
+
+
+void DaphneV3Interface::_send( std::string && message, daphne::MessageTypeV2 type) {
+
+  ControlEnvelopeV2 env;
+  env.set_version(2);
+  env.set_dir(DIR_REQUEST);
+
+  env.set_type(type);
+  env.set_payload(message);
+  #warning ADD TIME and possibly other missing types
+  
+  std::string bytes = env.SerializeAsString();
+
+  if (! m_socket.send(zmq::buffer(bytes), zmq::send_flags::none)) {
+    throw FailedSend(ERS_HERE, MessageTypeV2_Name(type) );
+  }
+}
+
+std::string DaphneV3Interface::_receive() {
+
+  zmq::message_t reply;
+  if (! m_socket.recv(reply, zmq::recv_flags::none)) {
+    // timeout or EAGAIN
+    throw FailedReceive(ERS_HERE, m_connection);
+  }
+  if (reply.size() <= 0) {
+    throw EmptyPayload(ERS_HERE, m_connection);
+  }
+  
+  ControlEnvelopeV2 rep;
+  if (!rep.ParseFromArray(reply.data(), (int)reply.size() )) {
+    throw FailedDecoding(ERS_HERE, reply.to_string());
+  }
+  
+  if (rep.version() != 2 || rep.dir() != DIR_RESPONSE) {
+    ers::warning(UnexpectedDirection(ERS_HERE, rep.version(), Direction_Name(rep.dir()), reply.to_string() )); 
+  }
+
+  return rep.payload();
+}
+
+
 
 
 bool DaphneV3Interface::read_test_register(uint64_t& value) const
@@ -126,7 +176,7 @@ bool DaphneV3Interface::read_test_register(uint64_t& value) const
   }
 }
 
-bool DaphneV3Interface::validate_connection() const
+bool DaphneV3Interface::validate_connection()
 {
   static const uint64_t good_value = 0xdeadbeef;
   uint64_t val = 0;
