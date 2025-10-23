@@ -54,8 +54,25 @@ void DaphneV3ControllerModule::do_conf(const CommandData_t&)
   // this should include the slot check
   validate_configuration(*board_conf);
 
+  configure_analog_chain(true);
+
+  auto end_time = std::chrono::high_resolution_clock::now();
   
-  // Step 1: Build the ConfigureRequest
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+  TLOG() << get_name() << ": board configured in " << duration.count() << " microseconds";
+  
+}
+
+void DaphneV3ControllerModule::do_start(const CommandData_t& )  { /* nothing yet */ }
+void DaphneV3ControllerModule::do_scrap(const CommandData_t&)  { m_iface.reset(); }
+
+void DaphneV3ControllerModule::configure_analog_chain(bool initial_config) {
+
+  auto general_conf = m_module_config->get_daphne_conf();
+  auto board_conf = initial_config ? m_module_config->get_board_conf() :
+    general_conf->get_default_v3_settings();
+
+    // Step 1: Build the ConfigureRequest
   ConfigureRequest req;
   req.set_daphne_address(board_conf->get_address());
   req.set_slot(board_conf->get_slot_id());
@@ -109,70 +126,24 @@ void DaphneV3ControllerModule::do_conf(const CommandData_t&)
         
   }  // loop over AFE
   
-  TLOG() << get_name() << " Message ready to send";
+  TLOG() << get_name() << ": Configuration message ready to send";
 
-  // Step 2: Wrap in Envelope
-  ControlEnvelope env;
-  env.set_type(CONFIGURE_FE);   // in scrap it's SCRAP
-  env.set_payload(req.SerializeAsString());
-
-  // Step 3: ZMQ send/recv
-  zmq::context_t context(1);
-  zmq::socket_t socket(context, zmq::socket_type::req);
-
-  // find out if the address has a port with a regex
-  static const std::regex ip_with_port("^[^/\s:]+(?::\d{1,5})?$");
-  std::smatch string_values; 
-  if (! std::regex_match( board_conf->get_address(), string_values, ip_with_port ) ) {
-    TLOG() << get_name() << " in error"; // throw that the address is wrong
+  auto response = m_iface->send<ConfigureResponse>( req.SerializeAsString(),
+						    MT2_CONFIGURE_FE_REQ,
+						    MT2_CONFIGURE_FE_RESP );
+  
+  if ( ! response.success() ) {
+    throw UnsuccessfulConfiguration(ERS_HERE, get_name(), response.message());
   }
 
-  auto connection = string_values.size() > 1 ?
-    fmt::format("tcp://{}", board_conf->get_address()) :
-    fmt::format("tcp://{}:{}", board_conf->get_address(), s_default_control_port) ;
-  socket.connect(connection);
-
-  TLOG() << get_name() << " sending data to " << connection;
-
-  std::string out_str = env.SerializeAsString();
-  zmq::message_t message(out_str.size());
-  memcpy(message.data(), out_str.data(), out_str.size());
-  socket.send(message, zmq::send_flags::none);
-
-  zmq::message_t reply;
-  socket.recv(reply, zmq::recv_flags::none);
-
-  ControlEnvelope response_env;
-  response_env.ParseFromArray(reply.data(), reply.size());
-
-  TLOG() << "Received response of type: " << response_env.type();
-
-  if (response_env.type() == CONFIGURE_FE) {
-    ConfigureResponse resp;
-    resp.ParseFromString(response_env.payload());
-    TLOG() << "Success: " << resp.success();
-    TLOG() << "Message: " << resp.message();
-  } else {
-    TLOG() << "Unexpected message type: " << response_env.type();
-  }
-
-  auto end_time = std::chrono::high_resolution_clock::now();
+  TLOG() << "Success message: " << response.message();
   
-  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
-  TLOG() << get_name() << ": board configured in " << duration.count() << " microseconds";
-  
-}
-
-void DaphneV3ControllerModule::do_start(const CommandData_t& )  { /* nothing yet */ }
-void DaphneV3ControllerModule::do_scrap(const CommandData_t&)  { m_iface.reset(); }
-
-void DaphneV3ControllerModule::configure_analog_chain(bool initial_config) {
   return;
 }
 
   void DaphneV3ControllerModule::create_interface( const std::string & address,
 						   std::chrono::milliseconds timeout )  {
-
+    
     m_iface = make_unique<DaphneV3Interface>( address, get_name(), timeout);
     
   }

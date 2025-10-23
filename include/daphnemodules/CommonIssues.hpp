@@ -31,6 +31,12 @@ namespace dunedaq {
                      ((size_t)tot)
                      )
 
+  ERS_DECLARE_ISSUE( daphnemodules,
+                     UnsuccessfulConfiguration,
+                     name << ": board reports configuration failure. Message: " << message,
+                     ((std::string)name) ((std::string)message)
+		     )
+
 } // dunedaq namespace
 
 #endif // COMMONISSUES_HPP
