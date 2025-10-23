@@ -64,7 +64,21 @@ void DaphneV3ControllerModule::do_conf(const CommandData_t&)
 }
 
 void DaphneV3ControllerModule::do_start(const CommandData_t& )  { /* nothing yet */ }
-void DaphneV3ControllerModule::do_scrap(const CommandData_t&)  { m_iface.reset(); }
+void DaphneV3ControllerModule::do_scrap(const CommandData_t&)  {
+
+  TLOG() << get_name() << " starting scrap";
+  auto start_time = std::chrono::high_resolution_clock::now();
+
+  using namespace daphne;
+
+  configure_analog_chain(false);
+
+  m_iface.reset();
+
+  auto end_time = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+  TLOG() << get_name() << ": scrapped in " << duration.count() << " microseconds";
+}
 
 void DaphneV3ControllerModule::configure_analog_chain(bool initial_config) {
 
