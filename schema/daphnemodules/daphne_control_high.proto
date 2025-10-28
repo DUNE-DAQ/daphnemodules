@@ -135,11 +135,32 @@ message InfoResponse {
   GeneralInfo          general_info = 3;
 }
 
+message TriggerChannelSnapshot {
+  uint32 channel       = 1;   // 0..39
+  uint32 threshold     = 2;   // 10-bit
+  uint64 record_count  = 3;
+  uint64 busy_count    = 4;
+  uint64 full_count    = 5;
+}
+
+message ReadTriggerCountersRequest {
+  repeated uint32 channels = 1;   // optional; empty = all 0..39
+  uint32 base_addr         = 2;   // optional override, default 0xA0010000
+}
+
+message ReadTriggerCountersResponse {
+  bool success                                 = 1;
+  string message                               = 2;
+  repeated TriggerChannelSnapshot snapshots    = 3;
+}
+
+// --- Test register: always returns 0xDEADBEEF ---
 message TestRegRequest {}
 message TestRegResponse {
   uint64 value   = 1;  // 0xDEADBEEF
   string message = 2;  // optional "ok" text
 }
+
 
 // ----------------- Multi-register writes -----------------
 
@@ -192,7 +213,6 @@ enum MessageType {
   READ_TEST_REG           = 264;
 }
 
-
 // ======================= Transport V2 (additive) ==========================
 // New transport is self-contained and doesn't disturb existing codes.
 
@@ -205,8 +225,8 @@ enum Direction {
 // Requests are EVEN, responses are ODD = (request + 1)
 // Start at a high range to avoid collisions with legacy MessageType.
 enum MessageTypeV2 {
-  MT2_UNSPECIFIED                    = 0;  //First entry protobuf requirement
-
+  MT2_UNSPECIFIED                    = 0;   // <-- required first entry
+  
   // High-level
   MT2_CONFIGURE_CLKS_REQ             = 200;
   MT2_CONFIGURE_CLKS_RESP            = 201;
@@ -250,6 +270,8 @@ enum MessageTypeV2 {
   // Chunked dump (multi-message sequence keeps same task_id)
   MT2_DUMP_SPYBUFFER_CHUNK_REQ       = 300; MT2_DUMP_SPYBUFFER_CHUNK_RESP       = 301;
   MT2_READ_TEST_REG_REQ              = 304; MT2_READ_TEST_REG_RESP              = 305;
+
+  MT2_READ_TRIGGER_COUNTERS_REQ      = 320; MT2_READ_TRIGGER_COUNTERS_RESP      = 321; 
 }
 
 message ControlEnvelopeV2 {
@@ -267,6 +289,8 @@ message ControlEnvelopeV2 {
   // Timing (optional, useful when debugging)
   uint64         timestamp_ns  = 20;
 }
+
+
 
 message ControlEnvelope {
   MessageType type = 1;
