@@ -31,12 +31,6 @@
 namespace dunedaq {
   
   ERS_DECLARE_ISSUE( daphnemodules,
-                     MonitoringFailed,
-                     "Monitoring of " << item << " failed",
-                     ((std::string)item)
-                   )
-
-  ERS_DECLARE_ISSUE( daphnemodules,
                      WrongMonitoringString,
                      "Board " << id
 		     << ": response from board was not parsed correctly for "

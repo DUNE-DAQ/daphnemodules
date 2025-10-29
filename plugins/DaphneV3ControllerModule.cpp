@@ -205,8 +205,34 @@ void DaphneV3ControllerModule::configure_analog_chain(bool initial_config) {
 
     if ( m_scrap_called.load() ) return;
 
-    const std::lock_guard<std::mutex> lock(m_mutex);
+    const std::unique_lock<std::mutex> lock(m_mutex);
 
+    ReadTriggerCountersRequest req;
+    auto response = m_iface.load()->send<ReadTriggerCountersResponse>( req.SerializeAsString(),
+								       MT2_READ_TRIGGER_COUNTERS_REQ,
+								       MT2_READ_TRIGGER_COUNTERS_RESP );
+
+    if ( ! response.success() ) {
+      ers::warning( TriggerMonitoringFailed(ERS_HERE, get_name(), response.message() ) );
+      return;
+    }
+
+    const auto snapshots = response.snapshots();
+
+    static uint32_t def_threshold = 0x3fff; 
+    
+    for ( const auto & c : snapshots ) {
+
+      // we only publish channels info when threshold is not default or the coutners are not zero
+      if ( c.threshold() == def_threshold 
+	   && c.record_count() == 0
+	   && c.busy_count() == 0
+	   && c.full_count() == 0 ) continue;
+
+      
+      
+    }
+    
   }
 
   

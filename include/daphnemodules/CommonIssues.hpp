@@ -37,6 +37,23 @@ namespace dunedaq {
                      ((std::string)name) ((std::string)message)
 		     )
 
+
+  // Monitoring 
+  ERS_DECLARE_ISSUE( daphnemodules,
+                     MonitoringFailed,
+                     "Monitoring of " << item << " failed",
+                     ((std::string)item)
+                   )
+  
+  ERS_DECLARE_ISSUE_BASE( daphnemodules,
+			  TriggerMonitoringFailed,
+			  MonitoringFailed,
+			  item << " failed to retrieve reponse for trigger snapshots. Message: " << message,
+			  ((std::string)item),
+			  ((std::string)message)
+                   )
+
+
 } // dunedaq namespace
 
 #endif // COMMONISSUES_HPP
