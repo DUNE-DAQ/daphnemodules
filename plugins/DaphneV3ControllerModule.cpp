@@ -38,6 +38,8 @@ void DaphneV3ControllerModule::init(std::shared_ptr<appfwk::ConfigurationManager
 void DaphneV3ControllerModule::do_conf(const CommandData_t&)
 {
 
+  const std::lock_guard<std::mutex> lock(m_mutex);
+  
   TLOG() << get_name() << " starting configuring";
   auto start_time = std::chrono::high_resolution_clock::now();
 
@@ -66,6 +68,9 @@ void DaphneV3ControllerModule::do_conf(const CommandData_t&)
 void DaphneV3ControllerModule::do_start(const CommandData_t& )  { /* nothing yet */ }
 void DaphneV3ControllerModule::do_scrap(const CommandData_t&)  {
 
+  m_scrap_called.store(true);
+  const std::lock_guard<std::mutex> lock(m_mutex);
+  
   TLOG() << get_name() << " starting scrap";
   auto start_time = std::chrono::high_resolution_clock::now();
 
@@ -73,7 +78,7 @@ void DaphneV3ControllerModule::do_scrap(const CommandData_t&)  {
 
   configure_analog_chain(false);
 
-  m_iface.reset();
+  m_iface = nullptr;
 
   auto end_time = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
@@ -142,9 +147,9 @@ void DaphneV3ControllerModule::configure_analog_chain(bool initial_config) {
   
   TLOG() << get_name() << ": Configuration message ready to send";
 
-  auto response = m_iface->send<ConfigureResponse>( req.SerializeAsString(),
-						    MT2_CONFIGURE_FE_REQ,
-						    MT2_CONFIGURE_FE_RESP );
+  auto response = m_iface.load()->send<ConfigureResponse>( req.SerializeAsString(),
+							   MT2_CONFIGURE_FE_REQ,
+							   MT2_CONFIGURE_FE_RESP );
   
   if ( ! response.success() ) {
     throw UnsuccessfulConfiguration(ERS_HERE, get_name(), response.message());
@@ -192,6 +197,18 @@ void DaphneV3ControllerModule::configure_analog_chain(bool initial_config) {
   }
 
   }
+
+  void
+  DaphneV3ControllerModule::generate_opmon_data() {
+
+    if ( ! m_iface.load() ) return ;
+
+    if ( m_scrap_called.load() ) return;
+
+    const std::lock_guard<std::mutex> lock(m_mutex);
+
+  }
+
   
 } // namespace dunedaq::daphnemodules
 

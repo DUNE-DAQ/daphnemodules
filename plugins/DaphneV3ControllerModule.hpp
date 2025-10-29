@@ -17,6 +17,7 @@ namespace dunedaq {
     public:
       explicit DaphneV3ControllerModule(const std::string& name);
       void init(std::shared_ptr<appfwk::ConfigurationManager>) override;
+      void generate_opmon_data() override;
 
     private:
       void do_conf(const CommandData_t&);
@@ -32,8 +33,9 @@ namespace dunedaq {
   
       void configure_analog_chain(bool intial_config);
   
-      std::unique_ptr<DaphneV3Interface> m_iface = nullptr;
-
+      std::atomic<std::shared_ptr<DaphneV3Interface>> m_iface = nullptr;
+      std::mutex m_mutex;  // mutex for interface
+      std::atomic<bool> m_scrap_called = false;
 
       using const_channel_id_t = std::invoke_result<decltype(&daphne::ChannelConfig::id),
 						    daphne::ChannelConfig>::type;
