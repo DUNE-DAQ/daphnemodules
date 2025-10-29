@@ -207,7 +207,7 @@ void DaphneV3ControllerModule::configure_analog_chain(bool initial_config) {
 
     if ( m_scrap_called.load() ) return;
 
-    const std::unique_lock<std::mutex> lock(m_mutex);
+    std::unique_lock<std::mutex> lock(m_mutex);
 
     ReadTriggerCountersRequest req;
     auto response = m_iface.load()->send<ReadTriggerCountersResponse>( req.SerializeAsString(),
@@ -219,6 +219,8 @@ void DaphneV3ControllerModule::configure_analog_chain(bool initial_config) {
       return;
     }
 
+    lock.unlock();
+    
     const auto snapshots = response.snapshots();
 
     static uint32_t def_threshold = 0x3ff; 
