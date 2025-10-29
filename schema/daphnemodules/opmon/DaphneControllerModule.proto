@@ -33,3 +33,14 @@ message ChannelInfo {
   uint64 total_packets  = 5;
   uint64 new_packets    = 6;
 }
+
+
+// This metric is only for v3, but it might disappear due to firmware development
+message TempTriggerSnapshotInfo {
+
+  uint32 threshold     = 2;   // 10-bit
+  uint64 record_count  = 3;
+  uint64 busy_count    = 4;
+  uint64 full_count    = 5;
+
+}

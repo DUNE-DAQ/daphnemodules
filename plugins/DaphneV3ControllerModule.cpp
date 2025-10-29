@@ -10,6 +10,8 @@
 #include "appmodel/DaphneV2PGA.hpp"
 #include "appmodel/DaphneV2LNA.hpp"
 
+#include "daphnemodules/opmon/DaphneControllerModule.pb.h"
+
 #include <fmt/format.h>
 #include <regex>
 
@@ -223,14 +225,19 @@ void DaphneV3ControllerModule::configure_analog_chain(bool initial_config) {
     
     for ( const auto & c : snapshots ) {
 
-      // we only publish channels info when threshold is not default or the coutners are not zero
+      // we only publish channels info when threshold is not default or the counters are not zero
       if ( c.threshold() == def_threshold 
 	   && c.record_count() == 0
 	   && c.busy_count() == 0
 	   && c.full_count() == 0 ) continue;
 
-      
-      
+      opmon::TempTriggerSnapshotInfo info;
+      info.set_threshold( c.threshold() );
+      info.set_record_count( c.record_count() );
+      info.set_busy_count( c.busy_count() );
+      info.set_full_count( c.full_count() );
+
+      publish( std::move(info), {{"channel", fmt::format("{}", c.channel() ) }} );
     }
     
   }
