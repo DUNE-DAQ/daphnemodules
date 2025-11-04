@@ -6,18 +6,9 @@
  * Licensing/copyright details are in the COPYING file that you should have         
  */
 
-#include "DaphneV3Interface.hpp"
-#include "logging/Logging.hpp"
-
-#include <fmt/format.h>
-#include <regex>
-
-using namespace dunedaq::daphnemodules;
-using namespace daphne;
-
-
+ 
 template<class T>
-T DaphneV3Interface::send( std::string && message, daphne::MessageTypeV2 sent_type, daphne::MessageTypeV2 received_type ) {
+T dunedaq::daphnemodules::DaphneV3Interface::send( std::string && message, daphne::MessageTypeV2 sent_type, daphne::MessageTypeV2 received_type ) {
 
   std::unique_lock<std::mutex> lock(m_access_mutex);
 
@@ -40,7 +31,6 @@ T DaphneV3Interface::send( std::string && message, daphne::MessageTypeV2 sent_ty
 
   return out;
 }
-
 
 
 
