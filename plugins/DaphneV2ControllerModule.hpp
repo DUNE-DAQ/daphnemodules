@@ -11,14 +11,9 @@
 #ifndef DAPHNEMODULES_PLUGINS_DAPHNEV2CONTROLLERMODULE_HPP_ 
 #define DAPHNEMODULES_PLUGINS_DAPHNEV2CONTROLLERMODULE_HPP_
 
-#include "appfwk/DAQModule.hpp"
-#include "DaphneV2ControllerModule.hpp"
 
-#include <atomic>
-#include <limits>
-#include <string>
-#include <array>
-#include <mutex>
+#include "DaphneV2ControllerModule.hpp"
+#include "appfwk/DAQModule.hpp"
 
 #include "DaphneV2Interface.hpp"
 #include "daphnemodules/CommonIssues.hpp"
@@ -29,6 +24,13 @@
 #include <appmodel/DaphneV2ControllerModule.hpp>
 
 #include "logging/Logging.hpp" // NOTE: if ISSUES ARE DECLARED BEFORE include logging/Logging.hpp, TLOG_DEBUG<<issue wont work.
+
+#include <atomic>
+#include <limits>
+#include <string>
+#include <array>
+#include <mutex>
+#include <memory>
 
 
 namespace dunedaq {
@@ -114,7 +116,7 @@ namespace dunedaq {
 		     ((uint16_t)slot)((uint16_t)afe)((uint64_t)check)
 		   )
   
-}
+}  // namespace dunedaq
 
 namespace dunedaq::daphnemodules {
 
@@ -136,7 +138,7 @@ public:
 
 private:
 
-  using ChannelId = uint8_t;
+  using ChannelId = uint8_t;  // NOLINT
   
   // Commands DaphneV2ControllerModule can receive
   void do_conf(const CommandData_t&);
@@ -166,7 +168,7 @@ private:
   
   static const uint16_t s_frame_alignment_good = 0x3f80;
 
-  uint16_t m_error_counter = 0;
+  uint16_t m_error_counter = 0;  // NOLINT
   // counter use to see how many times we failed the parsing of the monitoing
 
   //monitoring
