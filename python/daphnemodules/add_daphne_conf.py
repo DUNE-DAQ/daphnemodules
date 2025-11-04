@@ -157,9 +157,9 @@ def add_daphne_conf(oksfile:str, object_name:str, json_file:str, timeout_ms:int 
                                        default_afe=def_afe )
         db.update_dal(board)
 
-        link=dal.DaphneMap(name,
-                           key=f"{detector}.{crate}.{slot}",
-                           conf=board)
+        link=dal.DaphneMapEntry(name,
+                                key=f"{detector}.{crate}.{slot}",
+                                conf=board)
         db.update_dal(link)
         
         maps.append(link)
