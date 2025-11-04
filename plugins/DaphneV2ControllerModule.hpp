@@ -8,11 +8,11 @@
  * received with this code.
  */
 
-#ifndef DAPHNEMODULES_PLUGINS_DaphneV2ControllerModule_HPP_
-#define DAPHNEMODULES_PLUGINS_DaphneV2ControllerModule_HPP_
+#ifndef DAPHNEMODULES_PLUGINS_DAPHNEV2CONTROLLERMODULE_HPP_ 
+#define DAPHNEMODULES_PLUGINS_DAPHNEV2CONTROLLERMODULE_HPP_
 
 #include "appfwk/DAQModule.hpp"
-#include "appmodel/DaphneV2ControllerModule.hpp"
+#include "DaphneV2ControllerModule.hpp"
 
 #include <atomic>
 #include <limits>
@@ -24,6 +24,9 @@
 #include "daphnemodules/CommonIssues.hpp"
 
 #include "daphnemodules/opmon/DaphneControllerModule.pb.h"
+
+#include <appmodel/DaphneV2BoardConf.hpp>
+#include <appmodel/DaphneV2ControllerModule.hpp>
 
 #include "logging/Logging.hpp" // NOTE: if ISSUES ARE DECLARED BEFORE include logging/Logging.hpp, TLOG_DEBUG<<issue wont work.
 
@@ -182,4 +185,4 @@ private:
 
 } // namespace dunedaq::daphnemodules
 
-#endif // DAPHNEMODULES_PLUGINS_DaphneV2ControllerModule_HPP_
+#endif // DAPHNEMODULES_PLUGINS_DAPHNEV2CONTROLLERMODULE_HPP_ 

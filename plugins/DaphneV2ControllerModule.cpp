@@ -31,6 +31,9 @@
 #include <bitset>
 #include <thread>
 #include <algorithm>
+#include <memory>
+#include <utility>
+#include <vector>
 #include <fmt/format.h>
 
 
@@ -67,8 +70,8 @@ DaphneV2ControllerModule::generate_opmon_data()
   if ( m_scrap_called.load() ) return;
 
   // read the channel counters
-  constexpr uint64_t s_dropped_counter_address = 0x40700000;
-  constexpr uint64_t s_start_counter_buffer = 0x40800000;
+  constexpr uint64_t s_dropped_counter_address = 0x40700000;  // NOLINT
+  constexpr uint64_t s_start_counter_buffer = 0x40800000;     // NOLINT
   constexpr auto  s_packets_counter_address = s_start_counter_buffer + s_max_channels*8;
   constexpr auto  s_tot_packets_counter_address = s_packets_counter_address + s_max_channels*8;
 
@@ -117,7 +120,7 @@ DaphneV2ControllerModule::generate_opmon_data()
     try { 
       opmon::ChannelInfo c_info;
 
-      auto & channel_counters = m_channel_counters[c];
+      auto & channel_counters = m_channel_counters[c];  // NOLINT c is an integer 
 
       auto trig_buf = m_interface->read_register(s_start_counter_buffer+c*8, 1);  
       const auto & trig = trig_buf[0];
@@ -240,7 +243,7 @@ DaphneV2ControllerModule::generate_opmon_data()
   //   }
   // }
  
-}
+}  // NOLINT(readability/fn_size)
 
 void
 DaphneV2ControllerModule::do_conf(const CommandData_t&)
@@ -323,7 +326,7 @@ DaphneV2ControllerModule::do_scrap(const CommandData_t&)
   configure_analog_chain(false);
 
   // break the interface
-  m_interface.release();
+  m_interface.reset(nullptr);
 
   auto end_time = std::chrono::high_resolution_clock::now();
 
@@ -346,9 +349,9 @@ DaphneV2ControllerModule::create_interface(const std::string & ip, std::chrono::
   }
 
   auto board = m_module_config->get_board_conf();
-  TLOG() << get_name() << ": using daphne at " << ip << " with slot " << (int)board->get_slot_id(); 
+  TLOG() << get_name() << ": using daphne at " << ip << " with slot " << (int)board->get_slot_id(); // NOLINT(readability/casting)
 
-  m_interface.reset( new  DaphneV2Interface( ip.c_str(), 2001, timeout ) );
+  m_interface = std::make_unique<DaphneV2Interface>( ip.c_str(), 2001, timeout );
   
 }
 
@@ -617,7 +620,7 @@ DaphneV2ControllerModule::configure_trigger_mode() {
       if ( board_conf->is_channel_used(ch) )
 	mask[ch] = true;
     }
-    m_interface->write_register(0x6001, {(uint64_t)mask.to_ulong()});
+    m_interface->write_register(0x6001, {(uint64_t)mask.to_ulong()});  // NOLINT
 
     // check 
     // thing.read(0x3001, 1)
@@ -643,7 +646,7 @@ DaphneV2ControllerModule::configure_trigger_mode() {
       auto reg = 0x5000 + stream_id; // stream is first come first served basis
       auto value = (ch/8)*10 + ch%8;
 
-      m_interface->write_register(reg, {(uint64_t)value});
+      m_interface->write_register(reg, {(uint64_t)value});  // NOLINT
 
       ++stream_id;
     } // loop over full_stream channels
