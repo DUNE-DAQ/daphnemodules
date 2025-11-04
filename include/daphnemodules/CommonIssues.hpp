@@ -1,8 +1,20 @@
-#ifndef COMMONISSUES_HPP
-#define COMMONISSUES_HPP
+/**
+ * @file CommonIssues.hpp
+ *
+ * Developer(s) of this DAQModule have yet to replace this line with a brief description of the DAQModule.
+ *
+ * This is part of the DUNE DAQ Software Suite, copyright 2020.
+ * Licensing/copyright details are in the COPYING file that you should have
+ * received with this code.
+ */
+
+#ifndef DAPHNEMODULES_INCLUDE_DAPHNEMODULES_COMMONISSUES_HPP_ 
+#define DAPHNEMODULES_INCLUDE_DAPHNEMODULES_COMMONISSUES_HPP_ 
 
 #include "ers/Issue.hpp"
 #include "logging/Logging.hpp" // NOTE: if ISSUES ARE DECLARED BEFORE include logging/Logging.hpp, TLOG_DEBUG<<issue wont work.
+
+#include <string>
 
 namespace dunedaq {
 
@@ -54,6 +66,6 @@ namespace dunedaq {
                    )
 
 
-} // dunedaq namespace
+} // namespace dunedaq
 
-#endif // COMMONISSUES_HPP
+#endif // DAPHNEMODULES_INCLUDE_DAPHNEMODULES_COMMONISSUES_HPP_

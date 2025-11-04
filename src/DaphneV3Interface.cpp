@@ -12,9 +12,6 @@
 #include <fmt/format.h>
 #include <regex>
 
-#warning CHECK IF WE NEED THIS
-#include <sys/time.h>
-
 using namespace dunedaq::daphnemodules;
 using namespace daphne;
 
