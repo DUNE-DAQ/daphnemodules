@@ -13,19 +13,19 @@
 #ifndef DAPHNEMODULES_SRC_DAPHNEV3INTERFACE_HPP_
 #define DAPHNEMODULES_SRC_DAPHNEV3INTERFACE_HPP_ 
 
-#include <memory>
-#include <mutex>
-#include <functional>
-
-
 #include <ers/ers.hpp>
 #include "logging/Logging.hpp" // NOTE: if ISSUES ARE DECLARED BEFORE include logging/Logging.hpp, TLOG_DEBUG<<issue wont work.
 
 #include <zmq.hpp>
-
 #include "daphnemodules/daphne_control_high.pb.h"
-
 #include "daphnemodules/CommonIssues.hpp"
+
+#include <memory>
+#include <mutex>
+#include <functional>
+#include <string>
+
+
 
 namespace dunedaq {
 
@@ -80,7 +80,7 @@ namespace dunedaq {
 
   
  
-  } // dunedaq namespace
+  } // namespace dunedaq
 
 
 namespace dunedaq::daphnemodules {

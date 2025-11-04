@@ -196,11 +196,13 @@ namespace dunedaq::daphnemodules {
       }
       auto offset = ch -> get_offset();
       if ( gain == 1 ) {
-	if ( offset > 2700 ) 
+	if ( offset > 2700 ) {
 	  throw InvalidChannelConfiguration(ERS_HERE, id, ch->get_trim(), offset, gain);
+	}
       } else if ( gain == 2 ) {
-	if ( offset > 1500 ) 
+	if ( offset > 1500 ) {
 	  throw InvalidChannelConfiguration(ERS_HERE, id, ch->get_trim(), offset, gain);
+	}
       }
     } // loop over channels
 

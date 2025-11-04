@@ -1,4 +1,16 @@
-#define BOOST_TEST_MODULE DaphneV3InterfaceTest
+/**
+ * @file DaphneV3Interface_test.cxx
+ *
+ * Simple unittest for the daphne v3 interface
+ *
+ * This is part of the DUNE DAQ Software Suite, copyright 2020.
+ * Licensing/copyright details are in the COPYING file that you should have
+ * received with this code.
+ *
+ */
+
+
+#define BOOST_TEST_MODULE DaphneV3InterfaceTest  // NOLINT
 #include <boost/test/included/unit_test.hpp>
 
 #include "DaphneV3Interface.hpp"

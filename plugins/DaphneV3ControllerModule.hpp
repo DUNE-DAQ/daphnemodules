@@ -17,6 +17,11 @@
 #include "appmodel/DaphneV3ControllerModule.hpp"
 #include "appmodel/DaphneV2BoardConf.hpp"
 
+#include <string>
+#include <memory>
+
+#ifndef DAPHNEMODULES_PLUGINS_DAPHNEV3CONTROLLERMODULE_HPP_
+#define DAPHNEMODULES_PLUGINS_DAPHNEV3CONTROLLERMODULE_HPP_
 
 namespace dunedaq::daphnemodules{
 
@@ -60,4 +65,6 @@ namespace dunedaq::daphnemodules{
   
   };
     
-}  // dunedaq::daphnemodules namespace
+}  // namespace dunedaq::daphnemodules 
+
+#endif // DAPHNEMODULES_PLUGINS_DAPHNEV3CONTROLLERMODULE_HPP_ 

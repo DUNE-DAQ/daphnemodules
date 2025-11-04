@@ -1,16 +1,22 @@
 /** 
+ * @file DaphneV3Interface.cpp
  *  
  * Implementations of DaphneV3Interface's functions                                                                    
  * 
  * This is part of the DUNE DAQ Software Suite, copyright 2020.                                                      
  * Licensing/copyright details are in the COPYING file that you should have         
+ * received with this code.
+ *
  */
 
 #include "DaphneV3Interface.hpp"
-#include "logging/Logging.hpp"
 
+#include "logging/Logging.hpp"
 #include <fmt/format.h>
+
 #include <regex>
+#include <string>
+#include <utility>
 
 using namespace dunedaq::daphnemodules;
 using namespace daphne;
@@ -24,7 +30,7 @@ DaphneV3Interface::DaphneV3Interface( std::string address,
 
 
   m_socket.set(zmq::sockopt::routing_id, routing);
-  auto value = (int) timeout.count();
+  auto value = (int) m_timeout.count();  // NOLINT
   TLOG() << routing << " timeout set to " << value << " ms";
   m_socket.set(zmq::sockopt::rcvtimeo, value);
   m_socket.set(zmq::sockopt::sndtimeo, value);
@@ -112,7 +118,7 @@ ControlEnvelopeV2 DaphneV3Interface::_receive() {
   }
   
   ControlEnvelopeV2 rep;
-  if (!rep.ParseFromArray(reply.data(), (int)reply.size() )) {
+  if (!rep.ParseFromArray(reply.data(), static_cast<int>(reply.size()) )) {
     throw FailedDecoding(ERS_HERE, rep.GetTypeName(), reply.to_string());
   }
   
@@ -126,7 +132,7 @@ ControlEnvelopeV2 DaphneV3Interface::_receive() {
 
 bool DaphneV3Interface::validate_connection()
 {
-  static const uint64_t good_value = 0xdeadbeef;
+  static const uint64_t good_value = 0xdeadbeef;  // NOLINT
 
   TestRegRequest req; // empty
   auto reply = send<TestRegResponse>( req.SerializeAsString(),

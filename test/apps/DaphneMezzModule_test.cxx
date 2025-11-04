@@ -1,3 +1,19 @@
+/**
+ * @file DaphneMezzModule_test.cxx
+ *
+ * Testing configurations sender for the daphne v3 
+ *
+ * This is part of the DUNE DAQ Software Suite, copyright 2020.
+ * Licensing/copyright details are in the COPYING file that you should have
+ * received with this code.
+ *
+ */
+
+#include "DaphneV3Interface.hpp"
+
+#include <zmq.hpp>
+#include "daphnemodules/daphne_control_high.pb.h"
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -7,9 +23,7 @@
 #include <chrono>
 #include <random>
 
-#include <zmq.hpp>
-#include "daphnemodules/daphne_control_high.pb.h"
-#include "DaphneV3Interface.hpp"
+
 
 using namespace daphne;
 using namespace dunedaq::daphnemodules;
