@@ -26,6 +26,8 @@
 #include <ers/ers.hpp>
 #include "logging/Logging.hpp" // NOTE: if ISSUES ARE DECLARED BEFORE include logging/Logging.hpp, TLOG_DEBUG<<issue wont work.
 
+#include "daphnemodules/CommonIssues.hpp"
+
 namespace dunedaq {
 
   ERS_DECLARE_ISSUE( daphnemodules,
@@ -34,12 +36,6 @@ namespace dunedaq {
 		     ERS_EMPTY
 		   ) 
 
-  ERS_DECLARE_ISSUE( daphnemodules,
-		     InvalidIPAddress,
-		     "Invalid address: " << ip,
-		     ((std::string)ip)
-		   ) 
-  
   ERS_DECLARE_ISSUE( daphnemodules,
 		     FailedPing,
 		     "Failed to ping daphne board at " << ip << ':' << port,

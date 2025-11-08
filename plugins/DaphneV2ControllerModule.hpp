@@ -8,46 +8,39 @@
  * received with this code.
  */
 
-#ifndef DAPHNEMODULES_PLUGINS_DaphneV2ControllerModule_HPP_
-#define DAPHNEMODULES_PLUGINS_DaphneV2ControllerModule_HPP_
+#ifndef DAPHNEMODULES_PLUGINS_DAPHNEV2CONTROLLERMODULE_HPP_ 
+#define DAPHNEMODULES_PLUGINS_DAPHNEV2CONTROLLERMODULE_HPP_
 
+
+#include "DaphneV2ControllerModule.hpp"
 #include "appfwk/DAQModule.hpp"
-#include "appmodel/DaphneV2ControllerModule.hpp"
+
+#include "DaphneV2Interface.hpp"
+#include "daphnemodules/CommonIssues.hpp"
+
+#include "daphnemodules/opmon/DaphneControllerModule.pb.h"
+
+#include <appmodel/DaphneV2BoardConf.hpp>
+#include <appmodel/DaphneV2ControllerModule.hpp>
+
+#include "logging/Logging.hpp" // NOTE: if ISSUES ARE DECLARED BEFORE include logging/Logging.hpp, TLOG_DEBUG<<issue wont work.
 
 #include <atomic>
 #include <limits>
 #include <string>
 #include <array>
 #include <mutex>
-
-#include "DaphneV2Interface.hpp"
-
-#include "daphnemodules/opmon/DaphneControllerModule.pb.h"
-
-#include "logging/Logging.hpp" // NOTE: if ISSUES ARE DECLARED BEFORE include logging/Logging.hpp, TLOG_DEBUG<<issue wont work.
+#include <memory>
 
 
 namespace dunedaq {
   
   ERS_DECLARE_ISSUE( daphnemodules,
-                     ConfigurationFailed,
-                     name << " failed to retrieve its conf object",
-                     ((std::string)name)
-                   )
-
-  
-  ERS_DECLARE_ISSUE( daphnemodules,
-                     MonitoringFailed,
-                     "Monitoring of " << item << " failed",
-                     ((std::string)item)
-                   )
-
-  ERS_DECLARE_ISSUE( daphnemodules,
                      WrongMonitoringString,
-                     "Board in slot " << slot
+                     "Board " << id
 		     << ": response from board was not parsed correctly for "
 		     << counter << " times. Last Rseponse: " << response,
-                     ((uint16_t)slot)((uint16_t)counter)((std::string)response)
+                     ((std::string)id)((uint16_t)counter)((std::string)response)
                    )
 
   ERS_DECLARE_ISSUE( daphnemodules,
@@ -86,13 +79,6 @@ namespace dunedaq {
 		     ((uint32_t)id)((uint32_t)max)
 		   )
 
-  
-  ERS_DECLARE_ISSUE( daphnemodules,
-		     InvalidChannelConfiguration,
-                     "Channel " << id << " has invalid configuration, trim: " << trim << ", offset: " << offset << ", gain:" << gain,
-		     ((uint32_t)id)((uint32_t)trim)((uint32_t)offset)((uint32_t)gain)
-		   )
-
   ERS_DECLARE_ISSUE( daphnemodules,
 		     InvalidAFEVoltage,
                      "AFE " << id << " has invalid voltage, gain: " << gain << ", bias: " << bias,
@@ -117,13 +103,6 @@ namespace dunedaq {
                      "Invalid threshold: " << threshold,
 		     ((uint32_t)threshold)
 		     )
-
-    ERS_DECLARE_ISSUE( daphnemodules,
-		       TooManyChannels,
-                     "Too many full stream channels. Total requested:  " << tot,
-		     ((size_t)tot)
-		     )
-
   
    ERS_DECLARE_ISSUE( daphnemodules,
                      InvalidBiasCtrlConfiguration,
@@ -137,7 +116,7 @@ namespace dunedaq {
 		     ((uint16_t)slot)((uint16_t)afe)((uint64_t)check)
 		   )
   
-}
+}  // namespace dunedaq
 
 namespace dunedaq::daphnemodules {
 
@@ -159,7 +138,7 @@ public:
 
 private:
 
-  using ChannelId = uint8_t;
+  using ChannelId = uint8_t;  // NOLINT
   
   // Commands DaphneV2ControllerModule can receive
   void do_conf(const CommandData_t&);
@@ -189,7 +168,7 @@ private:
   
   static const uint16_t s_frame_alignment_good = 0x3f80;
 
-  uint16_t m_error_counter = 0;
+  uint16_t m_error_counter = 0;  // NOLINT
   // counter use to see how many times we failed the parsing of the monitoing
 
   //monitoring
@@ -208,4 +187,4 @@ private:
 
 } // namespace dunedaq::daphnemodules
 
-#endif // DAPHNEMODULES_PLUGINS_DaphneV2ControllerModule_HPP_
+#endif // DAPHNEMODULES_PLUGINS_DAPHNEV2CONTROLLERMODULE_HPP_ 

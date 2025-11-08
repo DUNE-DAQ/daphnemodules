@@ -31,6 +31,9 @@
 #include <bitset>
 #include <thread>
 #include <algorithm>
+#include <memory>
+#include <utility>
+#include <vector>
 #include <fmt/format.h>
 
 
@@ -67,8 +70,8 @@ DaphneV2ControllerModule::generate_opmon_data()
   if ( m_scrap_called.load() ) return;
 
   // read the channel counters
-  constexpr uint64_t s_dropped_counter_address = 0x40700000;
-  constexpr uint64_t s_start_counter_buffer = 0x40800000;
+  constexpr uint64_t s_dropped_counter_address = 0x40700000;  // NOLINT
+  constexpr uint64_t s_start_counter_buffer = 0x40800000;     // NOLINT
   constexpr auto  s_packets_counter_address = s_start_counter_buffer + s_max_channels*8;
   constexpr auto  s_tot_packets_counter_address = s_packets_counter_address + s_max_channels*8;
 
@@ -117,7 +120,7 @@ DaphneV2ControllerModule::generate_opmon_data()
     try { 
       opmon::ChannelInfo c_info;
 
-      auto & channel_counters = m_channel_counters[c];
+      auto & channel_counters = m_channel_counters[c];  // NOLINT c is an integer 
 
       auto trig_buf = m_interface->read_register(s_start_counter_buffer+c*8, 1);  
       const auto & trig = trig_buf[0];
@@ -164,7 +167,7 @@ DaphneV2ControllerModule::generate_opmon_data()
     if ( ! std::regex_match( cmd_res.result, string_values, volt_regex ) ) {
       ++m_error_counter;
       WrongMonitoringString temp_error(ERS_HERE,
-				       m_module_config -> get_slot(), m_error_counter, cmd_res.result);
+				       get_name(), m_error_counter, cmd_res.result);
       TLOG() << temp_error;
       if ( m_error_counter >= 10 ) {
 	ers::error( temp_error );
@@ -240,22 +243,23 @@ DaphneV2ControllerModule::generate_opmon_data()
   //   }
   // }
  
-}
+}  // NOLINT(readability/fn_size)
 
 void
 DaphneV2ControllerModule::do_conf(const CommandData_t&)
 {
   auto start_time = std::chrono::high_resolution_clock::now();
 
-  auto slot = m_module_config->get_slot();
+  auto board_conf = m_module_config->get_board_conf();
+  auto slot = board_conf->get_slot_id();
   if ( slot >= 16 ) 
     //   // the slot used laster in the code is a 4 bit register, so we need to check we are not overflowing
-    throw InvalidSlot(ERS_HERE, slot, m_module_config->get_address());
+    throw InvalidSlot(ERS_HERE, slot, board_conf->get_address());
   
   // during configuration no other operations are allowed
   const std::lock_guard<std::mutex> lock(m_mutex);
   
-  create_interface(m_module_config->get_address(),
+  create_interface(board_conf->get_address(),
 		   m_module_config->get_daphne_conf()->get_timeout());
 
   validate_configuration( * m_module_config->get_board_conf() );
@@ -322,7 +326,7 @@ DaphneV2ControllerModule::do_scrap(const CommandData_t&)
   configure_analog_chain(false);
 
   // break the interface
-  m_interface.release();
+  m_interface.reset(nullptr);
 
   auto end_time = std::chrono::high_resolution_clock::now();
 
@@ -344,9 +348,10 @@ DaphneV2ControllerModule::create_interface(const std::string & ip, std::chrono::
     throw InvalidIPAddress(ERS_HERE, ip);
   }
 
-  TLOG() << get_name() << ": using daphne at " << ip << " with slot " << (int)m_module_config->get_slot(); 
+  auto board = m_module_config->get_board_conf();
+  TLOG() << get_name() << ": using daphne at " << ip << " with slot " << (int)board->get_slot_id(); // NOLINT(readability/casting)
 
-  m_interface.reset( new  DaphneV2Interface( ip.c_str(), 2001, timeout ) );
+  m_interface = std::make_unique<DaphneV2Interface>( ip.c_str(), 2001, timeout );
   
 }
 
@@ -390,8 +395,7 @@ DaphneV2ControllerModule::configure_timing_endpoints() {
   // bits 11..6  = detector_id(5..0), default is "000010"
   // bits 5..0   = version_id(5..0), default is "000010"
 
-  const auto * board = m_module_config->get_board_conf();
-  
+  auto board = m_module_config->get_board_conf();
   std::bitset<26> config_value(board->get_slot_id());
   config_value <<= 10;
   config_value |=  board -> get_crate_id();
@@ -419,7 +423,7 @@ DaphneV2ControllerModule::configure_timing_endpoints() {
   } while (!check[0]);
 
   if ( ! check[0] ) {
-    throw PLLNotLocked(ERS_HERE, m_module_config->get_slot(), "MMCM0");
+    throw PLLNotLocked(ERS_HERE, board->get_slot_id(), "MMCM0");
   }
   
   m_interface->write_buffer(0x4002, {1234});
@@ -435,7 +439,7 @@ DaphneV2ControllerModule::configure_timing_endpoints() {
   } while (!check[1]);
 
   if ( ! check[1] ) {
-    throw PLLNotLocked(ERS_HERE, m_module_config->get_slot(), "MMCM1");
+    throw PLLNotLocked(ERS_HERE, board->get_slot_id(), "MMCM1");
   }
   
   // at this point everything that is in register 0x4000 is the status of the timing endpoint
@@ -457,7 +461,7 @@ DaphneV2ControllerModule::configure_timing_endpoints() {
   } while (!check[12]);
 
   if ( ! check[12] ) {
-    throw TimingEndpointNotReady(ERS_HERE, m_module_config->get_slot(), check.to_string() );
+    throw TimingEndpointNotReady(ERS_HERE, board->get_slot_id(), check.to_string() );
   }
   
   TLOG() << get_name() << ": done donfiguring timing endpoint";
@@ -575,7 +579,7 @@ void DaphneV2ControllerModule::align_DDR() {
 
       // things are ok when the data is 0x3f80
       if ( data[0] != DaphneV2ControllerModule::s_frame_alignment_good ) 
-	throw DDRNotAligned(ERS_HERE, m_module_config->get_slot(), afe, data[0] );
+	throw DDRNotAligned(ERS_HERE, board_conf->get_slot_id(), afe, data[0] );
     } //afe used
   }
 
@@ -616,7 +620,7 @@ DaphneV2ControllerModule::configure_trigger_mode() {
       if ( board_conf->is_channel_used(ch) )
 	mask[ch] = true;
     }
-    m_interface->write_register(0x6001, {(uint64_t)mask.to_ulong()});
+    m_interface->write_register(0x6001, {(uint64_t)mask.to_ulong()});  // NOLINT
 
     // check 
     // thing.read(0x3001, 1)
@@ -642,7 +646,7 @@ DaphneV2ControllerModule::configure_trigger_mode() {
       auto reg = 0x5000 + stream_id; // stream is first come first served basis
       auto value = (ch/8)*10 + ch%8;
 
-      m_interface->write_register(reg, {(uint64_t)value});
+      m_interface->write_register(reg, {(uint64_t)value});  // NOLINT
 
       ++stream_id;
     } // loop over full_stream channels
