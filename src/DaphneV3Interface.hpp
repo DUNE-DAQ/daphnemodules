@@ -130,7 +130,7 @@ namespace dunedaq::daphnemodules {
 
     uint64_t m_message_counter = 0;
 
-    static const size_t s_default_control_port = 40001;
+    inline static const size_t s_default_control_port = 40001;
   }; 
   
 
