@@ -12,26 +12,27 @@ T dunedaq::daphnemodules::DaphneV3Interface::send( std::string && message, daphn
 
   std::unique_lock<std::mutex> lock(m_access_mutex);
 
-  _send(std::move(message), sent_type);
+  const uint64_t msg_id = m_message_counter++;
+  _send(std::move(message), sent_type, msg_id);
 
-  auto ret = _receive();
+  ControlEnvelopeV2 ret;
+  while (true) {
+    ret = _receive();
+    if (ret.correl_id() == msg_id && ret.type() == received_type) break;
+    ers::warning(TypeMismatch(ERS_HERE,
+                              MessageTypeV2_Name(ret.type()),
+                              MessageTypeV2_Name(received_type)));
+  }
 
   lock.unlock();
 
-  const auto ty = ret.type();
   T out;
-  if ( ty != received_type ) {
-    throw FailedDecoding(ERS_HERE, out.GetTypeName(), ret.payload(),
-			 TypeMismatch(ERS_HERE, MessageTypeV2_Name(ty), MessageTypeV2_Name(received_type)) );
-  }
-
   if (!out.ParseFromString(ret.payload())) {
     throw FailedDecoding(ERS_HERE, out.GetTypeName(), ret.payload());
   }
 
   return out;
 }
-
 
 
 

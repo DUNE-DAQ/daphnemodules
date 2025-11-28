@@ -78,14 +78,14 @@ void DaphneV3Interface::close() {
 ControlEnvelopeV2 DaphneV3Interface::send( std::string && message, daphne::MessageTypeV2 type) {
 
   const std::lock_guard<std::mutex> lock(m_access_mutex);
-  
-  _send(std::move(message), type);
+  const uint64_t msg_id = m_message_counter++;
+  _send(std::move(message), type, msg_id);
 
   return _receive();
 }
 
 
-void DaphneV3Interface::_send( std::string && message, daphne::MessageTypeV2 type) {
+void DaphneV3Interface::_send( std::string && message, daphne::MessageTypeV2 type, uint64_t msg_id) {
 
   ControlEnvelopeV2 env;
   env.set_version(2);
@@ -95,7 +95,8 @@ void DaphneV3Interface::_send( std::string && message, daphne::MessageTypeV2 typ
   env.set_payload(message);
 
   // additional information
-  env.set_msg_id( m_message_counter++ );
+  env.set_task_id(msg_id);
+  env.set_msg_id(msg_id);
   env.set_timestamp_ns(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count());
 
   
@@ -141,6 +142,5 @@ bool DaphneV3Interface::validate_connection()
   
   return reply.value() == good_value;
 }
-
 
 

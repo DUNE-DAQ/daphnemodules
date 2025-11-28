@@ -113,7 +113,7 @@ namespace dunedaq::daphnemodules {
     bool validate_connection();
     
   protected:
-    void _send( std::string && message, daphne::MessageTypeV2 );
+    void _send( std::string && message, daphne::MessageTypeV2, uint64_t msg_id );
     daphne::ControlEnvelopeV2 _receive();
     
     void close();
