@@ -49,6 +49,7 @@ namespace dunedaq::daphnemodules{
     std::atomic<std::shared_ptr<DaphneV3Interface>> m_iface = nullptr;
     std::mutex m_mutex;  // mutex for interface
     std::atomic<bool> m_scrap_called = false;
+    std::atomic<bool> m_configuring = false;
 
     using const_channel_id_t = std::invoke_result<decltype(&daphne::ChannelConfig::id),
 						  daphne::ChannelConfig>::type;

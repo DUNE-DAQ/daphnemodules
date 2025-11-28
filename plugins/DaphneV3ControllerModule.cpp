@@ -54,6 +54,7 @@ namespace dunedaq::daphnemodules {
   {
 
     const std::lock_guard<std::mutex> lock(m_mutex);
+    m_configuring.store(true);
   
     TLOG() << get_name() << " starting configuring";
     auto start_time = std::chrono::high_resolution_clock::now();
@@ -77,6 +78,7 @@ namespace dunedaq::daphnemodules {
   
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
     TLOG() << get_name() << ": board configured in " << duration.count() << " microseconds";
+    m_configuring.store(false);
   
   }
 
@@ -218,6 +220,8 @@ namespace dunedaq::daphnemodules {
   DaphneV3ControllerModule::generate_opmon_data() {
 
     if ( ! m_iface.load() ) return ;
+
+    if ( m_configuring.load() ) return ;
 
     if ( m_scrap_called.load() ) return;
 
