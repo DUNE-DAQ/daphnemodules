@@ -15,7 +15,7 @@ T dunedaq::daphnemodules::DaphneV3Interface::send( std::string && message, daphn
   const uint64_t msg_id = m_message_counter++;
   _send(std::move(message), sent_type, msg_id);
 
-  ControlEnvelopeV2 ret;
+  daphne::ControlEnvelopeV2 ret;
   while (true) {
     ret = _receive();
     if (ret.correl_id() == msg_id && ret.type() == received_type) break;
