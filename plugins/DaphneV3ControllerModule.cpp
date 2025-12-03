@@ -259,6 +259,7 @@ namespace dunedaq::daphnemodules {
 
     lock.lock();
 
+    // The request for the general info has no payload, so the first argument is 0
     auto info_response = m_iface.load()->send<daphne::GeneralInfo>( "",
 								    daphne::MT2_READ_GENERAL_INFO_REQ,
 								    daphne::MT2_READ_GENERAL_INFO_RESP );
@@ -267,7 +268,18 @@ namespace dunedaq::daphnemodules {
 
     opmon::GeneralInfo info;
     info.set_v_bias_0( info_response.v_bias_0() );
+    info.set_v_bias_1( info_response.v_bias_1() );
+    info.set_v_bias_2( info_response.v_bias_2() );
+    info.set_v_bias_3( info_response.v_bias_3() );
+    info.set_v_bias_4( info_response.v_bias_4() );
+
+    info.set_power_minus5v( info_response.power_minus5v() );
+    info.set_power_plus2p5v( info_response.power_plus2p5v() );
+    info.set_power_ce( info_response.power_ce() );
+    info.set_temperature( info_response.temperature() );
     
+    publish( std::move(info) );
+
   }
 
   
