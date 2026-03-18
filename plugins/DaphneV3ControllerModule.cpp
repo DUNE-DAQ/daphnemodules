@@ -14,12 +14,15 @@
 #include "daphnemodules/daphne_control_low.pb.h"
 
 #include "appmodel/DaphneConf.hpp"
+#include "appmodel/DaphneBoard.hpp"
+#include "appmodel/DaphneMapEntry.hpp"
 #include "appmodel/DaphneV2BoardConf.hpp"
 #include "appmodel/DaphneV2Channel.hpp"
 #include "appmodel/DaphneV2AFE.hpp"
 #include "appmodel/DaphneV2ADC.hpp"
 #include "appmodel/DaphneV2PGA.hpp"
 #include "appmodel/DaphneV2LNA.hpp"
+#include "appmodel/appmodelIssues.hpp"
 
 #include "daphnemodules/opmon/DaphneControllerModule.pb.h"
 
@@ -48,6 +51,25 @@ namespace dunedaq::daphnemodules {
       throw ConfigurationFailed(ERS_HERE, get_name());
     }
     m_module_config = mdal;
+
+    auto daphne_conf = m_module_config->get_daphne_conf();
+    cfg->load_deferred_db(daphne_conf->get_configuration_file());
+
+    auto m_daphne_board = cfg->get_dal<appmodel::DaphneBoard>(daphne_conf->get_daphne_board());
+    if (m_daphne_board == nullptr) {
+      throw(appmodel::BadConf(ERS_HERE, "DaphneBoard not found"));
+    }
+    auto daphne_map = m_daphne_board->get_boards();
+    for (auto entry: daphne_map) {
+      if (entry->get_key() == m_module_config->get_daphne_id()) {
+        m_board_conf = entry->get_conf();
+        break;
+      }
+    }
+    if (m_board_conf == nullptr) {
+      throw(appmodel::BadConf(ERS_HERE, "DaphneBoard map does not contain an entry with our id"));
+    }
+
   }
 
 
@@ -62,15 +84,14 @@ namespace dunedaq::daphnemodules {
   
     using namespace daphne;
 
-    auto board_conf = m_module_config->get_board_conf();
     auto general_conf = m_module_config->get_daphne_conf();
 
-    create_interface( board_conf->get_address(),
+    create_interface( m_board_conf->get_address(),
 		      general_conf->get_timeout() );
 
     // validation to be taken from the previous version
     // this should include the slot check
-    validate_configuration(*board_conf);
+    validate_configuration(*m_board_conf);
 
     configure_analog_chain(true);
 
@@ -104,8 +125,8 @@ namespace dunedaq::daphnemodules {
   void DaphneV3ControllerModule::configure_analog_chain(bool initial_config) {
 
     auto general_conf = m_module_config->get_daphne_conf();
-    auto board_conf = initial_config ? m_module_config->get_board_conf() :
-      general_conf->get_default_v3_settings();
+    auto board_conf = initial_config ? m_board_conf :
+      m_board->get_default_v3_settings();
 
     // Step 1: Build the ConfigureRequest
     daphne::ConfigureRequest req;

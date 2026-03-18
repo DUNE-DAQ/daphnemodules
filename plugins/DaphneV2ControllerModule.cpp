@@ -9,6 +9,7 @@
  */
 
 #include "DaphneV2ControllerModule.hpp"
+#include "appmodel/DaphneMapEntry.hpp"
 #include "appmodel/DaphneV2BoardConf.hpp"
 #include "appmodel/DaphneV2Channel.hpp"
 #include "appmodel/DaphneV2AFE.hpp"
@@ -16,6 +17,7 @@
 #include "appmodel/DaphneV2LNA.hpp"
 #include "appmodel/DaphneV2PGA.hpp"
 #include "appmodel/DaphneConf.hpp"
+#include "appmodel/appmodelIssues.hpp"
 
 #include "fddetdataformats/DAPHNEFrame.hpp"
 
@@ -57,6 +59,24 @@ DaphneV2ControllerModule::init(std::shared_ptr<appfwk::ConfigurationManager> cfg
     throw ConfigurationFailed(ERS_HERE, get_name());
   }
   m_module_config = mdal;
+
+    auto daphne_conf = m_module_config->get_daphne_conf();
+    cfgMgr->load_deferred_db(daphne_conf->get_configuration_file());
+
+    auto m_daphne_board = cfgMgr->get_dal<appmodel::DaphneBoard>(daphne_conf->get_daphne_board());
+    if (m_daphne_board == nullptr) {
+      throw(appmodel::BadConf(ERS_HERE, "DaphneBoard not found"));
+    }
+    auto daphne_map = m_daphne_board->get_boards();
+    for (auto entry: daphne_map) {
+      if (entry->get_key() == m_module_config->get_daphne_id()) {
+        m_board_conf = entry->get_conf();
+        break;
+      }
+    }
+    if (m_board_conf == nullptr) {
+      throw(appmodel::BadConf(ERS_HERE, "DaphneBoard map does not contain an entry with our id"));
+    }
 }
   
 
@@ -250,19 +270,18 @@ DaphneV2ControllerModule::do_conf(const CommandData_t&)
 {
   auto start_time = std::chrono::high_resolution_clock::now();
 
-  auto board_conf = m_module_config->get_board_conf();
-  auto slot = board_conf->get_slot_id();
+  auto slot = m_board_conf->get_slot_id();
   if ( slot >= 16 ) 
     //   // the slot used laster in the code is a 4 bit register, so we need to check we are not overflowing
-    throw InvalidSlot(ERS_HERE, slot, board_conf->get_address());
+    throw InvalidSlot(ERS_HERE, slot, m_board_conf->get_address());
   
   // during configuration no other operations are allowed
   const std::lock_guard<std::mutex> lock(m_mutex);
   
-  create_interface(board_conf->get_address(),
+  create_interface(m_board_conf->get_address(),
 		   m_module_config->get_daphne_conf()->get_timeout());
 
-  validate_configuration( * m_module_config->get_board_conf() );
+  validate_configuration(*m_board_conf);
 
   disable_links();
   
@@ -348,8 +367,7 @@ DaphneV2ControllerModule::create_interface(const std::string & ip, std::chrono::
     throw InvalidIPAddress(ERS_HERE, ip);
   }
 
-  auto board = m_module_config->get_board_conf();
-  TLOG() << get_name() << ": using daphne at " << ip << " with slot " << (int)board->get_slot_id(); // NOLINT(readability/casting)
+  TLOG() << get_name() << ": using daphne at " << ip << " with slot " << (int)m_board_conf->get_slot_id(); // NOLINT(readability/casting)
 
   m_interface = std::make_unique<DaphneV2Interface>( ip.c_str(), 2001, timeout );
   
@@ -395,12 +413,11 @@ DaphneV2ControllerModule::configure_timing_endpoints() {
   // bits 11..6  = detector_id(5..0), default is "000010"
   // bits 5..0   = version_id(5..0), default is "000010"
 
-  auto board = m_module_config->get_board_conf();
-  std::bitset<26> config_value(board->get_slot_id());
+  std::bitset<26> config_value(m_board_conf->get_slot_id());
   config_value <<= 10;
-  config_value |=  board -> get_crate_id();
+  config_value |=  m_board_conf -> get_crate_id();
   config_value <<= 6;
-  config_value |=  board -> get_detector_id();
+  config_value |=  m_board_conf -> get_detector_id();
   config_value <<= 6;
   config_value |= std::bitset<6>(fddetdataformats::DAPHNEFrame::version).to_ulong();
   
@@ -423,7 +440,7 @@ DaphneV2ControllerModule::configure_timing_endpoints() {
   } while (!check[0]);
 
   if ( ! check[0] ) {
-    throw PLLNotLocked(ERS_HERE, board->get_slot_id(), "MMCM0");
+    throw PLLNotLocked(ERS_HERE, m_board_conf->get_slot_id(), "MMCM0");
   }
   
   m_interface->write_buffer(0x4002, {1234});
@@ -439,7 +456,7 @@ DaphneV2ControllerModule::configure_timing_endpoints() {
   } while (!check[1]);
 
   if ( ! check[1] ) {
-    throw PLLNotLocked(ERS_HERE, board->get_slot_id(), "MMCM1");
+    throw PLLNotLocked(ERS_HERE, m_board_conf->get_slot_id(), "MMCM1");
   }
   
   // at this point everything that is in register 0x4000 is the status of the timing endpoint
@@ -461,7 +478,7 @@ DaphneV2ControllerModule::configure_timing_endpoints() {
   } while (!check[12]);
 
   if ( ! check[12] ) {
-    throw TimingEndpointNotReady(ERS_HERE, board->get_slot_id(), check.to_string() );
+    throw TimingEndpointNotReady(ERS_HERE, m_board_conf->get_slot_id(), check.to_string() );
   }
   
   TLOG() << get_name() << ": done donfiguring timing endpoint";
@@ -477,8 +494,8 @@ void DaphneV2ControllerModule::configure_analog_chain(bool initial_config) {
     TLOG() << get_name() << ": " << result.command << " -> " << result.result;
   }
 
-  auto board_conf = initial_config ? m_module_config->get_board_conf() :
-    m_module_config->get_daphne_conf()->get_default_v2_settings();
+  auto board_conf = initial_config ? m_board_conf :
+      m_board->get_default_v2_settings();
     
   auto result = m_interface->send_command(fmt::format("WR VBIASCTRL V {}", board_conf->get_bias_ctrl()));
   TLOG() << get_name() << ": " << result.command << " -> " << result.result;
@@ -572,14 +589,13 @@ void DaphneV2ControllerModule::align_DDR() {
   // this trigger the spy buffers
     
   // read register ch 8 of each afe,   by looping on all the afe we use
-  auto board_conf = m_module_config->get_board_conf();
   for ( size_t afe = 0; afe < s_max_afes ; ++afe ) {
-    if ( board_conf -> is_afe_used(afe) ) {
+    if ( m_board_conf -> is_afe_used(afe) ) {
       auto data = m_interface->read_register(0x40000000 + (afe * 0x100000) + (8 * 0x10000), 15);  // ch = 8
 
       // things are ok when the data is 0x3f80
       if ( data[0] != DaphneV2ControllerModule::s_frame_alignment_good ) 
-	throw DDRNotAligned(ERS_HERE, board_conf->get_slot_id(), afe, data[0] );
+	throw DDRNotAligned(ERS_HERE, m_board_conf->get_slot_id(), afe, data[0] );
     } //afe used
   }
 
@@ -599,14 +615,12 @@ DaphneV2ControllerModule::configure_trigger_mode() {
 
   TLOG() << get_name() << ": Setting trigger mode";
 
-  auto c = m_module_config->get_board_conf();
-
-  m_interface->write_register(0x6100, {c->get_self_trigger_xcorr()});
-  m_interface->write_register(0x6002, {c->get_tp_conf()});
-  m_interface->write_register(0x6003, {c->get_compensator()});
-  m_interface->write_register(0x6004, {c->get_inverter()}); 
+  m_interface->write_register(0x6100, {m_board_conf->get_self_trigger_xcorr()});
+  m_interface->write_register(0x6002, {m_board_conf->get_tp_conf()});
+  m_interface->write_register(0x6003, {m_board_conf->get_compensator()});
+  m_interface->write_register(0x6004, {m_board_conf->get_inverter()}); 
   
-  auto threshold = c->get_self_trigger_threshold();
+  auto threshold = m_board_conf->get_self_trigger_threshold();
   
   if ( threshold > 0 ) {
     // se are in self trigger mode
@@ -614,10 +628,9 @@ DaphneV2ControllerModule::configure_trigger_mode() {
     m_interface->write_register(0x6000, {threshold});
 
     std::bitset<DaphneV2ControllerModule::s_max_channels> mask;
-    auto board_conf = m_module_config->get_board_conf();
     // we unmask all the channels that are enabled
     for ( ChannelId ch = 0; ch < s_max_channels; ++ch ) {
-      if ( board_conf->is_channel_used(ch) )
+      if ( m_board_conf->is_channel_used(ch) )
 	mask[ch] = true;
     }
     m_interface->write_register(0x6001, {(uint64_t)mask.to_ulong()});  // NOLINT
@@ -631,7 +644,7 @@ DaphneV2ControllerModule::configure_trigger_mode() {
     m_interface->write_register(0x6000, {0});  // for safety we mask everything
 
     size_t stream_id = 0;
-    auto full_stream_channels = c->get_full_stream_channels();
+    auto full_stream_channels = m_board_conf->get_full_stream_channels();
     for ( const auto & ch : full_stream_channels ) {
 
       // The channles are not identified with an id from 0-39, they have a different identifier to represent the

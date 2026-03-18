@@ -15,6 +15,7 @@
 #include "daphnemodules/CommonIssues.hpp"
 #include "daphnemodules/daphne_control_high.pb.h"
 #include "appmodel/DaphneV3ControllerModule.hpp"
+#include "appmodel/DaphneBoard.hpp"
 #include "appmodel/DaphneV2BoardConf.hpp"
 
 #include <string>
@@ -42,6 +43,10 @@ namespace dunedaq::daphnemodules{
 
     using conf_t = appmodel::DaphneV3ControllerModule;
     const conf_t* m_module_config = nullptr;
+
+    const appmodel::DaphneBoard* m_board{nullptr};
+    const appmodel::DaphneV2BoardConf* m_board_conf{nullptr};
+
     void validate_configuration(const appmodel::DaphneV2BoardConf &) const;   
   
     void configure_analog_chain(bool intial_config);

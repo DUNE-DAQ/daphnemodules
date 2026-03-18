@@ -20,8 +20,9 @@
 
 #include "daphnemodules/opmon/DaphneControllerModule.pb.h"
 
-#include <appmodel/DaphneV2BoardConf.hpp>
-#include <appmodel/DaphneV2ControllerModule.hpp>
+#include "appmodel/DaphneBoard.hpp"
+#include "appmodel/DaphneV2BoardConf.hpp"
+#include "appmodel/DaphneV2ControllerModule.hpp"
 
 #include "logging/Logging.hpp" // NOTE: if ISSUES ARE DECLARED BEFORE include logging/Logging.hpp, TLOG_DEBUG<<issue wont work.
 
@@ -183,6 +184,8 @@ private:
   std::atomic<counter_t> m_last_package_counter = 0;
   std::atomic<counter_t> m_last_unsent_counter = 0;
   
+    const appmodel::DaphneBoard* m_board{nullptr};
+    const appmodel::DaphneV2BoardConf* m_board_conf{nullptr};
 };
 
 } // namespace dunedaq::daphnemodules
