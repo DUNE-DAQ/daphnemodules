@@ -16,7 +16,7 @@
 #include "appmodel/DaphneV2ADC.hpp"
 #include "appmodel/DaphneV2LNA.hpp"
 #include "appmodel/DaphneV2PGA.hpp"
-#include "appmodel/DaphneConf.hpp"
+#include "appmodel/DeferredConfig.hpp"
 #include "appmodel/appmodelIssues.hpp"
 
 #include "fddetdataformats/DAPHNEFrame.hpp"
@@ -63,7 +63,7 @@ DaphneV2ControllerModule::init(std::shared_ptr<appfwk::ConfigurationManager> cfg
     auto daphne_conf = m_module_config->get_daphne_conf();
     cfgMgr->load_deferred_db(daphne_conf->get_configuration_file());
 
-    auto m_daphne_board = cfgMgr->get_dal<appmodel::DaphneBoard>(daphne_conf->get_daphne_board());
+    auto m_daphne_board = cfgMgr->get_dal<appmodel::DaphneBoard>(daphne_conf->get_entry_uid());
     if (m_daphne_board == nullptr) {
       throw(appmodel::BadConf(ERS_HERE, "DaphneBoard not found"));
     }
@@ -279,7 +279,7 @@ DaphneV2ControllerModule::do_conf(const CommandData_t&)
   const std::lock_guard<std::mutex> lock(m_mutex);
   
   create_interface(m_board_conf->get_address(),
-		   m_module_config->get_daphne_conf()->get_timeout());
+		   m_board_conf->timeout());
 
   validate_configuration(*m_board_conf);
 
@@ -424,7 +424,7 @@ DaphneV2ControllerModule::configure_timing_endpoints() {
   TLOG() << get_name() << ": configuring timing endpoint with value " << config_value.to_string();
   m_interface->write_register(0x4001, {0x1});
   m_interface->write_register(0x3000, {config_value.to_ulong()});
-  if ( m_module_config->get_daphne_conf()->get_time_reset() ) {
+  if ( m_board_conf->get_time_reset() ) {
     m_interface->write_register(0x4003, {1234});
   }
 

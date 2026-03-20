@@ -13,7 +13,6 @@
 #include "daphnemodules/daphne_control_high.pb.h"
 #include "daphnemodules/daphne_control_low.pb.h"
 
-#include "appmodel/DaphneConf.hpp"
 #include "appmodel/DaphneBoard.hpp"
 #include "appmodel/DaphneMapEntry.hpp"
 #include "appmodel/DaphneV2BoardConf.hpp"
@@ -22,6 +21,7 @@
 #include "appmodel/DaphneV2ADC.hpp"
 #include "appmodel/DaphneV2PGA.hpp"
 #include "appmodel/DaphneV2LNA.hpp"
+#include "appmodel/DeferredConfig.hpp"
 #include "appmodel/appmodelIssues.hpp"
 
 #include "daphnemodules/opmon/DaphneControllerModule.pb.h"
@@ -55,7 +55,7 @@ namespace dunedaq::daphnemodules {
     auto daphne_conf = m_module_config->get_daphne_conf();
     cfg->load_deferred_db(daphne_conf->get_configuration_file());
 
-    auto m_daphne_board = cfg->get_dal<appmodel::DaphneBoard>(daphne_conf->get_daphne_board());
+    auto m_daphne_board = cfg->get_dal<appmodel::DaphneBoard>(daphne_conf->get_entry_uid());
     if (m_daphne_board == nullptr) {
       throw(appmodel::BadConf(ERS_HERE, "DaphneBoard not found"));
     }
@@ -84,10 +84,8 @@ namespace dunedaq::daphnemodules {
   
     using namespace daphne;
 
-    auto general_conf = m_module_config->get_daphne_conf();
-
     create_interface( m_board_conf->get_address(),
-		      general_conf->get_timeout() );
+		      m_board_conf->timeout() );
 
     // validation to be taken from the previous version
     // this should include the slot check
@@ -124,7 +122,6 @@ namespace dunedaq::daphnemodules {
 
   void DaphneV3ControllerModule::configure_analog_chain(bool initial_config) {
 
-    auto general_conf = m_module_config->get_daphne_conf();
     auto board_conf = initial_config ? m_board_conf :
       m_board->get_default_v3_settings();
 
@@ -132,7 +129,7 @@ namespace dunedaq::daphnemodules {
     daphne::ConfigureRequest req;
     req.set_daphne_address(board_conf->get_address());
     req.set_slot(board_conf->get_slot_id());
-    req.set_timeout_ms(general_conf->get_timeout_ms());
+    req.set_timeout_ms(board_conf->get_timeout_ms());
     req.set_biasctrl(board_conf->get_bias_ctrl());
     req.set_self_trigger_threshold(board_conf->get_self_trigger_threshold());
     req.set_self_trigger_xcorr(board_conf->get_self_trigger_xcorr());
