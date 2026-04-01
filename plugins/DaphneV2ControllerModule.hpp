@@ -166,6 +166,7 @@ private:
   static const ChannelId s_max_afes = 5;
   using conf_t = appmodel::DaphneV2ControllerModule;
   const conf_t* m_module_config = nullptr;
+  std::shared_ptr<appfwk::ConfigurationManager> m_config_manager;
   
   static const uint16_t s_frame_alignment_good = 0x3f80;
 

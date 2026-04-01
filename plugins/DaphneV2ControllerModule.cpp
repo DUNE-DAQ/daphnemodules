@@ -59,24 +59,7 @@ DaphneV2ControllerModule::init(std::shared_ptr<appfwk::ConfigurationManager> cfg
     throw ConfigurationFailed(ERS_HERE, get_name());
   }
   m_module_config = mdal;
-
-    auto daphne_conf = m_module_config->get_daphne_conf();
-    cfgMgr->load_deferred_db(daphne_conf->get_configuration_file());
-
-    auto m_daphne_board = cfgMgr->get_dal<appmodel::DaphneBoard>(daphne_conf->get_entry_uid());
-    if (m_daphne_board == nullptr) {
-      throw(appmodel::BadConf(ERS_HERE, "DaphneBoard not found"));
-    }
-    auto daphne_map = m_daphne_board->get_boards();
-    for (auto entry: daphne_map) {
-      if (entry->get_key() == m_module_config->get_daphne_id()) {
-        m_board_conf = entry->get_conf();
-        break;
-      }
-    }
-    if (m_board_conf == nullptr) {
-      throw(appmodel::BadConf(ERS_HERE, "DaphneBoard map does not contain an entry with our id"));
-    }
+  m_config_manager = cfgMgr;
 }
   
 
@@ -269,6 +252,24 @@ void
 DaphneV2ControllerModule::do_conf(const CommandData_t&)
 {
   auto start_time = std::chrono::high_resolution_clock::now();
+
+  auto daphne_conf = m_module_config->get_daphne_conf();
+  m_config_manager->load_deferred_db(daphne_conf->get_configuration_file());
+
+  auto m_daphne_board = m_config_manager->get_dal<appmodel::DaphneBoard>(daphne_conf->get_entry_uid());
+  if (m_daphne_board == nullptr) {
+    throw(appmodel::BadConf(ERS_HERE, "DaphneBoard not found"));
+  }
+  auto daphne_map = m_daphne_board->get_boards();
+  for (auto entry: daphne_map) {
+    if (entry->get_key() == m_module_config->get_daphne_id()) {
+      m_board_conf = entry->get_conf();
+      break;
+    }
+  }
+  if (m_board_conf == nullptr) {
+    throw(appmodel::BadConf(ERS_HERE, "DaphneBoard map does not contain an entry with our id"));
+  }
 
   auto slot = m_board_conf->get_slot_id();
   if ( slot >= 16 ) 

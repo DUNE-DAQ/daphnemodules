@@ -43,6 +43,7 @@ namespace dunedaq::daphnemodules{
 
     using conf_t = appmodel::DaphneV3ControllerModule;
     const conf_t* m_module_config = nullptr;
+    std::shared_ptr<appfwk::ConfigurationManager> m_config_manager;
 
     const appmodel::DaphneBoard* m_board{nullptr};
     const appmodel::DaphneV2BoardConf* m_board_conf{nullptr};

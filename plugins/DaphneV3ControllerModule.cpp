@@ -51,11 +51,22 @@ namespace dunedaq::daphnemodules {
       throw ConfigurationFailed(ERS_HERE, get_name());
     }
     m_module_config = mdal;
+    m_config_manager = cfg;
+  }
+
+
+  void DaphneV3ControllerModule::do_conf(const CommandData_t&)
+  {
+
+    const std::lock_guard<std::mutex> lock(m_mutex);
+  
+    TLOG() << get_name() << " starting configuring";
+    auto start_time = std::chrono::high_resolution_clock::now();
 
     auto daphne_conf = m_module_config->get_daphne_conf();
-    cfg->load_deferred_db(daphne_conf->get_configuration_file());
+    m_config_manager->load_deferred_db(daphne_conf->get_configuration_file());
 
-    auto m_daphne_board = cfg->get_dal<appmodel::DaphneBoard>(daphne_conf->get_entry_uid());
+    auto m_daphne_board = m_config_manager->get_dal<appmodel::DaphneBoard>(daphne_conf->get_entry_uid());
     if (m_daphne_board == nullptr) {
       throw(appmodel::BadConf(ERS_HERE, "DaphneBoard not found"));
     }
@@ -69,17 +80,6 @@ namespace dunedaq::daphnemodules {
     if (m_board_conf == nullptr) {
       throw(appmodel::BadConf(ERS_HERE, "DaphneBoard map does not contain an entry with our id"));
     }
-
-  }
-
-
-  void DaphneV3ControllerModule::do_conf(const CommandData_t&)
-  {
-
-    const std::lock_guard<std::mutex> lock(m_mutex);
-  
-    TLOG() << get_name() << " starting configuring";
-    auto start_time = std::chrono::high_resolution_clock::now();
 
   
     using namespace daphne;
