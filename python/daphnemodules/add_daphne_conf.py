@@ -63,7 +63,8 @@ def add_daphne_conf(oksfile:str, object_name:str, json_file:str, timeout_ms:int 
                                        bias_ctrl=0,
                                        self_trigger_threshold=0,
                                        default_channel=def_channel,
-                                       default_afe=def_afe )
+                                       default_afe=def_afe,
+                                       timeout_ms=timeout_ms )
     db.update_dal(def_board)
 
     maps=[]
@@ -154,7 +155,8 @@ def add_daphne_conf(oksfile:str, object_name:str, json_file:str, timeout_ms:int 
                                        crate_id=crate,
                                        slot_id=slot,
                                        default_channel=def_channel,
-                                       default_afe=def_afe )
+                                       default_afe=def_afe,
+                                       timeout_ms=timeout_ms )
         db.update_dal(board)
 
         link=dal.DaphneMapEntry(name,
@@ -168,8 +170,7 @@ def add_daphne_conf(oksfile:str, object_name:str, json_file:str, timeout_ms:int 
     ## create default objects, they will override old configurations
 
     
-    new_conf = dal.DaphneConf(object_name,
-                              timeout_ms=timeout_ms,
+    new_conf = dal.DaphneBoard(object_name,
                               boards=maps,
                               default_v2_settings=def_board,
                               default_v3_settings=def_board )

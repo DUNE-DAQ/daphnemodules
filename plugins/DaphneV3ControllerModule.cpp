@@ -13,13 +13,16 @@
 #include "daphnemodules/daphne_control_high.pb.h"
 #include "daphnemodules/daphne_control_low.pb.h"
 
-#include "appmodel/DaphneConf.hpp"
+#include "appmodel/DaphneBoard.hpp"
+#include "appmodel/DaphneMapEntry.hpp"
 #include "appmodel/DaphneV2BoardConf.hpp"
 #include "appmodel/DaphneV2Channel.hpp"
 #include "appmodel/DaphneV2AFE.hpp"
 #include "appmodel/DaphneV2ADC.hpp"
 #include "appmodel/DaphneV2PGA.hpp"
 #include "appmodel/DaphneV2LNA.hpp"
+#include "appmodel/DeferredConfig.hpp"
+#include "appmodel/appmodelIssues.hpp"
 
 #include "daphnemodules/opmon/DaphneControllerModule.pb.h"
 
@@ -48,6 +51,7 @@ namespace dunedaq::daphnemodules {
       throw ConfigurationFailed(ERS_HERE, get_name());
     }
     m_module_config = mdal;
+    m_config_manager = cfg;
   }
 
 
@@ -59,18 +63,33 @@ namespace dunedaq::daphnemodules {
     TLOG() << get_name() << " starting configuring";
     auto start_time = std::chrono::high_resolution_clock::now();
 
+    auto daphne_conf = m_module_config->get_daphne_conf();
+    m_config_manager->load_deferred_db(daphne_conf->get_configuration_file());
+
+    auto m_daphne_board = m_config_manager->get_dal<appmodel::DaphneBoard>(daphne_conf->get_entry_uid());
+    if (m_daphne_board == nullptr) {
+      throw(appmodel::BadConf(ERS_HERE, "DaphneBoard not found"));
+    }
+    auto daphne_map = m_daphne_board->get_boards();
+    for (auto entry: daphne_map) {
+      if (entry->get_key() == m_module_config->get_daphne_id()) {
+        m_board_conf = entry->get_conf();
+        break;
+      }
+    }
+    if (m_board_conf == nullptr) {
+      throw(appmodel::BadConf(ERS_HERE, "DaphneBoard map does not contain an entry with our id"));
+    }
+
   
     using namespace daphne;
 
-    auto board_conf = m_module_config->get_board_conf();
-    auto general_conf = m_module_config->get_daphne_conf();
-
-    create_interface( board_conf->get_address(),
-		      general_conf->get_timeout() );
+    create_interface( m_board_conf->get_address(),
+		      m_board_conf->timeout() );
 
     // validation to be taken from the previous version
     // this should include the slot check
-    validate_configuration(*board_conf);
+    validate_configuration(*m_board_conf);
 
     configure_analog_chain(true);
 
@@ -103,15 +122,14 @@ namespace dunedaq::daphnemodules {
 
   void DaphneV3ControllerModule::configure_analog_chain(bool initial_config) {
 
-    auto general_conf = m_module_config->get_daphne_conf();
-    auto board_conf = initial_config ? m_module_config->get_board_conf() :
-      general_conf->get_default_v3_settings();
+    auto board_conf = initial_config ? m_board_conf :
+      m_board->get_default_v3_settings();
 
     // Step 1: Build the ConfigureRequest
     daphne::ConfigureRequest req;
     req.set_daphne_address(board_conf->get_address());
     req.set_slot(board_conf->get_slot_id());
-    req.set_timeout_ms(general_conf->get_timeout_ms());
+    req.set_timeout_ms(board_conf->get_timeout_ms());
     req.set_biasctrl(board_conf->get_bias_ctrl());
     req.set_self_trigger_threshold(board_conf->get_self_trigger_threshold());
     req.set_self_trigger_xcorr(board_conf->get_self_trigger_xcorr());
