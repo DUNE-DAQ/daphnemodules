@@ -44,6 +44,18 @@ namespace dunedaq {
                      )
 
   ERS_DECLARE_ISSUE( daphnemodules,
+                     InvalidFullStreamChannel,
+                     "Invalid full stream channel " << channel << "; valid channels are 0..39",
+                     ((uint32_t)channel)
+                     )
+
+  ERS_DECLARE_ISSUE( daphnemodules,
+                     DuplicateFullStreamChannel,
+                     "Full stream channel " << channel << " was requested more than once",
+                     ((uint32_t)channel)
+                     )
+
+  ERS_DECLARE_ISSUE( daphnemodules,
                      UnsuccessfulConfiguration,
                      name << ": board reports configuration failure. Message: " << message,
                      ((std::string)name) ((std::string)message)

@@ -34,6 +34,9 @@ daq_add_unit_test(DaphneInterface_test
 daq_add_unit_test(DaphneV3Interface_test
     LINK_LIBRARIES daphnemodules Boost::unit_test_framework)
 
+daq_add_unit_test(DaphneV3FullStream_test
+    LINK_LIBRARIES daphnemodules Boost::unit_test_framework)
+
 daq_add_application(daphne_mezzanine_communication_test DaphneMezzModule_test.cxx
     TEST LINK_LIBRARIES daphnemodules)
            

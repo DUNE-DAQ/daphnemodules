@@ -49,6 +49,9 @@ namespace dunedaq::daphnemodules{
     std::atomic<std::shared_ptr<DaphneV3Interface>> m_iface = nullptr;
     std::mutex m_mutex;  // mutex for interface
     std::atomic<bool> m_scrap_called = false;
+    // The current schema has no explicit gateware mode. A non-empty mux list
+    // unambiguously selects full-stream; an empty list remains ambiguous.
+    std::atomic<bool> m_full_stream_mode = false;
 
     using const_channel_id_t = std::invoke_result<decltype(&daphne::ChannelConfig::id),
 						  daphne::ChannelConfig>::type;

@@ -9,6 +9,7 @@
  */
 
 #include "DaphneV3ControllerModule.hpp"
+#include "daphnemodules/DaphneV3FullStream.hpp"
 #include "logging/Logging.hpp"
 #include "daphnemodules/daphne_control_high.pb.h"
 #include "daphnemodules/daphne_control_low.pb.h"
@@ -30,6 +31,7 @@
 #include <string>
 #include <memory>
 #include <utility>
+#include <vector>
 
 namespace dunedaq::daphnemodules {
 
@@ -119,6 +121,13 @@ namespace dunedaq::daphnemodules {
     req.set_compensator(board_conf->get_compensator());
     req.set_inverters(board_conf->get_inverter());
 
+    std::vector<uint32_t> full_stream_channels;
+    full_stream_channels.reserve(board_conf->get_full_stream_channels().size());
+    for (const auto channel : board_conf->get_full_stream_channels()) {
+      full_stream_channels.push_back(channel);
+    }
+    append_full_stream_channels(full_stream_channels, req);
+
     for ( ChannelId ch = 0; ch < s_max_channels; ++ch ) {
 
       const auto & channel_conf = board_conf->get_channel(ch);
@@ -171,6 +180,11 @@ namespace dunedaq::daphnemodules {
       throw UnsuccessfulConfiguration(ERS_HERE, get_name(), response.message());
     }
 
+    // A non-empty mux list is the only unambiguous full-stream signal in the
+    // current API. Keep self-trigger monitoring for an empty list until the
+    // configuration schema carries an explicit gateware mode.
+    m_full_stream_mode.store(is_unambiguously_full_stream(full_stream_channels));
+
     TLOG() << "Success message: " << response.message();
   
   }
@@ -207,10 +221,22 @@ namespace dunedaq::daphnemodules {
       }
     } // loop over channels
 
-    auto size = c.get_full_stream_channels().size();
-    if (size>16) {
-      // we can only stream 16 channels at most
-      throw TooManyChannels( ERS_HERE, size );
+    std::vector<uint32_t> full_stream_channels;
+    full_stream_channels.reserve(c.get_full_stream_channels().size());
+    for (const auto channel : c.get_full_stream_channels()) {
+      full_stream_channels.push_back(channel);
+    }
+
+    const auto validation = validate_full_stream_channels(full_stream_channels);
+    switch (validation.error) {
+      case FullStreamChannelError::kNone:
+        break;
+      case FullStreamChannelError::kTooMany:
+        throw TooManyChannels(ERS_HERE, full_stream_channels.size());
+      case FullStreamChannelError::kOutOfRange:
+        throw InvalidFullStreamChannel(ERS_HERE, validation.channel);
+      case FullStreamChannelError::kDuplicate:
+        throw DuplicateFullStreamChannel(ERS_HERE, validation.channel);
     }
 
   }
@@ -224,40 +250,42 @@ namespace dunedaq::daphnemodules {
 
     std::unique_lock<std::mutex> lock(m_mutex);
 
-    daphne::ReadTriggerCountersRequest req;
-    auto response = m_iface.load()->send<daphne::ReadTriggerCountersResponse>( req.SerializeAsString(),
-									       daphne::MT2_READ_TRIGGER_COUNTERS_REQ,
-									       daphne::MT2_READ_TRIGGER_COUNTERS_RESP );
+    if (!m_full_stream_mode.load()) {
+      daphne::ReadTriggerCountersRequest req;
+      auto response = m_iface.load()->send<daphne::ReadTriggerCountersResponse>( req.SerializeAsString(),
+									         daphne::MT2_READ_TRIGGER_COUNTERS_REQ,
+									         daphne::MT2_READ_TRIGGER_COUNTERS_RESP );
 
-    if ( ! response.success() ) {
-      ers::warning( TriggerMonitoringFailed(ERS_HERE, get_name(), response.message() ) );
-      return;
+      if ( ! response.success() ) {
+        ers::warning( TriggerMonitoringFailed(ERS_HERE, get_name(), response.message() ) );
+        return;
+      }
+
+      lock.unlock();
+
+      const auto & snapshots = response.snapshots();
+
+      static uint32_t def_threshold = 0x0fffffff; // NOLINT
+
+      for ( const auto & c : snapshots ) {
+
+        // we only publish channels info when threshold is not default or the counters are not zero
+        if ( c.threshold() == def_threshold
+	     && c.record_count() == 0
+	     && c.busy_count() == 0
+	     && c.full_count() == 0 ) continue;
+
+        opmon::TempTriggerSnapshotInfo info;
+        info.set_threshold( c.threshold() );
+        info.set_record_count( c.record_count() );
+        info.set_busy_count( c.busy_count() );
+        info.set_full_count( c.full_count() );
+
+        publish( std::move(info), {{"channel", fmt::format("{}", c.channel() ) }} );
+      }
+
+      lock.lock();
     }
-
-    lock.unlock();
-    
-    const auto & snapshots = response.snapshots();
-
-    static uint32_t def_threshold = 0x3ff; // NOLINT
-    
-    for ( const auto & c : snapshots ) {
-
-      // we only publish channels info when threshold is not default or the counters are not zero
-      if ( c.threshold() == def_threshold
-	   && c.record_count() == 0
-	   && c.busy_count() == 0
-	   && c.full_count() == 0 ) continue;
-      
-      opmon::TempTriggerSnapshotInfo info;
-      info.set_threshold( c.threshold() );
-      info.set_record_count( c.record_count() );
-      info.set_busy_count( c.busy_count() );
-      info.set_full_count( c.full_count() );
-
-      publish( std::move(info), {{"channel", fmt::format("{}", c.channel() ) }} );
-    }
-
-    lock.lock();
 
     // The request for the general info has no payload, so the first argument is 0
     auto info_response = m_iface.load()->send<daphne::GeneralInfo>( "",
