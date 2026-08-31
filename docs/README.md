@@ -1,5 +1,9 @@
 # DAPHNE V3 gateware-mode contract
 
+The dual-gateware client behavior described here is introduced in
+`daphnemodules` 3.0.4. Released 3.0.3 clients remain suitable for self-trigger,
+but they do not serialize the full-stream channel selection.
+
 `full_stream_channels` is an ordered list: entry zero selects the source for
 full-stream output zero, entry one selects output one, and so on. The DAPHNE V3
 hardware exposes 32 outputs selecting from board channels 0 through 39, so the

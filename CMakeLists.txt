@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(daphnemodules VERSION 3.0.3)
+project(daphnemodules VERSION 3.0.4)
 
 find_package(daq-cmake         REQUIRED)
 daq_setup_environment()
