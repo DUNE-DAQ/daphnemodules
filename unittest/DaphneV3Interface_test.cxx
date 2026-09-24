@@ -9,13 +9,12 @@
  *
  */
 
-
-#define BOOST_TEST_MODULE DaphneV3InterfaceTest  // NOLINT
+#define BOOST_TEST_MODULE DaphneV3InterfaceTest // NOLINT
 #include <boost/test/included/unit_test.hpp>
 
 #include "DaphneV3Interface.hpp"
-#include <iostream>
 #include <cstdlib>
+#include <iostream>
 
 using namespace dunedaq::daphnemodules;
 
@@ -24,24 +23,20 @@ BOOST_AUTO_TEST_SUITE(DaphneInterfaceV3_test)
 BOOST_AUTO_TEST_CASE(bad_address)
 {
 
- BOOST_CHECK_THROW( dunedaq::daphnemodules::DaphneV3Interface i("bad/address", "v3_unittest"),
-		    dunedaq::daphnemodules::InvalidIPAddress );
+  BOOST_CHECK_THROW(dunedaq::daphnemodules::DaphneV3Interface i("bad/address", "v3_unittest"),
+                    dunedaq::daphnemodules::InvalidIPAddress);
 
- BOOST_CHECK_THROW( dunedaq::daphnemodules::DaphneV3Interface i("bad.address:14q4", "v3_unittest"),
-		    dunedaq::daphnemodules::InvalidIPAddress );
+  BOOST_CHECK_THROW(dunedaq::daphnemodules::DaphneV3Interface i("bad.address:14q4", "v3_unittest"),
+                    dunedaq::daphnemodules::InvalidIPAddress);
 
- BOOST_CHECK_THROW( dunedaq::daphnemodules::DaphneV3Interface i("non.existing.address", "v3_unittest"),
-		    dunedaq::daphnemodules::FailedPing );
+  BOOST_CHECK_THROW(dunedaq::daphnemodules::DaphneV3Interface i("non.existing.address", "v3_unittest"),
+                    dunedaq::daphnemodules::FailedPing);
 
-  BOOST_CHECK_THROW( dunedaq::daphnemodules::DaphneV3Interface i("non.existing.address.with.port:7954", "v3_unittest"),
-		     dunedaq::daphnemodules::FailedPing );
-
+  BOOST_CHECK_THROW(dunedaq::daphnemodules::DaphneV3Interface i("non.existing.address.with.port:7954", "v3_unittest"),
+                    dunedaq::daphnemodules::FailedPing);
 }
 
-
 BOOST_AUTO_TEST_SUITE_END()
-
-
 
 // static std::string get_env_or_default(const char* name, const char* def)
 // {
@@ -49,8 +44,6 @@ BOOST_AUTO_TEST_SUITE_END()
 //     return v;
 //   return def;
 // }
-
-
 
 // BOOST_AUTO_TEST_CASE(connection_test)
 // {

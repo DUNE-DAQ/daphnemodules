@@ -13,8 +13,8 @@
 
 #define BOOST_TEST_MODULE DaphneInterface_test // NOLINT
 
-#include "boost/test/unit_test.hpp"
 #include "DaphneV2Interface.hpp"
+#include "boost/test/unit_test.hpp"
 
 BOOST_AUTO_TEST_SUITE(DaphneInterface_test)
 
@@ -22,10 +22,9 @@ BOOST_AUTO_TEST_CASE(Construction)
 {
 
   using namespace std::chrono;
-  
-  BOOST_CHECK_THROW( dunedaq::daphnemodules::DaphneV2Interface i("non.exising.ip", 1000, milliseconds(5)),
-		     dunedaq::daphnemodules::InvalidIPAddress );
 
+  BOOST_CHECK_THROW(dunedaq::daphnemodules::DaphneV2Interface i("non.exising.ip", 1000, milliseconds(5)),
+                    dunedaq::daphnemodules::InvalidIPAddress);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

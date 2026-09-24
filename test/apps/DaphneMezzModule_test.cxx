@@ -1,7 +1,7 @@
 /**
  * @file DaphneMezzModule_test.cxx
  *
- * Testing configurations sender for the daphne v3 
+ * Testing configurations sender for the daphne v3
  *
  * This is part of the DUNE DAQ Software Suite, copyright 2020.
  * Licensing/copyright details are in the COPYING file that you should have
@@ -11,90 +11,123 @@
 
 #include "DaphneV3Interface.hpp"
 
-#include <zmq.hpp>
 #include "daphnemodules/daphne_control_high.pb.h"
+#include <zmq.hpp>
 
-#include <iostream>
-#include <string>
-#include <vector>
-#include <stdexcept>
+#include <chrono>
 #include <cstdlib>
 #include <cstring>
-#include <chrono>
+#include <iostream>
 #include <random>
-
-
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 using namespace daphne;
 using namespace dunedaq::daphnemodules;
 
 // ------------- small helpers -------------
-static std::vector<zmq::message_t> recv_multipart(zmq::socket_t& s) {
+static std::vector<zmq::message_t>
+recv_multipart(zmq::socket_t& s)
+{
   std::vector<zmq::message_t> frames;
   while (true) {
     zmq::message_t part;
     auto ok = s.recv(part, zmq::recv_flags::none);
-    if (!ok || *ok <= 0) throw std::runtime_error("No response from slow controller");
+    if (!ok || *ok <= 0)
+      throw std::runtime_error("No response from slow controller");
     frames.emplace_back(std::move(part));
-    if (!s.get(zmq::sockopt::rcvmore)) break;
+    if (!s.get(zmq::sockopt::rcvmore))
+      break;
   }
   return frames;
 }
 
-static inline uint64_t now_ns() {
+static inline uint64_t
+now_ns()
+{
   using namespace std::chrono;
   return duration_cast<nanoseconds>(steady_clock::now().time_since_epoch()).count();
 }
 
-static inline std::pair<uint64_t,uint64_t> next_ids() {
-  static std::mt19937_64 rng{std::random_device{}()};
+static inline std::pair<uint64_t, uint64_t>
+next_ids()
+{
+  static std::mt19937_64 rng{ std::random_device{}() };
   static uint64_t seq = 1;
   uint64_t t = now_ns();
   uint64_t task = (t << 16) ^ (rng() & 0xFFFF);
-  uint64_t msg  = (t << 1) ^ (++seq);
-  task &= ((1ull<<63)-1);
-  msg  &= ((1ull<<63)-1);
-  return {task, msg};
+  uint64_t msg = (t << 1) ^ (++seq);
+  task &= ((1ull << 63) - 1);
+  msg &= ((1ull << 63) - 1);
+  return { task, msg };
 }
 
-static void usage(const char* prog) {
+static void
+usage(const char* prog)
+{
   std::cerr << "Usage: " << prog << " [--ip <addr>] [--port <num>] [--route <name>]\n"
             << "       " << prog << " [ip] [port]\n"
             << "Env:   DAPHNE_IP, DAPHNE_PORT\n"
             << "Default: 10.73.137.161:9000, route=mezz/0\n";
 }
 
-int main(int argc, char** argv) {
+int
+main(int argc, char** argv)
+{
   // ---- Defaults
   std::string ip = "10.73.137.161";
   int port = 9000;
   std::string route = "mezz/0";
 
   // ---- Env
-  if (const char* eip = std::getenv("DAPHNE_IP"); eip && *eip) ip = eip;
-  if (const char* ep  = std::getenv("DAPHNE_PORT"); ep  && *ep) { try { port = std::stoi(ep); } catch (...) {} }
+  if (const char* eip = std::getenv("DAPHNE_IP"); eip && *eip)
+    ip = eip;
+  if (const char* ep = std::getenv("DAPHNE_PORT"); ep && *ep) {
+    try {
+      port = std::stoi(ep);
+    } catch (...) {
+    }
+  }
 
   // ---- CLI flags (priority over env)
   for (int i = 1; i < argc; ++i) {
     if (!std::strcmp(argv[i], "--help") || !std::strcmp(argv[i], "-h")) {
-      usage(argv[0]); return 0;
+      usage(argv[0]);
+      return 0;
     }
-    if (!std::strcmp(argv[i], "--ip")    && i + 1 < argc) { ip = argv[++i]; continue; }
-    if (!std::strcmp(argv[i], "--port")  && i + 1 < argc) { try { port = std::stoi(argv[++i]); } catch (...) {} continue; }
-    if (!std::strcmp(argv[i], "--route") && i + 1 < argc) { route = argv[++i]; continue; }
+    if (!std::strcmp(argv[i], "--ip") && i + 1 < argc) {
+      ip = argv[++i];
+      continue;
+    }
+    if (!std::strcmp(argv[i], "--port") && i + 1 < argc) {
+      try {
+        port = std::stoi(argv[++i]);
+      } catch (...) {
+      }
+      continue;
+    }
+    if (!std::strcmp(argv[i], "--route") && i + 1 < argc) {
+      route = argv[++i];
+      continue;
+    }
   }
   // ---- Positional args (fallback if flags not used)
-  if (argc >= 2 && argv[1][0] != '-') ip = argv[1];
-  if (argc >= 3 && argv[2][0] != '-') { try { port = std::stoi(argv[2]); } catch (...) {} }
+  if (argc >= 2 && argv[1][0] != '-')
+    ip = argv[1];
+  if (argc >= 3 && argv[2][0] != '-') {
+    try {
+      port = std::stoi(argv[2]);
+    } catch (...) {
+    }
+  }
 
   const std::string address = ip + ":" + std::to_string(port);
   const std::string endpoint = "tcp://" + address;
   std::cerr << "[SMOKE-V2] connecting to " << endpoint << " route=" << route << "\n";
 
+  DaphneV3Interface iface(address, route);
 
-  
-  DaphneV3Interface iface( address, route);
-  
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   // ---- Build ConfigureRequest (same payload you used before)
@@ -143,7 +176,8 @@ int main(int argc, char** argv) {
     req.set_task_id(task_id);
     req.set_msg_id(msg_id);
     req.set_timestamp_ns(now_ns());
-    if (!route.empty()) req.set_route(route);
+    if (!route.empty())
+      req.set_route(route);
   }
 
   try {
@@ -154,7 +188,6 @@ int main(int argc, char** argv) {
     // sock.set(zmq::sockopt::sndtimeo, 4000);
     // sock.connect(endpoint);
 
-    
     // send
     // {
     //   std::string bytes = req.SerializeAsString();
@@ -174,7 +207,6 @@ int main(int argc, char** argv) {
     //   std::cerr << "Failed to parse ControlEnvelopeV2 reply\n"; return 3;
     // }
 
-    
     // // validate V2 transport
     // bool ok_dir  = (rep.dir()  == DIR_RESPONSE);
     // bool ok_type = (rep.type() == MT2_CONFIGURE_FE_RESP);
@@ -196,8 +228,8 @@ int main(int argc, char** argv) {
     //   std::cerr << "Failed to parse ConfigureResponse\n"; return 5;
     // }
 
-    auto resp = iface.send<ConfigureResponse>( cfg.SerializeAsString(), MT2_CONFIGURE_FE_REQ, MT2_CONFIGURE_FE_RESP);
-    
+    auto resp = iface.send<ConfigureResponse>(cfg.SerializeAsString(), MT2_CONFIGURE_FE_REQ, MT2_CONFIGURE_FE_RESP);
+
     // std::cout << "[V2 meta]\n";
     // std::cout << "  task_id      : " << rep.task_id() << "\n";
     // std::cout << "  msg_id       : " << rep.msg_id() << "\n";

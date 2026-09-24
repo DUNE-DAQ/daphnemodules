@@ -2,8 +2,8 @@
 #define DAPHNE_CONTROL_CLIENT_HPP
 #pragma once
 
-#include <string>
 #include <cstdint>
+#include <string>
 #include <zmq.hpp>
 
 #include "daphnemodules/daphne_control_envelope.pb.h"
@@ -24,18 +24,13 @@ class ControlClient
 public:
   using Milliseconds = std::chrono::milliseconds;
 
-  ControlClient(zmq::context_t& ctx,
-                std::string_view ip,
-                uint16_t          port,
-                Milliseconds      timeout = Milliseconds{500});
+  ControlClient(zmq::context_t& ctx, std::string_view ip, uint16_t port, Milliseconds timeout = Milliseconds{ 500 });
 
   /** Send an already-filled ConfigureRequest and wait for reply. */
-  daphnemodules::ConfigureResponse
-  configure(const daphnemodules::ConfigureRequest& req);
+  daphnemodules::ConfigureResponse configure(const daphnemodules::ConfigureRequest& req);
 
   /** Same for ConfigureCLKsRequest */
-  daphnemodules::ConfigureCLKsResponse
-  configure_clks(const daphnemodules::ConfigureCLKsRequest& req);
+  daphnemodules::ConfigureCLKsResponse configure_clks(const daphnemodules::ConfigureCLKsRequest& req);
 
 private:
   zmq::socket_t socket_;
