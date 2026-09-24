@@ -10,116 +10,102 @@
  */
 
 #ifndef DAPHNEMODULES_SRC_DAPHNEV2INTERFACE_HPP_
-#define DAPHNEMODULES_SRC_DAPHNEV2INTERFACE_HPP_ 
+#define DAPHNEMODULES_SRC_DAPHNEV2INTERFACE_HPP_
 
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
-#include <vector>
 #include <cstring>
-#include <unistd.h>
+#include <functional>
 #include <memory>
 #include <mutex>
-#include <functional>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <vector>
 
-
-#include <ers/ers.hpp>
 #include "logging/Logging.hpp" // NOTE: if ISSUES ARE DECLARED BEFORE include logging/Logging.hpp, TLOG_DEBUG<<issue wont work.
+#include <ers/ers.hpp>
 
 #include "daphnemodules/CommonIssues.hpp"
 
 namespace dunedaq {
 
-  ERS_DECLARE_ISSUE( daphnemodules,
-		     SocketCreationError,
-		     "Failed to create a socket",
-		     ERS_EMPTY
-		   ) 
+ERS_DECLARE_ISSUE(daphnemodules, SocketCreationError, "Failed to create a socket", ERS_EMPTY)
 
-  ERS_DECLARE_ISSUE( daphnemodules,
-		     FailedPing,
-		     "Failed to ping daphne board at " << ip << ':' << port,
-		     ((std::string)ip)((int)port)
-		   ) 
+ERS_DECLARE_ISSUE(daphnemodules,
+                  FailedPing,
+                  "Failed to ping daphne board at " << ip << ':' << port,
+                  ((std::string)ip)((int)port))
 
-  ERS_DECLARE_ISSUE( daphnemodules,
-		     FailedSocketInteraction,
-		     "Failed to call " << command,
-		     ((std::string)command)
-		   ) 
+ERS_DECLARE_ISSUE(daphnemodules, FailedSocketInteraction, "Failed to call " << command, ((std::string)command))
 
-  ERS_DECLARE_ISSUE( daphnemodules,
-		     CommandTimeout,
-		     "Command " << command << " timed out after " << timeout_us << " microseconds",
-		     ((std::string)command)((unsigned int)timeout_us)
-		   ) 
+ERS_DECLARE_ISSUE(daphnemodules,
+                  CommandTimeout,
+                  "Command " << command << " timed out after " << timeout_us << " microseconds",
+                  ((std::string)command)((unsigned int)timeout_us))
 
-  ERS_DECLARE_ISSUE( daphnemodules,
-		     SocketTimeout,
-		     "Socket timed out after " << timeout_us << " microseconds",
-		     ((unsigned int)timeout_us)
-		   ) 
- 
-  } // dunedaq namespace
+ERS_DECLARE_ISSUE(daphnemodules,
+                  SocketTimeout,
+                  "Socket timed out after " << timeout_us << " microseconds",
+                  ((unsigned int)timeout_us))
 
+} // dunedaq namespace
 
 namespace dunedaq::daphnemodules {
 
-  struct command_result{
-    std::string command;
-    std::string result;
-  };
-  
-  
-  class DaphneV2Interface {
+struct command_result
+{
+  std::string command;
+  std::string result;
+};
 
-  public:
-    DaphneV2Interface( const char* ipaddr, int port,
-		     std::chrono::milliseconds timeout = std::chrono::milliseconds(500));
+class DaphneV2Interface
+{
 
-    ~DaphneV2Interface() { if(m_connection_id>0) close();}
+public:
+  DaphneV2Interface(const char* ipaddr, int port, std::chrono::milliseconds timeout = std::chrono::milliseconds(500));
 
-    DaphneV2Interface(const DaphneV2Interface &) = delete;
-    DaphneV2Interface & operator= (const DaphneV2Interface & ) = delete;
-    DaphneV2Interface(DaphneV2Interface &&) = delete;
-    DaphneV2Interface & operator= (DaphneV2Interface &&) = delete;
-    
-    std::vector<uint64_t> read_register(uint64_t addr, uint8_t size) const { return read(0x00, addr, size) ; }
-    void write_register(uint64_t addr, std::vector<uint64_t> && data)  const { write(0x01, addr, std::move(data)) ; }
+  ~DaphneV2Interface()
+  {
+    if (m_connection_id > 0)
+      close();
+  }
 
-    std::vector<uint64_t> read_buffer(uint64_t addr, uint8_t size) const { return read(0x08, addr, size) ; }
-    void write_buffer(uint64_t addr, std::vector<uint64_t> && data) const { write(0x09, addr, std::move(data)) ; }
- 
-    bool validate_connection() const ;
+  DaphneV2Interface(const DaphneV2Interface&) = delete;
+  DaphneV2Interface& operator=(const DaphneV2Interface&) = delete;
+  DaphneV2Interface(DaphneV2Interface&&) = delete;
+  DaphneV2Interface& operator=(DaphneV2Interface&&) = delete;
 
-    command_result send_command(std::string cmd) const;
-    
-    // this will throw if it fails
-    command_result send_command_retry( std::string cmd, size_t retry = std::numeric_limits<size_t>::max() ) const ;
-    
-    // this will try until success but it won't thrwo if can retry become false
-    command_result send_command_interruptible( std::string cmd, std::function<bool()> can_retry) const ;
+  std::vector<uint64_t> read_register(uint64_t addr, uint8_t size) const { return read(0x00, addr, size); }
+  void write_register(uint64_t addr, std::vector<uint64_t>&& data) const { write(0x01, addr, std::move(data)); }
 
-    
-  protected:
-    
-    void close();
+  std::vector<uint64_t> read_buffer(uint64_t addr, uint8_t size) const { return read(0x08, addr, size); }
+  void write_buffer(uint64_t addr, std::vector<uint64_t>&& data) const { write(0x09, addr, std::move(data)); }
 
-    void write( uint8_t command_id, uint64_t addr, std::vector<uint64_t> && data) const;
-    std::vector<uint64_t> read(uint8_t command_id, uint64_t addr, uint8_t size) const;
+  bool validate_connection() const;
 
-    
-  private:
-    std::string m_ip;
-    int m_connection_id = -1;
-    sockaddr_in m_target;
-    std::chrono::milliseconds m_timeout{5}; 
-    mutable std::mutex m_access_mutex;
-    mutable std::mutex m_command_mutex;
-  }; 
-  
+  command_result send_command(std::string cmd) const;
+
+  // this will throw if it fails
+  command_result send_command_retry(std::string cmd, size_t retry = std::numeric_limits<size_t>::max()) const;
+
+  // this will try until success but it won't thrwo if can retry become false
+  command_result send_command_interruptible(std::string cmd, std::function<bool()> can_retry) const;
+
+protected:
+  void close();
+
+  void write(uint8_t command_id, uint64_t addr, std::vector<uint64_t>&& data) const;
+  std::vector<uint64_t> read(uint8_t command_id, uint64_t addr, uint8_t size) const;
+
+private:
+  std::string m_ip;
+  int m_connection_id = -1;
+  sockaddr_in m_target;
+  std::chrono::milliseconds m_timeout{ 5 };
+  mutable std::mutex m_access_mutex;
+  mutable std::mutex m_command_mutex;
+};
 
 } // namespce  dunedaq::daphnemodules
-
 
 #endif // DAPHNEMODULES_SRC_DAPHNEV2INTERFACE_HPP_
